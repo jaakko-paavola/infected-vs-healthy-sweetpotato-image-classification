@@ -51,11 +51,13 @@ DATA_FOLDER_PATH="/path/to/the/dvc/folder/root"
 
 ## Reading image metadata as DataFrame with Pandas
 
-DVC root contains couple of CSV-files that contain image metadata. These files have been produced by `preprocess_plant_data.py` and `preprocess_leaf_data.py` respectively.
+DVC root contains couple of CSV-files that contain image metadata. These files have been produced by `preprocess_plant_data.py`, `preprocess_leaf_data.py` and `preprocess_growth_chamber_plant_data.py` respectively.
 
 `plant_data.csv` contains plant data from `Trial_01/Dataset_01` and `Trial_02/Dataset_01`
 
 `leaf_data.csv` contains leaf data from `Trial_01/Dataset_02` and `Trial_02/Dataset_02`
+
+`growth_chamber_plant_data.csv` contains plant data from `Trial_02/Dataset_03`
 
 You can read CSV-file with Pandas with the following:
 
