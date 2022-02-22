@@ -116,7 +116,7 @@ for image_path in plant_master_df['Masked image path'].unique():
   image = cv2.imread(masked_image_path)
   image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-  segmented_image = watershed_segmentation(image, plot=True)
+  segmented_image = watershed_segmentation(image)
 
   plt.imshow(segmented_image)
   plt.show()

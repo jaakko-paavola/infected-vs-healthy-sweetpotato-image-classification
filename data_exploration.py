@@ -23,6 +23,8 @@ leaf_df = pd.read_csv(leaf_df_path)
 plant_df = pd.read_csv(plant_df_path)
 growth_chamber_plant_df = pd.read_csv(growth_chamber_plant_df_path)
 
+growth_chamber_plant_df_expanded = growth_chamber_plant_df.loc[growth_chamber_plant_df.index.repeat(3)]
+
 # %%
 
 plant_df = plant_df.drop(columns=["Unnamed: 0", "index"])
@@ -30,6 +32,32 @@ plant_df = plant_df.drop(columns=["Unnamed: 0", "index"])
 # %%
 
 plant_df
+
+# %%
+growth_chamber_plant_df = growth_chamber_plant_df.drop(columns=["Unnamed: 0"])
+
+# %%
+
+plant_master_df = pd.concat([plant_df, growth_chamber_plant_df_expanded])
+
+# %%
+
+plant_master_df
+
+# %%
+
+plant_master_df.dropna(axis=1, inplace=True)
+
+# %%
+
+plant_master_df
+
+# %%
+
+print(len(plant_df))
+print(len(growth_chamber_plant_df))
+print(len(growth_chamber_plant_df_expanded))
+
 # %%
 def parse_img_path(path):
     return os.path.join(DATA_FOLDER, path)
@@ -69,14 +97,13 @@ for image_path in plant_df['Original image path'].unique():
 # %%
 
 # Create temporary column for sum counts of each label
-plant_df['Label Frequency'] = 1 
-label_frequency = plant_df.groupby(["Genotype", "Condition"]).sum()[["Label Frequency"]]
+plant_master_df['Label Frequency'] = 1 
+label_frequency = plant_master_df.groupby(["Condition"]).sum()[["Label Frequency"]]
 
 # %%
 label_frequency = label_frequency.reset_index()
 # %%
-fg = sns.factorplot(x='Condition', y='Label Frequency', 
-                        col='Genotype', data=label_frequency, kind='bar')
+fg = sns.factorplot(x='Condition', y='Label Frequency', data=label_frequency, kind='bar')
 fg.set_xlabels('')
 
 # %%
