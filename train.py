@@ -47,7 +47,6 @@ train_dataset, test_dataset = torch.utils.data.random_split(plant_village_datase
 
 train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
 test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
-0.01
 # %%
 
 if torch.cuda.is_available():
