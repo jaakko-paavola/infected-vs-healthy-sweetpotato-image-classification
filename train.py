@@ -22,7 +22,7 @@ PLANT_VILLAGE_DATA_PATH_DF = os.path.join(DATA_FOLDER_PATH, "dummy_segmented_pla
 N_EPOCHS = 20
 BATCH_SIZE_TRAIN = 64
 BATCH_SIZE_TEST = 64
-LR = 0.01
+LR = 0.0001
 NUM_CLASSES = 3
 
 # %%
@@ -47,7 +47,7 @@ train_dataset, test_dataset = torch.utils.data.random_split(plant_village_datase
 
 train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
 test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
-
+0.01
 # %%
 
 if torch.cuda.is_available():
@@ -57,9 +57,7 @@ else:
 
 resnet18_model = resnet18(num_classes=NUM_CLASSES).to(device)
 
-learning_rate = 0.0001
-
-optimizer = optim.SGD(resnet18_model.parameters(), lr=learning_rate, momentum=0.75)
+optimizer = optim.SGD(resnet18_model.parameters(), lr=LR, momentum=0.75)
 loss_function = torch.nn.CrossEntropyLoss()
 
 # %%
