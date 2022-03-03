@@ -23,7 +23,7 @@ df_trial1_dataset1_data = pd.read_excel(os.path.join(DATA_FOLDER, trial1_dataset
 
 # %%
 # Remove extra columns for now
-columns_to_keep = ["Genotype", "Condition", "Plant", "Tray", "Round", "Days"]
+columns_to_keep = ["Genotype", "Condition", "Plant", "Tray", "Round", "Days", "Area (cm^2)"]
 df_trial1_dataset1_data = df_trial1_dataset1_data[columns_to_keep]
 
 # %%
@@ -59,8 +59,15 @@ df_trial1_dataset1_data.insert(1, "Dataset", 1)
 df_trial2_dataset1_data = pd.read_excel(os.path.join(DATA_FOLDER, trial2_dataset1, "02-Rgb_Morpho_Plant.xlsx"), sheet_name="Data")
 
 # %%
-columns_to_keep = ["Genotype", "Condition", "Plant Name", "Tray ID", "Round Order", "Day", "Position"]
+columns_to_keep = ["Genotype", "Condition", "Plant Name", "Tray ID", "Round Order", "Day", "Position", "AREA_MM"]
 df_trial2_dataset1_data = df_trial2_dataset1_data[columns_to_keep]
+
+# %%
+# Convert cm^2-area from Trial1/Dataset1 to mm^2-area to match Trial2/Dataset1 -data
+
+df_trial1_dataset1_data['AREA_MM'] = df_trial1_dataset1_data['Area (cm^2)']*100
+df_trial1_dataset1_data.drop('Area (cm^2)', axis=1, inplace=True)
+
 
 # %%
 # Extract only the numbers from the Position column and Tray ID column
