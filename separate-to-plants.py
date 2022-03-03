@@ -7,11 +7,21 @@ import glob
 import re
 from functools import cmp_to_key
 import pathlib
+from dotenv import load_dotenv
 
 # %%
+
+load_dotenv()
+
+# %% 
+
+DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
+
+# %%
+
 ## Set the paths here before running
-input_path_of_tray_images = f'/home/jaakkpaa/Documents/Source/Infected-sweetpotato-classification/data/Data/Trial_02/Dataset_01/FishEyeMasked'
-output_path_for_separated_plants = f'/home/jaakkpaa/Documents/Source/Infected-sweetpotato-classification/data/Separated_plants/Trial_02/Dataset_01/Background_included'
+input_path_of_tray_images = f'{DATA_FOLDER_PATH}/Data/Trial_02/Dataset_01/FishEyeMasked'
+output_path_for_separated_plants = f'{DATA_FOLDER_PATH}/Separated_plants/Trial_02/Dataset_01/Background_included'
 
 # %%
 # Remove little bits and pieces of other plants from this contour's bounding rectangle's corners
