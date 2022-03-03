@@ -51,14 +51,11 @@ def kmeans_segmentation(image, k, attempts=10, plot=False):
   # Reshape data into the original image dimensions
   segmented_image = segmented_data.reshape((image.shape))
 
-  if plot:
-    plt.imshow(segmented_image)
-
-  return segmented_image, ret, labels, centers
 
 # %%
 
 def watershed_segmentation(image, plot=False):
+
   shifted = cv2.pyrMeanShiftFiltering(image, 21, 51)
   gray = cv2.cvtColor(shifted, cv2.COLOR_BGR2GRAY)
 
@@ -67,19 +64,18 @@ def watershed_segmentation(image, plot=False):
 
   D = ndimage.distance_transform_edt(thresh)
 
-  localMax = peak_local_max(D, indices=False, min_distance=20,
+  peak_local_max = peak_local_max(D, indices=False, min_distance=20,
     labels=thresh)
 
-  markers = ndimage.label(localMax, structure=np.ones((3, 3)))[0]
+  markers = ndimage.label(peak_local_max, structure=np.ones((3, 3)))[0]
+
   labels = watershed(-D, markers, mask=thresh)
+
   print(f"{len(np.unique(labels)) - 1} unique segments found")
 
-  for label in np.unique(labels):
-    # if the label is zero, we are examining the 'background'
-    # so simply ignore it
-    if label == 0:
-      continue
+  contours = []
 
+  for label in np.unique(labels):
     # otherwise, allocate memory for the label region and draw
     # it on the mask
     mask = np.zeros(gray.shape, dtype="uint8")
@@ -91,18 +87,9 @@ def watershed_segmentation(image, plot=False):
     cnts = imutils.grab_contours(cnts)
     c = max(cnts, key=cv2.contourArea)
 
-    image_copy = image.copy()
+    contours.append(c)
 
-    if plot:
-      cv2.drawContours(image_copy, c, -1, (0, 255, 0), 3)
-      plt.imshow(image_copy)
-      plt.show()
-
-    # draw a circle enclosing the object
-    ((x, y), r) = cv2.minEnclosingCircle(c)
-    cv2.circle(image, (int(x), int(y)), int(r), (0, 255, 0), 2)
-    cv2.putText(image, "#{}".format(label), (int(x) - 10, int(y)),
-      cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+  plt.plot(labels, cmap=plt.cm.nipy_spectral)
 
   return image
 
@@ -118,6 +105,6 @@ for image_path in plant_master_df['Masked image path'].unique():
 
   segmented_image = watershed_segmentation(image)
 
-  plt.imshow(segmented_image)
-  plt.show()
+  #plt.imshow(segmented_image)
+  #plt.show()
 # %%
