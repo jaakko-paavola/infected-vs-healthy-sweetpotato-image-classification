@@ -11,6 +11,10 @@ Image processing and computer vision approaches to split and classify images of 
 
 1. Install DVC if you don't have it yet, e.g. with `pip install dvc` (see all installation methods [here](https://dvc.org/doc/install))
 2. Install the Google Cloud Storage support to dvc with `pip install 'dvc[gs]'`
+3. `git config merge.dvc.name 'DVC merge driver'`
+4. `git config merge.dvc.driver 'dvc git-hook merge-driver --ancestor %O --our %A --their %B'`
+
+Steps 3 and 4 enable DVC to automatically resolve Git conflicts (see more [here](https://dvc.org/doc/user-guide/how-to/merge-conflicts#append-only-directories))
 
 #### Install and configure Google Cloud CLI
 
