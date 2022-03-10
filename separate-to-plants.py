@@ -8,6 +8,7 @@ import re
 from functools import cmp_to_key
 import pathlib
 from dotenv import load_dotenv
+import pandas as pd
 
 # %%
 
@@ -99,3 +100,73 @@ for idx1, filename in enumerate(glob.glob(f'{input_path_of_tray_images}/*.png'))
         cv2.imwrite(f'{output_path_for_separated_plants}/{subfolder_name}/plant_index_{idx2+1}.png', result)
     
 # %%
+
+gc_df = pd.read_csv(os.path.join(DATA_FOLDER_PATH, 'growth_chamber_plant_data.csv'))
+
+output_path_for_separated_plants_gc = '/Separated_plants/Trial_02/Dataset_03/Background_included'
+
+regex_pattern_for_plant_info_gc = r"^([0-9]{6}) - ([0-9]{2}) - TV - (Hua|R3)-(H|FMV|CSV|VD) - ((?:[0-9]{2}-|)[0-9]{2}) - Mask.png$"
+
+split_gc_df = pd.DataFrame(columns=['Trial', 'Dataset', 'Genotype', 'Condition', 'Original image path', 'Masked image path', 'Split masked image path'])
+
+for index, row in gc_df.iterrows():
+    filename = row['Masked image path']
+    img = cv2.imread(os.path.join(DATA_FOLDER_PATH, filename))
+    file = re.search(regex_pattern_for_extracting_filename_from_path, filename).group(1)
+    prefix = re.match(regex_pattern_for_plant_info_gc, file).group(1)
+    tray = re.match(regex_pattern_for_plant_info_gc, file).group(2)
+    genotype = re.match(regex_pattern_for_plant_info_gc, file).group(3)
+    condition = re.match(regex_pattern_for_plant_info_gc, file).group(4)
+    plants = re.match(regex_pattern_for_plant_info_gc, file).group(5)
+    subfolder_name = f'{prefix} - {tray} - TV - {genotype}-{condition} - {plants}'
+    if(not os.path.exists(f'{DATA_FOLDER_PATH}/{output_path_for_separated_plants_gc}/{subfolder_name}')):
+        pathlib.Path(f'{DATA_FOLDER_PATH}/{output_path_for_separated_plants_gc}/{subfolder_name}').mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(f'{DATA_FOLDER_PATH}/{output_path_for_separated_plants_gc}/{subfolder_name}/' + file, img)
+
+    cnts = find_contours(img)
+    sorted_cnts = sorted(cnts, key=cmp_to_key(contour_sort))
+    for idx2, c in enumerate(sorted_cnts):
+        x, y, w, h = cv2.boundingRect(c)
+        ROI = img[y:y+h, x:x+w]
+        masked = mask_plant_parts(ROI)
+        result = masked.copy()
+
+        # Write the split plant in a file
+        split_plant_img_path = f'{output_path_for_separated_plants_gc}/{subfolder_name}/plant_index_{idx2+1}.png'
+        cv2.imwrite(f'{DATA_FOLDER_PATH}/{split_plant_img_path}', result)
+
+        # Add an entry for the split plant to the new dataframe
+        split_plant_data = {
+            'Trial': row['Trial'],
+            'Dataset': row['Dataset'],
+            'Genotype': row['Genotype'],
+            'Condition': row['Condition'],
+            'Original image path': row['Original image path'],
+            'Masked image path': row['Masked image path'],
+            'Split masked image path': split_plant_img_path,
+        }
+        split_gc_df = split_gc_df.append(split_plant_data, ignore_index=True)
+
+# %%
+
+# There were two errors that needed manual work.
+# In both cases one of the plants in the group image was split into two separate images
+# for a single plant, as the leaves of the plant had too much gap between them.
+# Here I drop the automatically created unnecessary rows after manually merging and deleting
+# the separate images for these two plants.
+
+split_gc_df = pd.read_csv(f'{DATA_FOLDER_PATH}/growth_chamber_plant_data_split.csv')
+
+split_gc_df[split_gc_df['Masked image path'].str.contains('180724 - 05 - TV - R3-H - 14-15 - Mask')]['Split masked image path']
+split_gc_df.iloc[96]['Split masked image path']
+split_gc_df.drop(96, inplace=True)
+split_gc_df[split_gc_df['Masked image path'].str.contains('180724 - 05 - TV - R3-H - 14-15 - Mask')]['Split masked image path']
+
+split_gc_df[split_gc_df['Masked image path'].str.contains('180724 - 06 - TV - R3-FMV - 11-13 - Mask')]['Split masked image path']
+split_gc_df.iloc[110]['Split masked image path']
+split_gc_df.drop(110, inplace=True)
+split_gc_df[split_gc_df['Masked image path'].str.contains('180724 - 06 - TV - R3-FMV - 11-13 - Mask')]['Split masked image path']
+
+# %%
+
+split_gc_df.to_csv(f'{DATA_FOLDER_PATH}/growth_chamber_plant_data_split.csv')
