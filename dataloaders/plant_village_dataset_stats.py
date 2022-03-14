@@ -2,7 +2,7 @@
 
 import os
 from torch.utils.data import DataLoader
-from dataloaders.plant_village_loader import PlantVillageLoader
+from dataloaders.csv_data_loader import CSVDataLoader
 from dotenv import load_dotenv
 import numpy as np
 from torchvision import transforms
@@ -23,7 +23,7 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-plant_village_dataset = PlantVillageLoader(csv_file=PLANT_VILLAGE_DATA_PATH_DF, root_dir=DATA_FOLDER_PATH, transform=transform)
+plant_village_dataset = CSVDataLoader(csv_file=PLANT_VILLAGE_DATA_PATH_DF, root_dir=DATA_FOLDER_PATH, transform=transform)
 
 plant_village_dataloader = DataLoader(plant_village_dataset, batch_size=256, shuffle=False, num_workers=4)
 

@@ -1,7 +1,7 @@
 # %%
 import os
 from torch.utils.data import DataLoader
-from dataloaders.plant_village_loader import PlantVillageLoader
+from dataloaders.csv_data_loader import CSVDataLoader
 from models.resnet import resnet18
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
@@ -37,7 +37,7 @@ data_transform = transforms.Compose([
                          std=[0.23811504, 0.28631625, 0.18748806])
 ])
 
-plant_village_dataset = PlantVillageLoader(csv_file=PLANT_VILLAGE_DATA_PATH_DF, root_dir=DATA_FOLDER_PATH,
+plant_village_dataset = CSVDataLoader(csv_file=PLANT_VILLAGE_DATA_PATH_DF, root_dir=DATA_FOLDER_PATH,
                                            transform=data_transform)
 
 train_size = int(0.85 * len(plant_village_dataset))

@@ -1,7 +1,7 @@
 # %%
 import os
 from torch.utils.data import DataLoader
-from dataloaders.plant_village_loader import PlantVillageLoader
+from dataloaders.csv_data_loader import CSVDataLoader
 from models.resnet import resnet18
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
@@ -31,12 +31,12 @@ data_transform = transforms.Compose([
     transforms.RandomRotation(180),
     transforms.Resize(224),
     transforms.ToTensor(),
-    # Values aquired from dataloaders/plant_village_dataset_stats.py
+    # Values aquired from dataloaders/plant_master_dataset_stats.py
     transforms.Normalize(mean=[0.2234376, 0.27598768, 0.16376022],
                          std=[0.23811504, 0.28631625, 0.18748806])
 ])
 
-plant_village_dataset = PlantVillageLoader(
+plant_village_dataset = CSVDataLoader(
   csv_file=PLANT_SPLIT_MASTER_PATH, 
   root_dir=DATA_FOLDER_PATH,
   image_path_col="Split masked image path",
