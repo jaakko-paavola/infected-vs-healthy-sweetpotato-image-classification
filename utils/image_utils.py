@@ -9,7 +9,8 @@ import numpy as np
 import imutils
 from skimage.color import rgba2rgb
 from skimage import data, io
-
+import math
+from typing import Tuple, Type, Union
 # %%
 
 load_dotenv()
@@ -21,31 +22,81 @@ image_path = os.path.join(os.getenv("DATA_FOLDER_PATH"), "Separated_plants/Trial
 
 # %%
 
-def find_minimum_bounding_box_from_masked_image(masked_image):
-  print(masked_image)
-  mask = masked_image != 0
-  print(mask)
-  plt.imshow(mask)
-  plt.show()
+def find_minimum_bounding_box_from_masked_image(masked_image: np.ndarray) -> Tuple[int, int, int, int]:
+  bw_image = cv2.cvtColor(masked_image, cv2.COLOR_BGR2GRAY)
+  mask = bw_image != 0
 
-  contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-  contours = imutils.grab_contours(contours)
-  max_contour = max(contours, key=cv2.contourArea)
-  minimum_bounding_rect = cv2.boundingRect(max_contour)
+  rows, columns = np.nonzero(mask)
+  y_min, y_max = rows.min(), rows.max()
+  x_min, x_max = columns.min(), columns.max()
+  height = abs(y_max - y_min)
+  width = abs(x_max - x_min)
+
+  # To draw the bounding box
+  #cv2.rectangle(masked_image,(x_min,y_min),(x_max,y_max),(0,255,0),2)
+
+  return x_min, y_min, x_max, y_max
+
+# %%
+
+# Bbox in format (x_min, y_min, x_max, y_max)
+def crop_image_with_bounding_box(image: np.ndarray, bbox: Tuple[int, int, int, int]) -> np.ndarray:
+  cropped_image = image[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+  return cropped_image
 
 
-  box = cv2.BoxPoints(minimum_bounding_rect)
-  box = np.int0(box)
-  cv2.drawContours(masked_image, [box], 0, (0,0,255), 2)
+# %%
 
-  plt.imshow(masked_image)
-  plt.show()
+def pad_image_to_minimum_size(image, size: Union[Tuple, int] = 224):
+  """
+    Size: Desired output size. If size is a tuple (h, w), pad image to match the tuple. If size is an integer,
+    smaller edge will be matched to this.
+  """
 
+  height, width = image.shape[0], image.shape[1]
+
+  if isinstance(size, tuple):
+    target_height = size[0]
+    target_width = size[1]
+
+    # Prevent negative padding with max(x, 0)
+    padding_vertical = max(target_height - height, 0)
+    padding_horizontal = max(target_width - width, 0)
+
+  elif isinstance(size, int):
+    if height > width:
+      height_width_ratio = height / width
+      padding_horizontal = max(size - width, 0)
+      padding_vertical = max(math.ceil(padding_horizontal * height_width_ratio), 0)
+    else:
+      width_height_ratio = width / height
+      padding_vertical = max(size - height, 0)
+      padding_horizontal = max(math.ceil(padding_vertical * width_height_ratio), 0)
+  else:
+    raise TypeError("Parameter size must be either tuple or integer")
+
+
+  top = math.ceil(padding_vertical / 2)
+  bottom = top
+  left = math.ceil(padding_horizontal / 2)
+  right = left
+
+  BLACK = [0, 0, 0]
+  padded_image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=BLACK)
+
+  return padded_image
 
 # %% 
 
-image = cv2.imread(image_path, 0)
-find_minimum_bounding_box_from_masked_image(image)
+""""
+How to crop and pad an image:
+  image = io.imread(image_path)
+  bbox = find_minimum_bounding_box_from_masked_image(image)
+  cropped_image = crop_image_with_bounding_box(image, bbox)
+  padded_image = pad_image_to_minimum_size(cropped_image, (200, 500))
+  plt.imshow(padded_image)
+  plt.show()
+"""
 
 # %%
 

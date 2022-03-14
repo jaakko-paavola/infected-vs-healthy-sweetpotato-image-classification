@@ -16,13 +16,11 @@ DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 leaf_df_path = os.path.join(DATA_FOLDER, "leaf_data.csv")
 plant_df_path = os.path.join(DATA_FOLDER, "plant_data.csv")
 growth_chamber_plant_df_path = os.path.join(DATA_FOLDER, "growth_chamber_plant_data.csv")
-plant_df_split_master_path = os.path.join(DATA_FOLDER, "plant_data_split_master.csv")
 
 # %%
 leaf_df = pd.read_csv(leaf_df_path)
 plant_df = pd.read_csv(plant_df_path)
 growth_chamber_plant_df = pd.read_csv(growth_chamber_plant_df_path)
-plant_df_split_master = pd.read_csv(plant_df_split_master_path)
 
 # %%
 def parse_img_path(path):
@@ -73,7 +71,3 @@ fg = sns.factorplot(x='Condition', y='Label Frequency',
                         col='Genotype', data=label_frequency, kind='bar')
 fg.set_xlabels('')
 # %%
-
-plant_df_split_master['Label'].value_counts()
-
-# %% 

@@ -21,22 +21,22 @@ PLANT_SPLIT_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_maste
 N_EPOCHS = 20
 BATCH_SIZE_TRAIN = 64
 BATCH_SIZE_TEST = 64
-LR = 0.01
-NUM_CLASSES = 4
+LR = 0.0001
+NUM_CLASSES = 3
 
 # %%
 
 data_transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.RandomRotation(180),
-    transforms.Resize((256, 256)),
+    transforms.Resize(224),
     transforms.ToTensor(),
     # Values aquired from dataloaders/plant_master_dataset_stats.py
-    transforms.Normalize(mean=[0.09872966, 0.11726899, 0.06568969],
-                         std=[0.1219357, 0.14506954, 0.08257045])
+    transforms.Normalize(mean=[0.2234376, 0.27598768, 0.16376022],
+                         std=[0.23811504, 0.28631625, 0.18748806])
 ])
 
-plant_master_dataset = CSVDataLoader(
+plant_village_dataset = CSVDataLoader(
   csv_file=PLANT_SPLIT_MASTER_PATH, 
   root_dir=DATA_FOLDER_PATH,
   image_path_col="Split masked image path",
@@ -44,10 +44,10 @@ plant_master_dataset = CSVDataLoader(
   transform=data_transform
 )
 
-train_size = int(0.85 * len(plant_master_dataset))
-test_size = len(plant_master_dataset) - train_size
+train_size = int(0.85 * len(plant_village_dataset))
+test_size = len(plant_village_dataset) - train_size
 
-train_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, test_size])
+train_dataset, test_dataset = torch.utils.data.random_split(plant_village_dataset, [train_size, test_size])
 
 train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
 test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
