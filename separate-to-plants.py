@@ -14,10 +14,10 @@ import pandas as pd
 
 load_dotenv()
 
-# %% 
+# %%
 
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
-
+print(DATA_FOLDER_PATH)
 # %%
 
 ## Set the paths here before running

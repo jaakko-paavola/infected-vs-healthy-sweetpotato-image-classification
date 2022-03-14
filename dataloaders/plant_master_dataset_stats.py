@@ -42,6 +42,7 @@ for i, data in enumerate(plant_master_dataloader):
     # shape (batch_size, 3, height, width)
     numpy_image = data['image'].numpy()
 
+    
     print(numpy_image.shape)
 
     # shape (3,)
