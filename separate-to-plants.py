@@ -169,6 +169,11 @@ split_gc_df[split_gc_df['Masked image path'].str.contains('180724 - 06 - TV - R3
 
 # %%
 
+# Drop extra slash from the beginning of the split masked image path name
+split_gc_df['Split masked image path'] = split_gc_df['Split masked image path'].str[1:]
+
+# %%
+
 split_gc_df.to_csv(f'{DATA_FOLDER_PATH}/growth_chamber_plant_data_split.csv')
 
 # %%
