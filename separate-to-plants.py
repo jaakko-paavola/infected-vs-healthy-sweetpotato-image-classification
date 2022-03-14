@@ -17,7 +17,6 @@ load_dotenv()
 # %%
 
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
-print(DATA_FOLDER_PATH)
 # %%
 
 ## Set the paths here before running
@@ -171,3 +170,5 @@ split_gc_df[split_gc_df['Masked image path'].str.contains('180724 - 06 - TV - R3
 # %%
 
 split_gc_df.to_csv(f'{DATA_FOLDER_PATH}/growth_chamber_plant_data_split.csv')
+
+# %%
