@@ -6,6 +6,8 @@ from dataloaders.csv_data_loader import CSVDataLoader
 from dotenv import load_dotenv
 import numpy as np
 from torchvision import transforms
+from utils.image_utils import crop_image_with_bounding_box, find_minimum_bounding_box_from_masked_image
+import matplotlib.pyplot as plt
 
 # %%
 
@@ -14,25 +16,35 @@ load_dotenv()
 # %%
 
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
-PLANT_VILLAGE_DATA_PATH_DF = os.path.join(DATA_FOLDER_PATH, "dummy_segmented_plant_village_data.csv")
+PLANT_SPLIT_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
 
 # %%
 
 transform = transforms.Compose([
     transforms.ToPILImage(),
+    transforms.Resize(224),
     transforms.ToTensor()
 ])
 
-plant_village_dataset = CSVDataLoader(csv_file=PLANT_VILLAGE_DATA_PATH_DF, root_dir=DATA_FOLDER_PATH, transform=transform)
+plant_master_dataset = CSVDataLoader(
+  csv_file=PLANT_SPLIT_MASTER_PATH, 
+  root_dir=DATA_FOLDER_PATH,
+  image_path_col="Split masked image path",
+  label_col="Label",
+  transform=transform
+)
 
-plant_village_dataloader = DataLoader(plant_village_dataset, batch_size=256, shuffle=False, num_workers=4)
+BATCH_SIZE = 1
+
+plant_master_dataloader = DataLoader(plant_master_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
 
 # %%
 
 image_mean = []
 image_std = []
 
-for i, data in enumerate(plant_village_dataloader):
+for i, data in enumerate(plant_master_dataloader):
+
     # shape (batch_size, 3, height, width)
     numpy_image = data['image'].numpy()
 
@@ -43,6 +55,7 @@ for i, data in enumerate(plant_village_dataloader):
     image_mean.append(batch_mean)
     image_std.append(batch_std0)
 
+
 image_mean = np.array(image_mean).mean(axis=0)
 image_std = np.array(image_std).mean(axis=0)
 
@@ -50,10 +63,12 @@ image_std = np.array(image_std).mean(axis=0)
 
 print(f"Image mean: {image_mean}")
 
-# Image mean: [0.2234376  0.27598768 0.16376022]
+# Image mean: [0.09872966 0.11726899 0.06568969]
 
 print(f"Image std: {image_std}")
 
-# Image std: [0.23811504 0.28631625 0.18748806]
+# Image std: [0.1219357  0.14506954 0.08257045]
+
+# %%
 
 # %%

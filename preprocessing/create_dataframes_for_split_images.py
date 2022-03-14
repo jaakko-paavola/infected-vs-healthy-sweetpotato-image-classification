@@ -36,8 +36,10 @@ for index, row in plant_df.iterrows():
     if img is None:
         plant_df.loc[index, 'Split masked image path'] = np.nan
     else:
-        plant_df.loc[index, 'Split masked image path'] = split_image_path
-
+        relative_path = os.path.relpath(split_image_path, DATA_FOLDER_PATH)
+        plant_df.loc[index, 'Split masked image path'] = relative_path
 # %%
 
 plant_df.to_csv(f'{DATA_FOLDER_PATH}/plant_data_split.csv')
+
+# %%

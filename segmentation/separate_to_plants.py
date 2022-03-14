@@ -14,15 +14,14 @@ import pandas as pd
 
 load_dotenv()
 
-# %% 
+# %%
 
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
-
 # %%
 
 ## Set the paths here before running
-input_path_of_tray_images = f'{DATA_FOLDER_PATH}/Data/Trial_02/Dataset_01/FishEyeMasked'
-output_path_for_separated_plants = f'{DATA_FOLDER_PATH}/Separated_plants/Trial_02/Dataset_01/Background_included'
+input_path_of_tray_images = f'{DATA_FOLDER_PATH}/Data/Trial_01/Dataset_01/FishEyeMasked'
+output_path_for_separated_plants = f'{DATA_FOLDER_PATH}/Separated_plants/Trial_01/Dataset_01/Background_included'
 
 # %%
 # Remove little bits and pieces of other plants from this contour's bounding rectangle's corners
@@ -75,6 +74,7 @@ for idx1, filename in enumerate(glob.glob(f'{input_path_of_tray_images}/*.png'))
     stage = re.match(regex_pattern_for_plant_info, filename).group(2)
     tray_id = re.match(regex_pattern_for_plant_info, filename).group(3)
     subfolder_name = f'{prefix}-{stage}-PS_{tray_id}'
+
     if(not os.path.exists(f'{output_path_for_separated_plants}/{subfolder_name}')):
         pathlib.Path(f'{output_path_for_separated_plants}/{subfolder_name}').mkdir(parents=True, exist_ok=True)
     cv2.imwrite(f'{output_path_for_separated_plants}/{subfolder_name}/' + file, img)
@@ -169,4 +169,11 @@ split_gc_df[split_gc_df['Masked image path'].str.contains('180724 - 06 - TV - R3
 
 # %%
 
+# Drop extra slash from the beginning of the split masked image path name
+split_gc_df['Split masked image path'] = split_gc_df['Split masked image path'].str[1:]
+
+# %%
+
 split_gc_df.to_csv(f'{DATA_FOLDER_PATH}/growth_chamber_plant_data_split.csv')
+
+# %%
