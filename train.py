@@ -83,6 +83,7 @@ for epoch in range(N_EPOCHS):
     for batch_num, batch in enumerate(train_plant_dataloader):
         data, target = batch['image'].to(device), batch['label'].to(device)
 
+        # For binary classification, transform labels to one-vs-rest
         target = target.eq(3).type(torch.int64)
 
         optimizer.zero_grad()
@@ -134,7 +135,9 @@ total = 0
 with torch.no_grad():
     for batch_num, batch in enumerate(test_plant_dataloader):
         data, target = batch['image'].to(device), batch['label'].to(device)
-        target = target.eq(3).int()
+
+        # For binary classification, transform labels to one-vs-rest
+        target = target.eq(3).type(torch.int64)
 
         output = resnet18_model(data)
         test_loss += loss_function(output, target).item()
@@ -163,26 +166,35 @@ y_true = []
 with torch.no_grad():
     for batch_num, batch in enumerate(test_plant_dataloader):
         data, target = batch['image'].to(device), batch['label'].to(device)
-        
+
+        # For binary classification, transform labels to one-vs-rest
+        target = target.eq(3).type(torch.int64)
+
         output = resnet18_model(data)
-        output = output.max(1, keepdim=True)[1].cpu().numpy()
+        output = output.max(1, keepdim=True)[1]
+
+        output = torch.flatten(output).cpu().numpy()
         y_pred.extend(output)
         
         target = target.cpu().numpy()
         y_true.extend(target)
 
 
+# Multi-class labels for confusion matrix
+# labels = ('CSV', 'FMV', 'Healthy', 'VD')
 
-# constant for classes
-labels = ('CSV', 'FMV', 'Healthy', 'VD')
+# Binary labels for confusion matrix
+labels = ('Non-VD', 'VD')
 
 # Build confusion matrix
 cf_matrix = confusion_matrix(y_true, y_pred)
+
 df_cm = pd.DataFrame(
-    cf_matrix/np.sum(cf_matrix) *10, 
+    cf_matrix/np.sum(cf_matrix), 
     index = [i for i in labels],
     columns = [i for i in labels]
-    )
+)
 plt.figure(figsize = (12,7))
+
 sn.heatmap(df_cm, annot=True)
 # %%
