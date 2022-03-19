@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import seaborn as sns
-
+import cv2
 # %%
 load_dotenv()
 
@@ -27,6 +27,36 @@ plant_df_split_master = pd.read_csv(plant_df_split_master_path)
 # %%
 def parse_img_path(path):
     return os.path.join(DATA_FOLDER, path)
+
+
+image_path = os.path.join(DATA_FOLDER, plant_df.sample(1)['Masked image path'].item())
+
+image = cv2.imread(image_path)
+
+plt.imshow(image)
+plt.show()
+
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+plt.imshow(gray)
+plt.show()
+
+thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)[1]
+
+plt.imshow(thresh)
+plt.show()
+
+
+closed_gaps_thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (50,50)))
+
+plt.imshow(closed_gaps_thresh)
+plt.show()
+
+cnts, _ = cv2.findContours(closed_gaps_thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+cv2.drawContours(image, cnts, -1, (0, 255, 0), 3)
+
+plt.imshow(image)
+plt.show()
 
 # %%
 for index, row in leaf_df.iterrows():

@@ -9,6 +9,11 @@ from torchvision import transforms, datasets
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
+import pathlib
+from sklearn.metrics import confusion_matrix
+import seaborn as sn
+import pandas as pd
+import numpy as np
 
 # %%
 
@@ -22,7 +27,7 @@ N_EPOCHS = 20
 BATCH_SIZE_TRAIN = 64
 BATCH_SIZE_TEST = 64
 LR = 0.01
-NUM_CLASSES = 4
+NUM_CLASSES = 2
 
 # %%
 
@@ -78,9 +83,12 @@ for epoch in range(N_EPOCHS):
     for batch_num, batch in enumerate(train_plant_dataloader):
         data, target = batch['image'].to(device), batch['label'].to(device)
 
-        optimizer.zero_grad() 
+        target = target.eq(3).type(torch.int64)
+
+        optimizer.zero_grad()
 
         output = resnet18_model(data)
+
         train_loss = loss_function(output, target)
         train_loss.backward()
         optimizer.step()
@@ -126,10 +134,13 @@ total = 0
 with torch.no_grad():
     for batch_num, batch in enumerate(test_plant_dataloader):
         data, target = batch['image'].to(device), batch['label'].to(device)
-        
+        target = target.eq(3).int()
+
         output = resnet18_model(data)
         test_loss += loss_function(output, target).item()
+
         pred = output.max(1, keepdim=True)[1]
+
         correct = pred.eq(target.view_as(pred)).sum().item()
         test_correct += correct
         total += data.shape[0]
@@ -138,4 +149,40 @@ with torch.no_grad():
 
 print("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, (100. * test_correct / total)))
 
+# %%
+
+# Store the model in the current path
+# CURRENT_PATH = pathlib.Path(__file__).parent.resolve()
+# torch.save(resnet18_model.state_dict(), os.path.join(CURRENT_PATH, "resnet18.pt"))
+
+# %%
+
+y_pred = []
+y_true = []
+
+with torch.no_grad():
+    for batch_num, batch in enumerate(test_plant_dataloader):
+        data, target = batch['image'].to(device), batch['label'].to(device)
+        
+        output = resnet18_model(data)
+        output = output.max(1, keepdim=True)[1].cpu().numpy()
+        y_pred.extend(output)
+        
+        target = target.cpu().numpy()
+        y_true.extend(target)
+
+
+
+# constant for classes
+labels = ('CSV', 'FMV', 'Healthy', 'VD')
+
+# Build confusion matrix
+cf_matrix = confusion_matrix(y_true, y_pred)
+df_cm = pd.DataFrame(
+    cf_matrix/np.sum(cf_matrix) *10, 
+    index = [i for i in labels],
+    columns = [i for i in labels]
+    )
+plt.figure(figsize = (12,7))
+sn.heatmap(df_cm, annot=True)
 # %%
