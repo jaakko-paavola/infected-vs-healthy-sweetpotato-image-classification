@@ -6,6 +6,7 @@ from typing import List
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from preprocessing_utils import fetch_image_data_from_trial_folder
+from separate_leaf.separate_leaves import segment
 # %%
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -47,7 +48,34 @@ leaf_master = pd.concat([df_trial1_dataset2, df_trial2_dataset2])
 leaf_master = leaf_master.reset_index()
 
 # %%
-
 file_name = "leaf_data.csv"
 file_path = os.path.join(DATA_FOLDER, file_name)
 leaf_master.to_csv(file_path)
+
+# %% separate leaves and save leaf paths to df with original paths
+leaves_segmented = leaf_master.copy()
+
+segmented_path_lists_masked = []
+segmented_path_lists_original = []
+
+for i, row in leaves_segmented.iterrows():
+    original_path = row["Original image path"]
+    original_masked_path = row["Masked image path"]
+
+    # currently original (= not masked) images can be segmented only if there is a corresponding masked image
+    segmented_paths_masked, segmented_paths_original = segment(os.path.join(DATA_FOLDER, original_masked_path), os.path.join(DATA_FOLDER, original_path))
+
+    segmented_path_lists_masked.append(segmented_paths_masked)
+    segmented_path_lists_original.append(segmented_paths_original)
+
+
+leaves_segmented = leaves_segmented.assign(
+    segmented_masked_image_path = segmented_path_lists_masked, 
+    segmented_original_image_path = segmented_path_lists_original)
+
+leaves_segmented = leaves_segmented.apply(pd.Series.explode).reset_index()
+
+# %%
+file_name = "leaves_segmented.csv"
+file_path = os.path.join(DATA_FOLDER, file_name)
+leaves_segmented.to_csv(file_path)
