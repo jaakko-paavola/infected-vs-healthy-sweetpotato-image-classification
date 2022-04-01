@@ -14,6 +14,9 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 import numpy as np
+import argparse
+
+arg_parser = argparse.ArgumentParser(description='Train the model')
 
 # %%
 
@@ -29,11 +32,14 @@ BATCH_SIZE_TEST = 64
 LR = 0.01
 NUM_CLASSES = 2
 
+# 
+
 # %%
 
 data_transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.RandomRotation(180),
+    transforms.RandomAffine(translate=(0.1, 0.3), scale=(0.6, 0.9)),
     transforms.Resize((256, 256)),
     transforms.ToTensor(),
     # Values aquired from dataloaders/plant_master_dataset_stats.py

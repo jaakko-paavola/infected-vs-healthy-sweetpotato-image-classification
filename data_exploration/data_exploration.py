@@ -29,6 +29,8 @@ def parse_img_path(path):
     return os.path.join(DATA_FOLDER, path)
 
 
+# %%
+
 image_path = os.path.join(DATA_FOLDER, plant_df.sample(1)['Masked image path'].item())
 
 image = cv2.imread(image_path)
@@ -93,14 +95,13 @@ for image_path in plant_df['Original image path'].unique():
 # %%
 
 # Create temporary column for sum counts of each label
-plant_df['Label Frequency'] = 1 
-label_frequency = plant_df.groupby(["Genotype", "Condition"]).sum()[["Label Frequency"]]
+plant_df_split_master['Label Frequency'] = 1 
+label_frequency = plant_df_split_master.groupby(["Condition"]).sum()[["Label Frequency"]]
 
 # %%
 label_frequency = label_frequency.reset_index()
 # %%
-fg = sns.factorplot(x='Condition', y='Label Frequency', 
-                        col='Genotype', data=label_frequency, kind='bar')
+fg = sns.factorplot(x='Condition', y='Label Frequency', data=label_frequency, kind='bar')
 fg.set_xlabels('')
 # %%
 
