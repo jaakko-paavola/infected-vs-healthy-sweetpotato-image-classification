@@ -14,9 +14,7 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
 import numpy as np
-import argparse
-
-arg_parser = argparse.ArgumentParser(description='Train the model')
+import click
 
 # %%
 

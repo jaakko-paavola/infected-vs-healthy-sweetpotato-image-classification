@@ -3,7 +3,6 @@ import warnings
 import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
-from .utils import load_state_dict_from_url
 from typing import Callable, Any, Optional, Tuple, List
 
 __all__ = ['Inception3', 'inception_v3', 'InceptionOutputs', '_InceptionOutputs']
@@ -21,40 +20,8 @@ InceptionOutputs.__annotations__ = {'logits': Tensor, 'aux_logits': Optional[Ten
 _InceptionOutputs = InceptionOutputs
 
 
-def inception_v3(pretrained: bool = False, progress: bool = True, **kwargs: Any) -> "Inception3":
-    r"""Inception v3 model architecture from
-    `"Rethinking the Inception Architecture for Computer Vision" <http://arxiv.org/abs/1512.00567>`_.
-    .. note::
-        **Important**: In contrast to the other models the inception_v3 expects tensors with a size of
-        N x 3 x 299 x 299, so ensure your images are sized accordingly.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
-        aux_logits (bool): If True, add an auxiliary branch that can improve training.
-            Default: *True*
-        transform_input (bool): If True, preprocesses the input according to the method with which it
-            was trained on ImageNet. Default: *False*
-    """
-    if pretrained:
-        if 'transform_input' not in kwargs:
-            kwargs['transform_input'] = True
-        if 'aux_logits' in kwargs:
-            original_aux_logits = kwargs['aux_logits']
-            kwargs['aux_logits'] = True
-        else:
-            original_aux_logits = True
-        kwargs['init_weights'] = False  # we are loading weights from a pretrained model
-        model = Inception3(**kwargs)
-        state_dict = load_state_dict_from_url(model_urls['inception_v3_google'],
-                                              progress=progress)
-        model.load_state_dict(state_dict)
-        if not original_aux_logits:
-            model.aux_logits = False
-            model.AuxLogits = None
-        return model
-
-    return Inception3(**kwargs)
-
+def inception3(num_classes=4) -> nn.Module:
+    return Inception3(num_classes=num_classes, name="inception_v3")
 
 class Inception3(nn.Module):
 
@@ -64,9 +31,14 @@ class Inception3(nn.Module):
         aux_logits: bool = True,
         transform_input: bool = False,
         inception_blocks: Optional[List[Callable[..., nn.Module]]] = None,
-        init_weights: Optional[bool] = None
+        init_weights: Optional[bool] = None,
+        name: str = "inception_v3"
     ) -> None:
         super(Inception3, self).__init__()
+        
+        if name is not None:
+            self.name = name
+
         if inception_blocks is None:
             inception_blocks = [
                 BasicConv2d, InceptionA, InceptionB, InceptionC,
