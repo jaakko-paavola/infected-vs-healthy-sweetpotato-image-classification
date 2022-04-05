@@ -15,22 +15,31 @@ import seaborn as sn
 import pandas as pd
 import numpy as np
 import click
+from models.model_factory import AVAILABLE_MODELS
 
 # %%
 
 load_dotenv()
-
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
-PLANT_SPLIT_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
 
-#--- hyperparameters ---
-N_EPOCHS = 20
-BATCH_SIZE_TRAIN = 64
-BATCH_SIZE_TEST = 64
-LR = 0.01
-NUM_CLASSES = 2
+# %%
 
-# 
+@click.command()
+@click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
+@click.option('-d', '--data', type=click.Choice(['plant', 'plant_golden', 'leaf', 'leaf_golden'], case_sensitive=False), default="plant", help='Dataset to use to train the model.')
+@click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
+@click.option('-hpf', '--hyperparam-file', type=str, help='File path to hyperparameters used during the training. File must be a ')
+@click.option('-aug', '--data-augmentaton', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
+def train():
+    
+    PLANT_SPLIT_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
+
+    #--- hyperparameters ---
+    N_EPOCHS = 20
+    BATCH_SIZE_TRAIN = 64
+    BATCH_SIZE_TEST = 64
+    LR = 0.01
+    NUM_CLASSES = 2
 
 # %%
 
@@ -202,3 +211,7 @@ plt.figure(figsize = (12,7))
 
 sn.heatmap(df_cm, annot=True)
 # %%
+
+
+if __name__ == "__main__":
+    train()

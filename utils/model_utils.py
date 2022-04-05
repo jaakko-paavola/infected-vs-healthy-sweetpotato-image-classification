@@ -2,16 +2,17 @@ from operator import mod
 from dotenv import load_dotenv
 import os
 import time
-from time_utils import now_to_str, str_to_datetime
+from time_utils import now_to_str, str_to_datetime, datetime_to_str
 from torch import nn
 from pathlib import Path
 import pandas as pd
 import random
 import string
 import json
-from typing import Union
+from typing import Tuple, Union
 from datetime import datetime
 from models.model_factory import AVAILABLE_MODELS
+import torch
 
 load_dotenv()
 
@@ -26,26 +27,24 @@ CLASSS_TO_MODEL_NAME_MAPPING = {
 	"VisionTransformer": "vision_transformer"
 }
 
-def get_model_file_name(id: str, model_name: str, timestamp: str):
+def get_model_file_name(id: str, model_name: str, timestamp: str) -> str:
+		if type(model_name) != str:
+			raise ValueError("Model name must be string")
+
 		model_file_name = f"{id}-{model_name}-{timestamp}.pt"
 		return model_file_name
 
-
-def create_model_file_name(model_name: str):
-		if type(model_name) != str:
-				raise ValueError("Model name must be string")
-
+def create_model_id_and_timestamp() -> Tuple[str, datetime]:
 		id = "".join(
 				random.choice(string.ascii_lowercase + string.digits) for i in range(8)
 		)
-		timestamp = now_to_str()
-		return get_model_file_name(id, model_name, timestamp)
+		timestamp = datetime.now()
+		return id, timestamp
 
-
-def split_model_file_name(model_file_string: str) -> Union[str, str, datetime]:
+def split_model_file_name(model_file_string: str, return_as_str=False) -> Tuple[str, str, Union[datetime, str]]:
 		if model_file_string.count("-") != 2:
 				raise ValueError(
-						"model_file_string be in format <id>-<model_name>-<timestamp without hyphen>.<extension>"
+						"model_file_string be in format <id>-<model_name>-<timestamp>.<extension>"
 				)
 
 		path = Path(model_file_string)
@@ -54,21 +53,32 @@ def split_model_file_name(model_file_string: str) -> Union[str, str, datetime]:
 		path = path.with_suffix("")
 
 		id, model_name, datetime_str = str(path).split("-")
+
+		if return_as_str:
+			return id, model_name, datetime_str
+		
 		datetime = str_to_datetime(datetime_str)
 
 		return id, model_name, datetime
 
 
-def save_torch_model(model: nn.Module) -> Union[str, str, datetime]:
+def save_torch_model(model: nn.Module) -> Tuple[str, str, datetime]:
 		# If custom name attribute has been given, use it
 		if hasattr(model, "name"):
 				model_name = model.name
-		# Default to class name
+		# Find class name and determine the model name
 		else:
 				model_name = type(model).__name__
-				
+				model_name = CLASSS_TO_MODEL_NAME_MAPPING[model_name]
 
-		model_file_name = create_model_file_name(model_name=model_name)
+		id, timestamp = create_model_id_and_timestamp()
+		timestamp_str = datetime_to_str(timestamp)
+
+		model_file_name = get_model_file_name(id=id, model_name=model_name, timestamp=timestamp_str)
+		model_file_path = os.path.join(MODEL_FOLDER, model_file_name)
+		torch.save(model.state_dict(), model_file_path)
+
+		return id, model_name, timestamp
 
 
 def add_model_info_to_df(
@@ -79,6 +89,7 @@ def add_model_info_to_df(
 		description: str = None,
 		# "plant" or "leaf"
 		plant_or_leaf: str = None,
+		num_classes: int = None,
 		binary_test_accuracy: float = None,
 		binary_test_loss: float = None,
 		binary_F1: float = None,
@@ -87,7 +98,6 @@ def add_model_info_to_df(
 		multiclass_F1: float = None,
 		other_json: json = None,
 ):
-
 		if model_name not in AVAILABLE_MODELS:
 				raise ValueError(
 						f"Model name not recognized, available models: {AVAILABLE_MODELS}"
@@ -95,6 +105,9 @@ def add_model_info_to_df(
 
 		if not plant_or_leaf:
 				raise ValueError("Need to specify if model is trained on plants or leaf images")
+
+		if not num_classes:
+				raise ValueError("Need to specify how many classes the model recognizes")
 
 		if (
 				not binary_test_accuracy
@@ -114,6 +127,7 @@ def add_model_info_to_df(
 				timestamp,
 				description,
 				plant_or_leaf,
+				num_classes,
 				binary_test_accuracy,
 				binary_test_loss,
 				binary_F1,
@@ -137,5 +151,10 @@ def store_model_and_add_info_to_df(model, **kwargs):
 		add_model_info_to_df(id=id, model_name=model_name, timestamp=timestamp, **kwargs)
 
 
-def get_model_info(id):
+def get_model_info(id: str) -> pd.Series:
 		row = MODEL_DF.loc[MODEL_DF["id"] == id]
+		return row
+
+def get_model_info_by_name(name: str, timestamp: datetime) -> pd.Series:
+		row = MODEL_DF.loc[(MODEL_DF["name"] == name) & (MODEL_DF["timestamp"] == timestamp)]
+		return row

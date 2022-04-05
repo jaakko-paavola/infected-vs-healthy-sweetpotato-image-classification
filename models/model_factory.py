@@ -2,17 +2,20 @@ from torch import nn
 from resnet import resnet18
 from inception import inception3
 from dotenv import load_dotenv
-from utils.model_utils import split_model_file_name
-from utils.time_utils import str_to_datetime
+from utils.model_utils import split_model_file_name, get_model_info
+from utils.time_utils import datetime_to_str, str_to_datetime
 import os
 from datetime import datetime
+import torch
+import pandas as pd
 
 load_dotenv()
 
 DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
+MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
-AVAILABLE_MODELS = ['resnet18', 'inception_v3', 'vision_transformer', ""]
+AVAILABLE_MODELS = ['resnet18', 'inception_v3']
 
 def get_model_class(name: str, num_of_classes: int) -> nn.Module:
 
@@ -24,6 +27,31 @@ def get_model_class(name: str, num_of_classes: int) -> nn.Module:
     return resnet18(num_classes=num_of_classes)
   elif name == 'inception_v3':
     return inception3(num_classes=num_of_classes)
+
+
+def get_trained_model_by_id(id: str) -> nn.Module:
+  models = os.listdir(MODEL_FOLDER)
+
+  # Filter models that don't contain the id
+  filtered_models = [model for model in models if id in models]
+
+  if len(filtered_models) == 0:
+    raise ValueError(f"Could not find model with id {id}")
+  elif len(filtered_models) > 0:
+    raise ValueError(f"Found multiple models with id {id}")
+
+  model_file_name = filtered_models[0]
+  id, model_name, timestamp = split_model_file_name(model_file_name)
+  model_weight_path = os.path.join(MODEL_FOLDER, model_file_name)
+
+  model_info = get_model_info(id)
+  num_classes = model_info['num_classes']
+
+  model_class = get_model_class(model_name, num_of_classes=num_classes)
+  model_class.load_state_dict(torch.load(model_weight_path))
+  model_class.eval()
+
+  return model_class
 
 
 def get_trained_model(name: str, latest: bool = True, timestamp: str = None) -> nn.Module:
@@ -44,37 +72,43 @@ def get_trained_model(name: str, latest: bool = True, timestamp: str = None) -> 
 
   if latest:
     # datetime.min is always smaller than any other datetime
+    model_id = None
     latest_model, latest_timestamp = None, datetime.min
     for model in filtered_models:
-      model_name, timestamp_str = split_model_file_name(model)
-      timestamp = str_to_datetime(timestamp_str)
+      id, model_name, timestamp = split_model_file_name(model)
 
       if timestamp > latest_timestamp:
+        model_id = id
         latest_model = model
         latest_timestamp = timestamp
 
-    model_path = os.path.join(MODEL_FOLDER, latest_model)
+    model_weight_path = os.path.join(MODEL_FOLDER, latest_model)
 
   else:
-
+    
+    model_id = None
     timestamp_model = None
 
     for model in filtered_models:
-      model_name, timestamp_str = split_model_file_name(model)
+      id, model_name, timestamp_str = split_model_file_name(model, return_as_str=True)
       if timestamp == timestamp_str:
+        model_id = id
         timestamp_model = model
 
-    if not model:
+
+    if not timestamp_model:
       raise ValueError(f"Could not find a model with name {name} and timestamp {timestamp}")
 
-    model_class = get_model_class(name)
-    model_path = os.path.join(MODEL_FOLDER, timestamp_model)
+    model_weight_path = os.path.join(MODEL_FOLDER, timestamp_model)
 
+  model_info = get_model_info(model_id)
+  num_classes = model_info['num_classes']
 
+  model_class = get_model_class(name, num_of_classes=num_classes)
+  model_class.load_state_dict(torch.load(model_weight_path))
+  model_class.eval()
 
-  model = TheModelClass)
-  model.load_state_dict(torch.load(PATH))
-  model.eval()
+  return model_class
 
 
 

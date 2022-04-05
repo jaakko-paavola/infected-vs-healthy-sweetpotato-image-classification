@@ -1,5 +1,9 @@
 import datetime
 
+def datetime_to_str(datetime):
+  datetime_str = datetime.strftime('%d%m%y_%H:%M')
+  return datetime_str
+
 def now_to_str():
   now = datetime.datetime.now()
   now_str = now.strftime('%d%m%y_%H:%M')
