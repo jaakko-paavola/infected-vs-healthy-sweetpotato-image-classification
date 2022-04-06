@@ -158,6 +158,7 @@ Send2Trash==1.8.0
 shortuuid==1.0.8
 shtab==1.5.3
 six==1.16.0
+sklearn==0.0
 smmap==5.0.0
 SQLAlchemy==1.4.36
 stack-data==0.1.4
@@ -183,6 +184,7 @@ voluptuous==0.12.2
 wcwidth==0.2.5
 webencodings==0.5.1
 widgetsnbextension==3.5.2
+xgboost==1.5.2
 xmltodict==0.12.0
 yarl==1.7.2
 zc.lockfile==2.0
