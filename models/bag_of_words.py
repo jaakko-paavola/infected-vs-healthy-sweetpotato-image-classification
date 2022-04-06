@@ -47,7 +47,6 @@ class BagOfWords:
         for index, row in data.iterrows():
             image_path = os.path.join(self.DATA_FOLDER_PATH, row['Split masked image path'])
             img = cv2.imread(image_path)
-
             if feature_detection_algorithm == 'SIFT':
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
