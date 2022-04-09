@@ -1,8 +1,8 @@
 from torch import nn
-from resnet import resnet18
-from inception import inception3
+from models.resnet import resnet18
+from models.inception import inception3
 from dotenv import load_dotenv
-from utils.model_utils import split_model_file_name, get_model_info
+from utils.model_utils import split_model_file_name, get_model_info, AVAILABLE_MODELS
 from utils.time_utils import datetime_to_str, str_to_datetime
 import os
 from datetime import datetime
@@ -15,7 +15,6 @@ DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
-AVAILABLE_MODELS = ['resnet18', 'inception_v3']
 
 def get_model_class(name: str, num_of_classes: int) -> nn.Module:
 

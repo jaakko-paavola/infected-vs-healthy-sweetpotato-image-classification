@@ -2,7 +2,7 @@ from operator import mod
 from dotenv import load_dotenv
 import os
 import time
-from time_utils import now_to_str, str_to_datetime, datetime_to_str
+from utils.time_utils import now_to_str, str_to_datetime, datetime_to_str
 from torch import nn
 from pathlib import Path
 import pandas as pd
@@ -11,7 +11,6 @@ import string
 import json
 from typing import Tuple, Union
 from datetime import datetime
-from models.model_factory import AVAILABLE_MODELS
 import torch
 
 load_dotenv()
@@ -20,6 +19,8 @@ DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
 
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
+
+AVAILABLE_MODELS = ['resnet18', 'inception_v3']
 
 CLASSS_TO_MODEL_NAME_MAPPING = {
 	"ResNet": "resnet18",
