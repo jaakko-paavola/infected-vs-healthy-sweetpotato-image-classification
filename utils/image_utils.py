@@ -101,28 +101,27 @@ How to crop and pad an image:
 # %%
 
 def transform_alpha_to_bg(folder_path):
+  rbga_image_paths = []
 
-      rbga_image_paths = []
+  for root, dirs, files in os.walk(folder_path):
 
-      for root, dirs, files in os.walk(folder_path):
+    # Iterate over subfolders until we are in folder that contains image files
+    if len(files) == 0:
+        continue
 
-        # Iterate over subfolders until we are in folder that contains image files
-        if len(files) == 0:
+    for file in files:
+        if ".png" in file:
+          file_path = os.path.join(root, file)
+          img = io.imread(file_path)
+
+          if img.shape[2] == 3:
             continue
-
-        for file in files:
-            if ".png" in file:
-              file_path = os.path.join(root, file)
-              img = io.imread(file_path)
-
-              if img.shape[2] == 3:
-                continue
-              else:
-                img_rgba = rgba2rgb(img, background=[0,0,0])
-                rbga_image_paths.append(file_path)
-                # io.imsave(file_path, img_rgba)
-            else:
-              print(f"Not image file: {file}")
+          else:
+            img_rgba = rgba2rgb(img, background=[0,0,0])
+            rbga_image_paths.append(file_path)
+            # io.imsave(file_path, img_rgba)
+        else:
+          print(f"Not image file: {file}")
 
 # %%
 
