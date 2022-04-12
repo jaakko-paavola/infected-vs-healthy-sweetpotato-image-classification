@@ -15,8 +15,6 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-SUPPORTED_IMAGE_TYPES = []
-
 @click.command()
 @click.option('-i', '--input', required=True, type=str, help="Path to input image.")
 @click.option('-id', '--identifier', type=str, help="Model id. You can print model info with help.py.")

@@ -10,7 +10,7 @@ asyncssh==2.8.1
 atpublic==3.0.1
 attrs==21.4.0
 backcall==0.2.0
-black==22.1.0
+black==22.3.0
 bleach==4.1.0
 cachetools==5.0.0
 certifi==2021.10.8
@@ -116,6 +116,9 @@ pygit2==1.8.0
 Pygments==2.11.2
 pygtrie==2.4.2
 pyparsing==3.0.7
+PyQt5==5.15.6
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.9.1
 pyrsistent==0.18.1
 python-benedict==0.24.3
 python-dateutil==2.8.2
