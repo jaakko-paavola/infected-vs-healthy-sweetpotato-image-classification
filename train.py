@@ -3,26 +3,25 @@ import os
 from sklearn.preprocessing import binarize
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
-from models.resnet import resnet18
-from models.F1_score import F1Score
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 from torchvision import transforms, datasets
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
-import pathlib
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sn
 import pandas as pd
 import numpy as np
 import click
+import statistics
 from models.model_factory import get_model_class
 from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df
 import logging
 from tqdm import tqdm
 import yaml
 
+logging.basicConfig() 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -35,40 +34,51 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 
 @click.command()
 @click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
-@click.option('-d', '--data', type=click.Choice(['plant', 'plant_golden', 'leaf', 'leaf_golden'], case_sensitive=False), default="plant", help='Dataset to use to train the model.')
+@click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf', 'leaf_golden'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
+@click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
 @click.option('-p', '--params-file', type=str, default="hyperparams.yaml", help='Full file path to hyperparameter-file used during the training. File must be a YAMl file and similarly structured than hyperparams.yaml.')
 @click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
-def train(model, data, binary, params_file, augmentation, save, verbose):
+def train(model, dataset, data_csv, binary, params_file, augmentation, save, verbose):
     
     if verbose:
         logger.setLevel(logging.DEBUG)
 
-    if data == 'plant':
-        DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
-    elif data == 'leaf':
-        DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaf_data.csv")
-    elif data == 'plant_golden':
-        raise NotImplementedError("Plant golden dataset not implemented yet")
-    elif data == 'leaf_golden':
-        raise NotImplementedError("Leaf golden dataset not implemented yet")
+    logger.info("Reading the data")
 
+    if (not dataset and not data_csv) or (dataset and data_csv):
+        raise ValueError("You must pass either -d (name of the available dataset) or -csv (path to data-CSV)")
+
+    if dataset:
+        if dataset == 'plant':
+            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
+        elif dataset == 'leaf':
+            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaf_data.csv")
+        elif dataset == 'plant_golden':
+            raise NotImplementedError("Plant golden dataset not implemented yet")
+        elif dataset == 'leaf_golden':
+            raise NotImplementedError("Leaf golden dataset not implemented yet")
+    # TODO: give dataset name when using custom CSV for storing the model
+    else:
+        DATA_MASTER_PATH = data_csv
+
+
+    # TODO: automatize label counting from dataframe
     if binary:
         NUM_CLASSES = 2
     else:
         NUM_CLASSES = 4
-
 
     with open(params_file, "r") as stream:
         try:
             params = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             logger.error(f"Error while reading YAML: {exc}")
+            raise exc
 
-
-    #--- hyperparameters ---
+    # hyperparameters
     N_EPOCHS = params[model]['N_EPOCHS']
     BATCH_SIZE_TRAIN = params[model]['BATCH_SIZE_TRAIN']
     BATCH_SIZE_TEST = params[model]['BATCH_SIZE_TEST']
@@ -82,7 +92,7 @@ def train(model, data, binary, params_file, augmentation, save, verbose):
             transforms.Resize((256, 256)),
             transforms.ToTensor(),
             # Values aquired from dataloaders/plant_master_dataset_stats.py
-            # TODO: automatice the mean and std calculation
+            # TODO: automatize the mean and std calculation
             transforms.Normalize(mean=[0.09872966, 0.11726899, 0.06568969],
                                 std=[0.1219357, 0.14506954, 0.08257045])
         ])
@@ -122,7 +132,7 @@ def train(model, data, binary, params_file, augmentation, save, verbose):
     training_losses = []
     training_accuracies = []
 
-    logging.info("Starting training cycle")
+    logger.info("Starting training cycle")
 
     for epoch in tqdm(range(N_EPOCHS)):
         total_train_loss = 0
@@ -161,6 +171,12 @@ def train(model, data, binary, params_file, augmentation, save, verbose):
         training_losses.append(total_train_loss / len(train_plant_dataloader))        
         training_accuracies.append((100. * train_correct / total))
 
+    # Calculate train loss and accuracy as an average of the last min(5, N_EPOCHS) losses or accuracies
+    train_loss = statistics.mean(training_losses[min(-N_EPOCHS, -5):])
+    train_accuracy = statistics.mean(training_accuracies[min(-N_EPOCHS, -5):])
+
+    logger.info("Final training score: Loss: %.4f, Accuracy: %.3f%%" % (train_loss, train_accuracy))
+
     plt.plot(range(N_EPOCHS), training_losses, label = "Training loss")
     plt.xlabel('epoch')
     plt.ylabel('loss')
@@ -184,7 +200,7 @@ def train(model, data, binary, params_file, augmentation, save, verbose):
     y_pred = []
     y_true = []
 
-    logging.info("Starting testing cycle")
+    logger.info("Starting testing cycle")
 
     with torch.no_grad():
         for batch_num, batch in enumerate(test_plant_dataloader):
@@ -211,7 +227,9 @@ def train(model, data, binary, params_file, augmentation, save, verbose):
             target_list = target.cpu().numpy()
             y_true.extend(target_list)
 
-    logging.info("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, (100. * test_correct / total)))
+    test_accuracy = 100. * test_correct / total
+
+    logger.info("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, test_accuracy))
 
     if binary:
         labels = ['Non-VD', 'VD']
@@ -219,8 +237,11 @@ def train(model, data, binary, params_file, augmentation, save, verbose):
         labels = ['CSV', 'FMV', 'Healthy', 'VD']
 
     # Print classification report
-    cf_report = classification_report(y_true, y_pred, target_names=labels)
-    print(cf_report)
+    cf_report = classification_report(y_true, y_pred, target_names=labels, output_dict=True)
+
+    precision = cf_report['weighted avg']['precision']
+    recall = cf_report['weighted avg']['recall']
+    f1_score = cf_report['weighted avg']['f1-score']
 
     # Build confusion matrix
     cf_matrix = confusion_matrix(y_true, y_pred)
@@ -232,14 +253,29 @@ def train(model, data, binary, params_file, augmentation, save, verbose):
     )
     plt.figure(figsize = (12,7))
 
+    # TODO: make seaborn to use PyQT5
+
     sn.heatmap(df_cm, annot=True)
 
-
-    #if save:
-    #    if binary:
-    #        store_model_and_add_info_to_df(model)
-    #    else:
-
+    if save:
+        logger.info("Saving to model")
+        
+        store_model_and_add_info_to_df(
+            model = model, 
+            description = "",
+            dataset = dataset,
+            num_classes = NUM_CLASSES,
+            precision = precision,
+            recall = recall,
+            train_accuracy = train_accuracy,
+            train_loss = train_loss,
+            validation_accuracy = None,
+            validation_loss = None,
+            test_accuracy = test_accuracy,
+            test_loss = test_loss,
+            f1_score = f1_score,
+            other_json = None,
+        )
 
 
 if __name__ == "__main__":

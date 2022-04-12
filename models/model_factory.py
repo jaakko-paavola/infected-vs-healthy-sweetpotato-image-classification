@@ -15,7 +15,6 @@ DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
-
 def get_model_class(name: str, num_of_classes: int) -> nn.Module:
 
   if name not in AVAILABLE_MODELS:

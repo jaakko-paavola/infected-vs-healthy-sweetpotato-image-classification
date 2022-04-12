@@ -21,14 +21,18 @@ columns = {
   "model_name": pd.Series(dtype='str'), 
   "timestamp": pd.Series(dtype='datetime64[ns]'), 
   "description": pd.Series(dtype='str'), 
-  "plant/leaf": pd.Series(dtype='str'),
+  "dataset": pd.Series(dtype='str'),
   "num_classes": pd.Series(dtype='int'),
-  "binary_test_accuracy": pd.Series(dtype='float'), 
-  "binary_test_loss": pd.Series(dtype='float'), 
-  "binary_F1": pd.Series(dtype='float'), 
-  "multiclass_test_accuracy": pd.Series(dtype='float'), 
-  "multiclass_test_loss": pd.Series(dtype='float'), 
-  "multiclass_F1": pd.Series(dtype='float'),
+  "precision": pd.Series(dtype='float'),
+  "recall": pd.Series(dtype='float'),
+  "train_accuracy": pd.Series(dtype='float'),
+  "train_loss": pd.Series(dtype='float'),
+  "validation_accuracy": pd.Series(dtype='float'),
+  "validation_loss": pd.Series(dtype='float'),
+  "test_accuracy": pd.Series(dtype='float'), 
+  "test_loss": pd.Series(dtype='float'),
+  # F1 score should be macro weighted
+  "f1_score": pd.Series(dtype='float'), 
   # Other should contain a json object dumped to a string
   "other_json": pd.Series(dtype=str)
 }
@@ -41,6 +45,6 @@ model_df
 
 # %%
 
-model_df.to_csv(os.path.join(DATA_FOLDER_PATH, "models.csv"))
+model_df.to_csv(os.path.join(DATA_FOLDER_PATH, "models.csv"), index = False)
 
 # %%
