@@ -20,7 +20,7 @@ def get_model_class(name: str, num_of_classes: int) -> nn.Module:
   if name not in AVAILABLE_MODELS:
     raise ValueError(f"Model type not supported, available models: {AVAILABLE_MODELS}")
 
-  # Names are defined in the class constructor function in the model desclarations
+  # Names are defined in the class constructor function in the model declarations
   if name == 'resnet18':
     return resnet18(num_classes=num_of_classes)
   elif name == 'inception_v3':
