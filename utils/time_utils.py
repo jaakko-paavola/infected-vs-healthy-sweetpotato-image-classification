@@ -17,4 +17,5 @@ def str_to_datetime(string: str):
 def pd_datatime_str_to_str(string: str) -> str:
   datetime = datetime.strptime(string, '%Y-%m-%d %H:%M:%S.%f')
   datetime_str = datetime.strftime('%d%m%y_%H:%M')
+  return datetime_str
 
