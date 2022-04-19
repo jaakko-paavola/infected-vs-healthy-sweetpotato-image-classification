@@ -35,7 +35,7 @@ def get_trained_model_by_id(id: str) -> nn.Module:
 
   if len(filtered_models) == 0:
     raise ValueError(f"Could not find model with id {id}")
-  elif len(filtered_models) > 0:
+  elif len(filtered_models) > 1:
     raise ValueError(f"Found multiple models with id {id}")
 
   model_file_name = filtered_models[0]
