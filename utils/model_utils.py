@@ -77,7 +77,7 @@ def save_torch_model(model: nn.Module) -> Tuple[str, str, datetime]:
 	# Find class name and determine the model name
 	else:
 		model_name = type(model).__name__
-		model_name = CLASSS_TO_MODEL_NAME_MAPPING[model_name]
+		model_name = CLASS_TO_MODEL_NAME_MAPPING[model_name]
 
 	id, timestamp = create_model_id_and_timestamp()
 	timestamp_str = datetime_to_str(timestamp)
