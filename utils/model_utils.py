@@ -24,7 +24,7 @@ MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
 AVAILABLE_MODELS = ["resnet18", "inception_v3"]
 
-CLASSS_TO_MODEL_NAME_MAPPING = {
+CLASS_TO_MODEL_NAME_MAPPING = {
 	"ResNet": "resnet18",
 	"Inception3": "inception_v3",
 	"VisionTransformer": "vision_transformer",
