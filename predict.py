@@ -31,7 +31,7 @@ if (not any([input, identifier, model, num_classes, dataset, verbose]))
   if verbose:
     logger.setLevel(logging.DEBUG)
 
-  if not identifier and (not model or not num_classes or not dataset):
+  if not identifier and (not all([model, num_classes, dataset])):
     raise ValueError("You must provide either model id or model architechture and num of classes and dataset.")
 
   logger.info("Loading the model")
