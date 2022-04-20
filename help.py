@@ -21,7 +21,11 @@ def help(list):
     models = pd.read_csv(MODELS_CSV)
     pd.options.display.max_columns = len(models.columns)
     print(tabulate(models, headers="keys", tablefmt="fancy_grid"))
-
+ else:
+    print("""
+        Usage: help.py [OPTIONS]
+        Try 'help.py --help' for help.
+    """)
 
 if __name__ == "__main__":
     help()
