@@ -101,7 +101,7 @@ How to crop and pad an image:
 # %%
 
 def transform_alpha_to_rgb(folder_path):
-  rbga_image_paths = []
+  rgba_image_paths = []
 
   for root, dirs, files in os.walk(folder_path):
 
