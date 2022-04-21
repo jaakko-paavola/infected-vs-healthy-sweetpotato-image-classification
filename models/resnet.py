@@ -1,12 +1,14 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from models.model_utils import _weight_initialization, ResNetBlock
+from models.model_parts import _weight_initialization, ResNetBlock
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=3, input_channels=3, in_planes=64):
+    def __init__(self, block, layers, num_classes=3, input_channels=3, in_planes=64, name="resnet18"):
         super(ResNet, self).__init__()
-        self.in_planes = in_planes
+        if name is not None:
+            self.name = name
 
+        self.in_planes = in_planes
         self.conv1 = nn.Conv2d(input_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(self.in_planes)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -42,6 +44,6 @@ class ResNet(nn.Module):
         return out
 
 
-def resnet18(num_classes=3) -> ResNet:
-    _resnet = ResNet(block=ResNetBlock, layers=[2, 2, 2, 2], num_classes=num_classes)
+def resnet18(num_classes=4) -> ResNet:
+    _resnet = ResNet(block=ResNetBlock, layers=[2, 2, 2, 2], num_classes=num_classes, name="resnet18")
     return _resnet
