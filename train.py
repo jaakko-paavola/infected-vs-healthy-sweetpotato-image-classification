@@ -3,6 +3,7 @@ import os
 from sklearn.preprocessing import binarize
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
+from dataloaders.gaussian_noise import GaussianNoise
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 from torchvision import transforms, datasets
@@ -87,14 +88,16 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
     if augmentation:
         data_transform = transforms.Compose([
             transforms.ToPILImage(),
+            transforms.Pad(50),
             transforms.RandomRotation(180),
-            transforms.RandomAffine(translate=(0.1, 0.3), scale=(0.6, 0.9), degrees=180),
+            transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
             transforms.Resize((256, 256)),
             transforms.ToTensor(),
             # Values aquired from dataloaders/plant_master_dataset_stats.py
             # TODO: automatize the mean and std calculation
             transforms.Normalize(mean=[0.09872966, 0.11726899, 0.06568969],
-                                std=[0.1219357, 0.14506954, 0.08257045])
+                                std=[0.1219357, 0.14506954, 0.08257045]),
+            GaussianNoise(0., 0.1),
         ])
     else:
         data_transform = None
@@ -162,7 +165,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             total_train_loss += train_loss.item()
 
             if batch_num == len(train_plant_dataloader) - 1:
-                logging.info('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' % 
+                logger.info('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' % 
                     (epoch, batch_num + 1, len(train_plant_dataloader), train_loss / (batch_num + 1), 
                     100. * train_correct / total, train_correct, total))
 
@@ -259,6 +262,8 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
     if save:
         logger.info("Saving to model")
+        
+        # TODO: store hyperparams to other_json
         
         store_model_and_add_info_to_df(
             model = model, 

@@ -7,10 +7,15 @@ sys.path.append('/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweet
 sys.path.append('/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/models/')
 sys.path.append('/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification')
 
+from dotenv import load_dotenv
+
+import torchvision.transforms as transforms
 
 from PIL import Image
 import numpy as np
 import torch
+from torch.autograd import Variable
+from torch import nn
 import os
 import copy
 from PIL import Image
@@ -19,6 +24,11 @@ from matplotlib.colors import ListedColormap
 from matplotlib import pyplot as plt
 
 from models.model_factory import get_trained_model_by_id
+from models.model_parts import ResNetBlock
+
+load_dotenv()
+
+DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 
 def format_np_output(np_arr):
     """
@@ -78,7 +88,7 @@ def apply_colormap_on_image(org_im, activation, colormap_name):
 
     # Apply heatmap on image
     heatmap_on_image = Image.new("RGBA", org_im.size)
-    heatmap_on_image = Image.alpha_composite(heatmap_on_image, org_im.convert('RGBA'))
+    heatmap_on_image = Image.alpha_composite(heatmap_on_image, org_im.convert('RGBA')).resize((256, 256))
     heatmap_on_image = Image.alpha_composite(heatmap_on_image, heatmap)
     return no_trans_heatmap, heatmap_on_image
 
@@ -170,7 +180,12 @@ class LayerCam():
         # Backward pass with specified target
         model_output.backward(gradient=one_hot_output, retain_graph=True)
         # Get hooked gradients
+        
+        if self.extractor.gradients is None:
+            return None
+        
         guided_gradients = self.extractor.gradients.data.numpy()[0]
+        
         # Get convolution outputs
         target = conv_output.data.numpy()[0]
         # Get weights from gradients
@@ -189,18 +204,45 @@ class LayerCam():
 if __name__ == '__main__':
     # Get params
     
-    for target_layer in range(1, 53):
-      
-      original_image = Image.open("/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/data/Separated_plants/Trial_02/Dataset_01/Background_included/82-7-PS_Tray_419/plant_index_2.png").convert('RGB')
-      prep_img = original_image
-      target_class = 2
-      file_name_to_export = f"restnet_layer{target_layer}"
-      pretrained_model = get_trained_model_by_id("mhefzv7d")
-      
-      # Layer cam
-      layer_cam = LayerCam(pretrained_model, target_layer=target_layer)
-      # Generate cam mask
-      cam = layer_cam.generate_cam(prep_img, target_class)
-      # Save mask
-      save_class_activation_images(original_image, cam, file_name_to_export)
-      print('Layer cam completed')
+    pretrained_model = get_trained_model_by_id("9zr4vtfh")
+    modules = [module for module in pretrained_model.features.modules() if not isinstance(module, nn.Sequential)]
+        
+    for target_layer in range(0, 50):
+        print(f"Target layer: {target_layer}")
+        print(f"Target layer: {modules[target_layer]}")
+        
+        if isinstance(modules[target_layer], ResNetBlock):
+            print(f"Skipping ResNet block")
+            continue 
+        
+        original_image = Image.open(os.path.join(DATA_FOLDER_PATH, "Separated_plants/Trial_02/Dataset_01/Background_included/82-7-PS_Tray_419/plant_index_2.png")).convert('RGB')
+        
+        original_image_np = np.asarray(original_image)
+        
+        image_transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Pad(50),
+            transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.09872966, 0.11726899, 0.06568969],
+                                std=[0.1219357, 0.14506954, 0.08257045]),
+        ])
+        prep_img = image_transform(original_image_np)
+        prep_img = prep_img.unsqueeze(0)
+        prep_img = Variable(prep_img, requires_grad=True)
+
+        target_class = 2
+        file_name_to_export = f"restnet_layer{target_layer}"
+        
+        # Layer cam
+        layer_cam = LayerCam(pretrained_model, target_layer=target_layer)
+        # Generate cam mask
+        cam = layer_cam.generate_cam(prep_img, target_class)
+        
+        if cam is None:
+            print(f"Skipping layer {target_layer}")
+            continue
+        
+        # Save mask
+        save_class_activation_images(original_image, cam, file_name_to_export)
+        print('Layer cam completed')

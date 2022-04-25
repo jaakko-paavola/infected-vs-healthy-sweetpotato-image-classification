@@ -1,3 +1,7 @@
+"""
+From https://discuss.pytorch.org/t/how-to-add-noise-to-mnist-dataset-when-using-pytorch/59745
+"""
+
 import torch
 
 class GaussianNoise(object):
