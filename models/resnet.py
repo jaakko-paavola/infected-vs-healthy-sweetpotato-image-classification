@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from models.model_parts import _weight_initialization, ResNetBlock
 
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=3, input_channels=3, in_planes=64, name="resnet18"):
+    def __init__(self, block, layers, num_classes=4, input_channels=3, in_planes=64, name="resnet18"):
         super(ResNet, self).__init__()
         if name is not None:
             self.name = name

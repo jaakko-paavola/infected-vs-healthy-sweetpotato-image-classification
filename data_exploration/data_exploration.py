@@ -108,3 +108,5 @@ fg.set_xlabels('')
 plant_df_split_master['Label'].value_counts()
 
 # %% 
+
+print(len(plant_df_split_master))
