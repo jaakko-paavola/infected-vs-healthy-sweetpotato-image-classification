@@ -23,11 +23,15 @@ logger.setLevel(logging.INFO)
 @click.option('-d', '--dataset', type=str, help='Name of the dataset model is trained on.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 def predict(input, identifier, model, num_classes, dataset, verbose):
-
+if (not any([input, identifier, model, num_classes, dataset, verbose]))
+    print("""
+        Usage: predict.py [OPTIONS]
+        Try 'predict.py --help' for help.
+    """)
   if verbose:
     logger.setLevel(logging.DEBUG)
 
-  if not identifier and (not model or not num_classes or not dataset):
+  if not identifier and (not all([model, num_classes, dataset])):
     raise ValueError("You must provide either model id or model architechture and num of classes and dataset.")
 
   logger.info("Loading the model")

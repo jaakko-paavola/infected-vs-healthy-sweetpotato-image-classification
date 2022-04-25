@@ -100,8 +100,8 @@ How to crop and pad an image:
 
 # %%
 
-def transform_alpha_to_bg(folder_path):
-  rbga_image_paths = []
+def transform_alpha_to_rgb(folder_path):
+  rgba_image_paths = []
 
   for root, dirs, files in os.walk(folder_path):
 
@@ -118,7 +118,7 @@ def transform_alpha_to_bg(folder_path):
             continue
           else:
             img_rgba = rgba2rgb(img, background=[0,0,0])
-            rbga_image_paths.append(file_path)
+            rgba_image_paths.append(file_path)
             # io.imsave(file_path, img_rgba)
         else:
           print(f"Not image file: {file}")
