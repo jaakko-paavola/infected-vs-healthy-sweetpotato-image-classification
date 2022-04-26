@@ -31,7 +31,7 @@ def get_trained_model_by_id(id: str) -> nn.Module:
   models = os.listdir(MODEL_FOLDER)
 
   # Filter models that don't contain the id
-  filtered_models = [model for model in models if id in models]
+  filtered_models = [model for model in models if id in model]
 
   if len(filtered_models) == 0:
     raise ValueError(f"Could not find model with id {id}")
@@ -43,7 +43,7 @@ def get_trained_model_by_id(id: str) -> nn.Module:
   model_weight_path = os.path.join(MODEL_FOLDER, model_file_name)
 
   model_info = get_model_info(id)
-  num_classes = model_info['num_classes']
+  num_classes = model_info['num_classes'].item()
 
   model_class = get_model_class(model_name, num_of_classes=num_classes)
   model_class.load_state_dict(torch.load(model_weight_path))
@@ -100,7 +100,7 @@ def get_trained_model(name: str, latest: bool = True, timestamp: str = None) -> 
     model_weight_path = os.path.join(MODEL_FOLDER, timestamp_model)
 
   model_info = get_model_info(model_id)
-  num_classes = model_info['num_classes']
+  num_classes = model_info['num_classes'].item()
 
   model_class = get_model_class(name, num_of_classes=num_classes)
   model_class.load_state_dict(torch.load(model_weight_path))
