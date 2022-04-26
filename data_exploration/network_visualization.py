@@ -2,11 +2,6 @@
 From https://github.com/utkuozbulak/pytorch-cnn-visualizations
 """
 
-import sys
-sys.path.append('/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/models/model_factory.py')
-sys.path.append('/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/models/')
-sys.path.append('/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification')
-
 from dotenv import load_dotenv
 
 import torchvision.transforms as transforms
