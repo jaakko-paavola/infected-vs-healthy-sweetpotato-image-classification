@@ -66,10 +66,9 @@ def cut(img, bounding_boxes, is_masked=True):
     return segments
     
 
-def write(segments, path, img_original):
+def write(segments, path, img_original, output_path):
     filename = re.findall(r'[^\/]+(?=\.)', path)[0]
-
-    pathname = os.path.join("segmented_leaves", filename)
+    pathname = os.path.join(output_path, filename)
 
     segmented_paths = []
     
@@ -88,7 +87,7 @@ def write(segments, path, img_original):
 
 
 
-def segment(path_masked, path_original):
+def segment(path_masked, path_original, output_path):
     img_orig_masked = cv2.imread(path_masked)
     img_masked = cv2.cvtColor(img_orig_masked, cv2.COLOR_BGR2RGB)
 
@@ -100,7 +99,7 @@ def segment(path_masked, path_original):
     segments_masked = cut(img_masked, bounding_boxes, is_masked=True)
     segments_original = cut(img_original, bounding_boxes, is_masked=False)
 
-    segmented_paths_masked = write(segments_masked, path_masked, img_masked)
-    segmented_paths_original = write(segments_original, path_original, img_original)
+    segmented_paths_masked = write(segments_masked, path_masked, img_masked, output_path)
+    segmented_paths_original = write(segments_original, path_original, img_original, output_path)
 
     return segmented_paths_masked, segmented_paths_original

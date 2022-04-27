@@ -66,3 +66,9 @@ plant_split_master_file_name = "plant_data_split_master.csv"
 plant_split_master_file_path = os.path.join(DATA_FOLDER_PATH, plant_split_master_file_name)
 plant_df_split_master.to_csv(plant_split_master_file_path)
 # %%
+
+def condition_to_label(df):
+    df['Label Category'] = pd.Categorical(df['Condition'])
+    df['Label Category'] = pd.Categorical(df['Condition'])
+    df['Label'] = df['Label Category'].cat.codes
+    return df
