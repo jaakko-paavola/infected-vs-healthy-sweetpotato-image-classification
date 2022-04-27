@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
 import torch.optim as optim
-from models.model_utils import AttentionBlock
+from models.model_parts import AttentionBlock
 from utils.image_utils import img_to_patch
 
 class VisionTransformer(nn.Module):
@@ -62,3 +62,14 @@ class VisionTransformer(nn.Module):
         cls = x[0]
         out = self.mlp_head(cls)
         return out
+    
+def vision_transformer(num_classes=4) -> VisionTransformer:
+    return VisionTransformer(
+        num_classes=num_classes, 
+        embed_dim=256, 
+        hidden_dim=512, 
+        num_channels=3, 
+        num_heads=8,
+        num_layers=6, 
+        patch_size=32, 
+        num_patches=64)

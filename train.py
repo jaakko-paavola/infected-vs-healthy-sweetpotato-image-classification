@@ -1,6 +1,5 @@
 # %%
 import os
-from sklearn.preprocessing import binarize
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
 from dataloaders.gaussian_noise import GaussianNoise
@@ -14,6 +13,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sn
 import pandas as pd
 import numpy as np
+
 import click
 import statistics
 from models.model_factory import get_model_class

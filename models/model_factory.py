@@ -1,6 +1,7 @@
 from torch import nn
 from models.resnet import resnet18
 from models.inception import inception3
+from models.vision_transformer import VisionTransformer, vision_transformer
 from dotenv import load_dotenv
 from utils.model_utils import split_model_file_name, get_model_info, AVAILABLE_MODELS
 from utils.time_utils import datetime_to_str, str_to_datetime
@@ -23,6 +24,8 @@ def get_model_class(name: str, num_of_classes: int) -> nn.Module:
   # Names are defined in the class constructor function in the model declarations
   if name == 'resnet18':
     return resnet18(num_classes=num_of_classes)
+  elif name == 'vision_transformer':
+    return vision_transformer(num_classes=num_of_classes)
   elif name == 'inception_v3':
     return inception3(num_classes=num_of_classes)
 

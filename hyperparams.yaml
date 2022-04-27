@@ -8,3 +8,8 @@ inception_v3:
   BATCH_SIZE_TRAIN: 64
   BATCH_SIZE_TEST: 64
   LR: 0.01
+vision_transformer:
+  N_EPOCHS: 20
+  BATCH_SIZE_TRAIN: 64
+  BATCH_SIZE_TEST: 64
+  LR: 0.01
