@@ -2,7 +2,11 @@
 import os
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
+<<<<<<< HEAD
 # from models.resnet import resnet18
+=======
+from models.resnet import resnet18
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 from models.vision_transformer import VisionTransformer
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
@@ -11,13 +15,21 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import pathlib
+<<<<<<< HEAD
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
+=======
+from sklearn.metrics import confusion_matrix
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 import seaborn as sn
 import pandas as pd
 import numpy as np
 import torchvision
 from utils.image_utils import img_to_patch
+<<<<<<< HEAD
 import optuna
+=======
+
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 # %%
 
 load_dotenv()
@@ -29,11 +41,16 @@ PLANT_SPLIT_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_maste
 N_EPOCHS = 10
 BATCH_SIZE_TRAIN = 64
 BATCH_SIZE_TEST = 64
+<<<<<<< HEAD
 BATCH_SIZE_VAL = 64
 LR = 0.01
 NUM_CLASSES = 4
 N_TRIALS = 3
 PATIENCE = 5
+=======
+LR = 0.01
+NUM_CLASSES = 2
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 
 # %%
 
@@ -55,6 +72,7 @@ plant_master_dataset = CSVDataLoader(
   transform=data_transform
 )
 
+<<<<<<< HEAD
 train_size = int(0.80 * len(plant_master_dataset))
 val_size = (len(plant_master_dataset)-train_size)//2 
 test_size = len(plant_master_dataset) - train_size - val_size
@@ -66,6 +84,15 @@ val_plant_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE_VAL, shuffl
 test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=4)
 
 print(len(train_dataset))
+=======
+train_size = int(0.85 * len(plant_master_dataset))
+test_size = len(plant_master_dataset) - train_size
+
+train_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, test_size])
+
+train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
+test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 
 #%% visualize some patches
 NUM_IMAGES = 4
@@ -84,18 +111,27 @@ plt.show()
 plt.close()
 
 #%%
+<<<<<<< HEAD
 import torch
+=======
+
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 if torch.cuda.is_available():
     device = torch.device('cuda')
 else:
     device = torch.device('cpu')
 
+<<<<<<< HEAD
 device
 
 #%% resnet18_model = resnet18(num_classes=NUM_CLASSES).to(device)
 model = VisionTransformer(
     # embed_dim=256,
     # hidden_dim=512,
+=======
+# resnet18_model = resnet18(num_classes=NUM_CLASSES).to(device)
+model = VisionTransformer(
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
     embed_dim=256,
     hidden_dim=512,
     num_heads=8,
@@ -103,14 +139,20 @@ model = VisionTransformer(
     patch_size=32,
     num_channels=3,
     num_patches=64,  # with patch size 32
+<<<<<<< HEAD
     num_classes=4,
     dropout=0.0
+=======
+    num_classes=2,
+    dropout=0.2
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 )
 
 # optimizer = optim.SGD(resnet18_model.parameters(), lr=LR, momentum=0.75)
 optimizer = optim.AdamW(model.parameters(), lr=3e-4)
 loss_function = torch.nn.CrossEntropyLoss()
 
+<<<<<<< HEAD
 #%%
 def objective(trial):
     optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "AdamW"])
@@ -272,6 +314,11 @@ study.optimize(func=objective, n_trials=N_TRIALS)
 study.best_params, study.best_value
 
 #%% training
+=======
+# %%
+
+# training
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 
 training_losses = []
 training_accuracies = []
@@ -284,10 +331,16 @@ for epoch in range(N_EPOCHS):
 
     for batch_num, batch in enumerate(train_plant_dataloader):
         data, target = batch['image'].to(device), batch['label'].to(device)
+<<<<<<< HEAD
         
         if NUM_CLASSES == 2:
             # For binary classification, transform labels to one-vs-rest
            target = target.eq(3).type(torch.int64)
+=======
+
+        # For binary classification, transform labels to one-vs-rest
+        target = target.eq(3).type(torch.int64)
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 
         optimizer.zero_grad()
 
@@ -328,6 +381,10 @@ plt.legend()
 plt.show()
 
 # %%
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 # test
 test_loss = 0
 test_correct = 0
@@ -354,7 +411,7 @@ with torch.no_grad():
 
 print("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, (100. * test_correct / total)))
 
-# 
+# %%
 
 # Store the model in the current path
 # CURRENT_PATH = pathlib.Path(__file__).parent.resolve()
@@ -391,6 +448,7 @@ labels = ('Non-VD', 'VD')
 # Build confusion matrix
 cf_matrix = confusion_matrix(y_true, y_pred)  #tn, fp, fn, tp
 
+
 df_cm = pd.DataFrame(
     cf_matrix/np.sum(cf_matrix), 
     index = [i for i in labels],
@@ -404,4 +462,5 @@ plt.savefig('transformer.png')
 print("precision", precision_score(y_true, y_pred))
 print("recall", recall_score(y_true, y_pred))
 print("f1", f1_score(y_true, y_pred))
+
 # %%
