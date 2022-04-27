@@ -114,15 +114,10 @@ def predict(input, identifier, model, num_classes, dataset, verbose):
 
     logits = model(image)
     probabilities = torch.nn.Softmax(dim=-1)(logits).tolist()[0]
-    results = dict(zip(LABELS, probabilities))
 
-    print(results)
-
-    return results
-Put the repeating rows that are common for both BoW and NN's outside the if-else:
     results = dict(zip(LABELS, probabilities))
-    print(results)
-    return results
+  print(results)
+  return results
 
 if __name__ == "__main__":
     predict()
