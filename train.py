@@ -91,7 +91,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             transforms.Pad(50),
             transforms.RandomRotation(180),
             transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
-            transforms.Resize((256, 256)),
+            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
             # Values aquired from dataloaders/plant_master_dataset_stats.py
             # TODO: automatize the mean and std calculation
@@ -152,7 +152,8 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             optimizer.zero_grad()
 
             output = model(data)
-
+            if (len(output) == 2):
+                output = output.logits
             train_loss = loss_function(output, target)
             train_loss.backward()
             optimizer.step()
