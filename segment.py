@@ -7,7 +7,7 @@ from preprocessing.preprocess_split_data import condition_to_label
 from segmentation.separate_leaves import segment as segment_leaves
 from preprocessing.preprocess_leaf_data import preprocess_leaf_data
 
-logging.basicConfig() 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
