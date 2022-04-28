@@ -9,7 +9,7 @@ from utils.image_utils import img_to_patch
 
 class VisionTransformer(nn.Module):
 
-    def __init__(self, embed_dim, hidden_dim, num_channels, num_heads, num_layers, num_classes, patch_size, num_patches, dropout=0.0):
+    def __init__(self, embed_dim, hidden_dim, num_channels, num_heads, num_layers, num_classes, patch_size, num_patches, dropout):
         """ from https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial15/Vision_Transformer.html
         Inputs:
             embed_dim - Dimensionality of the input feature vectors to the Transformer
@@ -63,13 +63,14 @@ class VisionTransformer(nn.Module):
         out = self.mlp_head(cls)
         return out
     
-def vision_transformer(num_classes=4) -> VisionTransformer:
+def vision_transformer(num_classes=4, num_heads=8, dropout=0.2) -> VisionTransformer:
     return VisionTransformer(
         num_classes=num_classes, 
         embed_dim=256, 
-        hidden_dim=512, 
+        hidden_dim=512,
         num_channels=3, 
-        num_heads=8,
+        num_heads=num_heads,
         num_layers=6, 
         patch_size=32, 
-        num_patches=64)
+        num_patches=64,
+        dropout=dropout)

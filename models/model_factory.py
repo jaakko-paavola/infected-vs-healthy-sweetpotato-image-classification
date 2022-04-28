@@ -16,7 +16,7 @@ DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
-def get_model_class(name: str, num_of_classes: int) -> nn.Module:
+def get_model_class(name: str, num_of_classes: int, **kwargs) -> nn.Module:
 
   if name not in AVAILABLE_MODELS:
     raise ValueError(f"Model type not supported, available models: {AVAILABLE_MODELS}")
@@ -25,7 +25,7 @@ def get_model_class(name: str, num_of_classes: int) -> nn.Module:
   if name == 'resnet18':
     return resnet18(num_classes=num_of_classes)
   elif name == 'vision_transformer':
-    return vision_transformer(num_classes=num_of_classes)
+    return vision_transformer(num_classes=num_of_classes, **kwargs)
   elif name == 'inception_v3':
     return inception3(num_classes=num_of_classes)
 
