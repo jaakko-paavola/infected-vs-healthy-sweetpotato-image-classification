@@ -2,11 +2,7 @@
 import os
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
-<<<<<<< HEAD
-# from models.resnet import resnet18
-=======
 from models.resnet import resnet18
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 from models.vision_transformer import VisionTransformer
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
@@ -15,21 +11,14 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 import pathlib
-<<<<<<< HEAD
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
-=======
-from sklearn.metrics import confusion_matrix
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 import seaborn as sn
 import pandas as pd
 import numpy as np
 import torchvision
-from utils.image_utils import img_to_patch
-<<<<<<< HEAD
+from utils.image_utils import img_to_patch, plot_patches
 import optuna
-=======
-
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
+from pytorchtools import EarlyStopping
 # %%
 
 load_dotenv()
@@ -41,16 +30,13 @@ PLANT_SPLIT_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_maste
 N_EPOCHS = 10
 BATCH_SIZE_TRAIN = 64
 BATCH_SIZE_TEST = 64
-<<<<<<< HEAD
 BATCH_SIZE_VAL = 64
 LR = 0.01
 NUM_CLASSES = 4
 N_TRIALS = 3
 PATIENCE = 5
-=======
-LR = 0.01
-NUM_CLASSES = 2
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
+FLAG_EARLYSTOPPING = True
+
 
 # %%
 
@@ -72,7 +58,6 @@ plant_master_dataset = CSVDataLoader(
   transform=data_transform
 )
 
-<<<<<<< HEAD
 train_size = int(0.80 * len(plant_master_dataset))
 val_size = (len(plant_master_dataset)-train_size)//2 
 test_size = len(plant_master_dataset) - train_size - val_size
@@ -84,54 +69,22 @@ val_plant_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE_VAL, shuffl
 test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=4)
 
 print(len(train_dataset))
-=======
-train_size = int(0.85 * len(plant_master_dataset))
-test_size = len(plant_master_dataset) - train_size
 
-train_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, test_size])
-
-train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
-test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 
 #%% visualize some patches
-NUM_IMAGES = 4
-train_images = torch.stack([train_dataset[idx]['image'] for idx in range(NUM_IMAGES)], dim=0)
-
-img_patches = img_to_patch(train_images, patch_size=32, flatten_channels=False)
-
-fig, ax = plt.subplots(train_images.shape[0], 1, figsize=(14,3))
-fig.suptitle("Images as input sequences of patches")
-for i in range(train_images.shape[0]):
-    img_grid = torchvision.utils.make_grid(img_patches[i], nrow=64, normalize=True, pad_value=0.9)
-    img_grid = img_grid.permute(1, 2, 0)
-    ax[i].imshow(img_grid)
-    ax[i].axis('off')
-plt.show()
-plt.close()
+plot_patches(4, train_dataset)
 
 #%%
-<<<<<<< HEAD
 import torch
-=======
 
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 if torch.cuda.is_available():
     device = torch.device('cuda')
 else:
     device = torch.device('cpu')
 
-<<<<<<< HEAD
 device
 
-#%% resnet18_model = resnet18(num_classes=NUM_CLASSES).to(device)
 model = VisionTransformer(
-    # embed_dim=256,
-    # hidden_dim=512,
-=======
-# resnet18_model = resnet18(num_classes=NUM_CLASSES).to(device)
-model = VisionTransformer(
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
     embed_dim=256,
     hidden_dim=512,
     num_heads=8,
@@ -139,20 +92,13 @@ model = VisionTransformer(
     patch_size=32,
     num_channels=3,
     num_patches=64,  # with patch size 32
-<<<<<<< HEAD
-    num_classes=4,
-    dropout=0.0
-=======
-    num_classes=2,
+    num_classes=NUM_CLASSES,
     dropout=0.2
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 )
 
-# optimizer = optim.SGD(resnet18_model.parameters(), lr=LR, momentum=0.75)
 optimizer = optim.AdamW(model.parameters(), lr=3e-4)
 loss_function = torch.nn.CrossEntropyLoss()
 
-<<<<<<< HEAD
 #%%
 def objective(trial):
     optimizer_name = trial.suggest_categorical("optimizer", ["Adam", "AdamW"])
@@ -176,13 +122,13 @@ def objective(trial):
     model = model = VisionTransformer(
         embed_dim=256,
         hidden_dim=512,
-        num_heads=8,
+        num_heads=trial.suggest_categorical('num_heads', [4, 8, 16]),
         num_layers=6,
         patch_size=32,
         num_channels=3,
         num_patches=64,  # with patch size 32
-        num_classes=2,
-        dropout=0.0
+        num_classes=NUM_CLASSES,
+        dropout=trial.suggest_uniform('dropout', 0.0, 0.2)
     )
     model = model.to(device)
     
@@ -194,7 +140,7 @@ def objective(trial):
     training_accuracies = []
     avg_valid_losses = []
     valid_accuracies = []
-    es = 0
+    early_stopping = EarlyStopping(patience=PATIENCE, verbose=True, delta=1e-4)
 
     for epoch in range(1, N_EPOCHS + 1):
         model.train()
@@ -204,9 +150,6 @@ def objective(trial):
 
         # Training batch loop
         for batch_num, batch in enumerate(train_plant_dataloader):
-            print(batch['image'])
-            print(batch['label'])
-            print(batch['label'].to(device))
             data, target = batch['image'].to(device), batch['label'].to(device)
             optimizer.zero_grad()
             if NUM_CLASSES == 2:
@@ -246,7 +189,7 @@ def objective(trial):
                 data, target = batch['image'].to(device), batch['label'].to(device)
                 valid_total += data.shape[0]
                 output = model(data)
-                print(output)
+        
                 if NUM_CLASSES == 2:
                     target = target.eq(3).type(torch.int64) # For binary classification, transform labels to one-vs-rest
                 valid_loss = loss_function(output, target)
@@ -255,31 +198,21 @@ def objective(trial):
                 valid_correct += correct
                 total_valid_loss += valid_loss.item()
 
-                # if batch_num == len(val_plant_dataloader) - 1:
-                print('Validation: Epoch %d - Batch %d/%d: Loss: %.4f | Validation Acc: %.3f%% (%d/%d)' % 
-                    (epoch, batch_num + 1, len(val_plant_dataloader), valid_loss.item(), 
-                    100. * valid_correct / valid_total, valid_correct, valid_total))
+                if batch_num == len(val_plant_dataloader) - 1:
+                    print('Validation: Epoch %d - Batch %d/%d: Loss: %.4f | Validation Acc: %.3f%% (%d/%d)' % 
+                        (epoch, batch_num + 1, len(val_plant_dataloader), valid_loss.item(), 
+                        100. * valid_correct / valid_total, valid_correct, valid_total))
 
         avg_valid_losses.append(total_valid_loss / (batch_num +1))
         valid_accuracies.append(100. * valid_correct / valid_total)
 
-        if avg_valid_losses[-1] < best_valid_loss:
-            best_valid_loss = avg_valid_losses[-1]
-            best_valid_acc = valid_accuracies[-1]
-            es = 0
-        else:
-            es += 1
-            if es > PATIENCE:
-                print("Early stopping: Validation Acc: %.3f%% (%d/%d)" % (100. * valid_correct / valid_total, valid_correct, valid_total))
+        if FLAG_EARLYSTOPPING:
+             # early_stopping needs the validation loss to check if it has decresed, 
+             # and if it has, it will make a checkpoint of the current model
+            early_stopping(avg_valid_losses[-1], model)
+            if early_stopping.early_stop:
+                print("Early stop")
                 break
-
-        # if FLAG_EARLYSTOPPING:
-        #     # early_stopping needs the validation loss to check if it has decresed, 
-        #     # and if it has, it will make a checkpoint of the current model
-        #     early_stopping(avg_valid_losses[-1], inception_v3_model)
-        #     if early_stopping.early_stop:
-        #         print("Early stop")
-        #         break
                 
     # Training loss and accuracy average for all batches
     plt.plot(range(1, epoch + 1), avg_training_losses, label = "Training loss")
@@ -303,8 +236,7 @@ def objective(trial):
     # model.load_state_dict(torch.load('checkpoint.pt'))
 
     # trial.report(early_stopping.val_loss_min, epoch)
-    return best_valid_acc
-
+    return early_stopping.val_loss_min
 
 
 # %%
@@ -313,13 +245,7 @@ study = optuna.create_study(direction='minimize')
 study.optimize(func=objective, n_trials=N_TRIALS)
 study.best_params, study.best_value
 
-#%% training
-=======
-# %%
-
-# training
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
-
+#%%
 training_losses = []
 training_accuracies = []
 train_batches = []
@@ -331,16 +257,11 @@ for epoch in range(N_EPOCHS):
 
     for batch_num, batch in enumerate(train_plant_dataloader):
         data, target = batch['image'].to(device), batch['label'].to(device)
-<<<<<<< HEAD
         
         if NUM_CLASSES == 2:
             # For binary classification, transform labels to one-vs-rest
            target = target.eq(3).type(torch.int64)
-=======
 
-        # For binary classification, transform labels to one-vs-rest
-        target = target.eq(3).type(torch.int64)
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 
         optimizer.zero_grad()
 
@@ -381,10 +302,6 @@ plt.legend()
 plt.show()
 
 # %%
-<<<<<<< HEAD
-=======
-
->>>>>>> 1a28d773e620e3cfb8e8e6d224dca239381f59ec
 # test
 test_loss = 0
 test_correct = 0
@@ -463,4 +380,3 @@ print("precision", precision_score(y_true, y_pred))
 print("recall", recall_score(y_true, y_pred))
 print("f1", f1_score(y_true, y_pred))
 
-# %%
