@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 import torch
 import pandas as pd
+from typing import Union
 
 load_dotenv()
 

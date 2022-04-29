@@ -52,7 +52,6 @@ plant_df_split_master
 # %%
 
 plant_df_split_master['Label Category'] = pd.Categorical(plant_df_split_master['Condition'])
-plant_df_split_master['Label Category'] = pd.Categorical(plant_df_split_master['Condition'])
 plant_df_split_master['Label'] = plant_df_split_master['Label Category'].cat.codes
 plant_df_split_master
 
@@ -64,5 +63,5 @@ plant_df_split_master = plant_df_split_master.reset_index()
 
 plant_split_master_file_name = "plant_data_split_master.csv"
 plant_split_master_file_path = os.path.join(DATA_FOLDER_PATH, plant_split_master_file_name)
-plant_df_split_master.to_csv(plant_split_master_file_path)
+plant_df_split_master.to_csv(plant_split_master_file_path, index=False)
 # %%

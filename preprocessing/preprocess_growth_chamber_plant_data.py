@@ -32,6 +32,6 @@ df_trial2_dataset3 = df_trial2_dataset3.drop(columns=["Image Type", "File_index"
 # %%
 file_name = "growth_chamber_plant_data.csv"
 file_path = os.path.join(DATA_FOLDER, file_name)
-df_trial2_dataset3.to_csv(file_path)
+df_trial2_dataset3.to_csv(file_path, index=False)
 
 
