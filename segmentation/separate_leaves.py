@@ -67,6 +67,7 @@ def cut(img, bounding_boxes, is_masked=True):
     
 
 def write(segments, path, img_original, output_path):
+    # TODO: regex matches \ character for filename that is used in Windows paths
     filename = re.findall(r'[^\/]+(?=\.)', path)[0]
     pathname = os.path.join(output_path, filename)
 
@@ -75,6 +76,7 @@ def write(segments, path, img_original, output_path):
     if not os.path.exists(pathname):
         os.makedirs(pathname)
     
+    # TODO: remove saving original image?
     # for now, save the original image in the same location as the segments, just for easy checking that the segmentation has gone right
     cv2.imwrite(os.path.join(pathname, f"{filename}.png"), img_original)
 
@@ -99,6 +101,7 @@ def segment(path_masked, path_original, output_path):
     segments_masked = cut(img_masked, bounding_boxes, is_masked=True)
     segments_original = cut(img_original, bounding_boxes, is_masked=False)
 
+    # TODO: if original image and masked image names will be the same (the separation is done on the folder level for example), the original image will overwrite the segmented masked image
     segmented_paths_masked = write(segments_masked, path_masked, img_masked, output_path)
     segmented_paths_original = write(segments_original, path_original, img_original, output_path)
 
