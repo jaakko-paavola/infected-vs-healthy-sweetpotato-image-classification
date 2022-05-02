@@ -1,65 +1,36 @@
-# # %%
-# %pip install ipywidgets 
-# %pip install optuna
-# %pip install timm
-# %pip install imutils
-# %pip install scikit-image
-# %pip install dotenv
-
-# # %%
-# %load_ext autoreload
-# %autoreload 2
-
 # %%
 import os
 import click
 from sklearn.metrics import f1_score
 from torch.utils.data import DataLoader
-import yaml
 from dataloaders.csv_data_loader import CSVDataLoader
-import torchvision.models as models
 from models.model_factory import get_model_class
-from models.vision_transformer import VisionTransformer, vision_transformer
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
-from torchvision import transforms, datasets
+from torchvision import transforms
 import torch
 import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-import pandas as pd
-import numpy as np
+from torch.utils.data import DataLoader
 import torch
 import os
-import re
-from PIL import Image
-# from models.inception import inception_v3
 import optuna
 from pytorchtools import EarlyStopping
-from sklearn.metrics import RocCurveDisplay
-from sklearn.metrics import roc_curve, auc, accuracy_score
 import warnings
-from sklearn.preprocessing import MultiLabelBinarizer
-import timm
-from models.resnet import resnet18
 import logging
-from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df
+from utils.model_utils import AVAILABLE_MODELS
 
-logging.basicConfig() 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # %%
-os.environ["CUDA_LAUNCH_BLOCKING"] = "1" # To get more comprehensive error messages from the GPU
 load_dotenv()
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
-# DATA_FOLDER_PATH = "/notebooks/data"
 PLANT_SPLIT_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
 warnings.filterwarnings("ignore")
 
-
 # %%
-def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, true_positive, 
+def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, true_positive,
         true_negative, false_positive, false_negative, target_all_batches, pred_all_batches, batch_num, no_of_batches, loss):
     print(f"{stage}: Epoch {epoch} - Batch {batch_num + 1}/{no_of_batches}: Loss: {loss} | {stage} Acc: {100. * total_correct / total} ({total_correct}/{total})")
     print(f"{stage} TP: {true_positive} TN: {true_negative} FP: {false_positive} FN: {false_negative}")
@@ -82,18 +53,18 @@ def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, t
         print(f"{stage} binary F1 as per sklearn: {f1b}")
     else:
         f1b = 0
-    
+
     return recall, precision, f1m, f1w, f1mi, f1b
 
 # %%
-def evaluate_predictions(total_correct, true_positive, true_negative, false_positive, false_negative, 
+def evaluate_predictions(total_correct, true_positive, true_negative, false_positive, false_negative,
         target_all_batches, pred_all_batches, target, output):
     pred = output.max(1, keepdim=True)[1]
     correct = pred.eq(target.view_as(pred)).sum().item()
     total_correct += correct
     true_positive += torch.logical_and(pred.eq(target.view_as(pred)), pred).sum().item()
-    true_negative += torch.logical_and(pred.eq(target.view_as(pred)), 1 - pred).sum().item()  
-    false_positive += torch.logical_and(pred.eq(1 - target.view_as(pred)), pred).sum().item()  
+    true_negative += torch.logical_and(pred.eq(target.view_as(pred)), 1 - pred).sum().item()
+    false_positive += torch.logical_and(pred.eq(1 - target.view_as(pred)), pred).sum().item()
     false_negative += torch.logical_and(pred.eq(1 - target.view_as(pred)), 1 - pred).sum().item()
     target_all_batches = torch.cat((target_all_batches, target.view_as(pred)), 0)
     pred_all_batches = torch.cat((pred_all_batches, pred), 0)
@@ -120,7 +91,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
         "eps": trial.suggest_uniform("eps", 1e-8, 1e-4),
         "weight_decay": trial.suggest_uniform("weight_decay", 1e-03, 0.1),
     }
-    
+
     parameter_grid_adamw_dict = {
         "betas": trial.suggest_categorical("betas", [(0.9, 0.99), (0.95, 0.999), (0.9, 0.949)]),
         "eps": trial.suggest_uniform("eps", 1e-8, 1e-4),
@@ -156,7 +127,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
         parameter_grid = parameter_grid_rmsprop_dict
     elif optimizer_name == "Adagrad":
         parameter_grid = parameter_grid_adagrad_dict
-           
+
     # Define an optimizer
     optimizer = getattr(optim, optimizer_name)(model.parameters(), lr=lr, **parameter_grid)
 
@@ -176,7 +147,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     valid_unweighted_macro_F1s = []
     valid_weighted_macro_F1s = []
     valid_binary_F1s = []
-    
+
     early_stopping = EarlyStopping(patience=EARLYSTOPPING_PATIENCE, verbose=True, delta=1e-4)
 
     for epoch in range(1, N_EPOCHS + 1):
@@ -212,11 +183,11 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
             target_all_batches, pred_all_batches, true_positive, true_negative, false_positive, false_negative, \
                 total_correct = evaluate_predictions(total_correct, true_positive, true_negative, false_positive, \
                 false_negative, target_all_batches, pred_all_batches, target, output)
-                
-        recall, precision, f1m, f1w, f1mi, f1b = compute_and_print_metrics("Training", NUM_CLASSES, epoch, total_correct, 
-            total, true_positive, true_negative, false_positive, false_negative, target_all_batches, pred_all_batches, 
+
+        recall, precision, f1m, f1w, f1mi, f1b = compute_and_print_metrics("Training", NUM_CLASSES, epoch, total_correct,
+            total, true_positive, true_negative, false_positive, false_negative, target_all_batches, pred_all_batches,
             batch_num, len(train_plant_dataloader), total_train_loss / (batch_num + 1))
-        
+
         train_unweighted_macro_F1s.append(f1m)
         train_weighted_macro_F1s.append(f1w)
         train_binary_F1s.append(f1b)
@@ -252,8 +223,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
                     total_correct = evaluate_predictions(total_correct, true_positive, true_negative, false_positive, \
                         false_negative, target_all_batches, pred_all_batches, target, output)
 
-        recall, precision, f1m, f1w, f1mi, f1b = compute_and_print_metrics("Validation", NUM_CLASSES, epoch, total_correct, 
-            total, true_positive, true_negative, false_positive, false_negative, target_all_batches, pred_all_batches, 
+        recall, precision, f1m, f1w, f1mi, f1b = compute_and_print_metrics("Validation", NUM_CLASSES, epoch, total_correct,
+            total, true_positive, true_negative, false_positive, false_negative, target_all_batches, pred_all_batches,
             batch_num, len(val_plant_dataloader), total_valid_loss / (batch_num + 1))
 
         valid_unweighted_macro_F1s.append(f1m)
@@ -264,7 +235,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
         valid_accuracies.append(100. * total_correct / total)
 
         if FLAG_EARLYSTOPPING:
-            # early_stopping needs the validation loss to check if it has decresed, 
+            # early_stopping needs the validation loss to check if it has decresed,
             # and if it has, it will make a checkpoint of the current model
             early_stopping(avg_valid_losses[-1], model)
             # If the loss has not decreased for {patience} number of epochs, trigger early stop
@@ -316,8 +287,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 
     # load the last checkpoint with the best model
     model.load_state_dict(torch.load('checkpoint.pt'))
-    
- # trial.report(early_stopping.val_loss_min, epoch)
+
+    # trial.report(early_stopping.val_loss_min, epoch)
     return early_stopping.val_loss_min
 
 # %%
@@ -334,7 +305,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose):
-    
+
     MODEL_NAME = model
 
     if verbose:
@@ -391,7 +362,7 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     else:
         data_transform = None
 
-    ## Set the optimizer search space:
+    ## TODO: selection of the optimizer space (possible via a commandline argument)
     OPTIMIZER_SEARCH_SPACE = []
     OPTIMIZER_SEARCH_SPACE.append("Adam")
     OPTIMIZER_SEARCH_SPACE.append("AdamW")
@@ -400,7 +371,7 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     # OPTIMIZER_SEARCH_SPACE.append("Adagrad")
 
     plant_master_dataset = CSVDataLoader(
-        csv_file=PLANT_SPLIT_MASTER_PATH, 
+        csv_file=PLANT_SPLIT_MASTER_PATH,
         root_dir=DATA_FOLDER_PATH,
         image_path_col="Split masked image path",
         label_col="Label",
@@ -411,28 +382,30 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     val_size = (len(plant_master_dataset) - train_size)//2
     test_size = len(plant_master_dataset) - train_size - val_size
 
-    train_dataset, test_dataset, val_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, test_size, val_size])
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, val_size, test_size])
 
     train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
     val_plant_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE_VALID, shuffle=True, num_workers=0)
-    test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
 
     if torch.cuda.is_available():
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
-
     study = optuna.create_study(direction='minimize')
     study.optimize(func=lambda trial: objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE),\
         n_trials=N_TRIALS)
-    # study.best_params
-    # study.best_trial
+
+    ## TODO: how to save n best models/hyperparameter configurations, how to save the unseen test dataset,
+    ## which can then be used in train.py to evaluate the model.
     # study.trials_dataframe()
-
-    # Save model
-    torch.save(model.state_dict(), f'{MODEL_NAME}_with_train+valid_best_value_{study.best_value}.pt')
-
+    # study.best_trial
+    # study.best_params
+    # study.best_trials
+    torch.save(test_dataset, f"{MODEL_NAME}_test_dataset_with_train+valid_best_value_{study.best_value}.pt") 
+    torch.save(model.state_dict(), f'{MODEL_NAME}_weights_with_train+valid_best_value_{study.best_value}.pt')
+    study.op
 
 if __name__ == "__main__":
     search_hyperparameters()
+# %%
