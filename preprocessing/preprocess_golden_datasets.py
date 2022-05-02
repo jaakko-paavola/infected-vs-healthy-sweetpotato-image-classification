@@ -1,9 +1,5 @@
 # %%
 
-import sys
-sys.path.insert(0, "/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/utils")
-sys.path.insert(0, "/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification")
-
 import pandas as pd
 from dotenv import load_dotenv
 import os
