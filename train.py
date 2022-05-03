@@ -80,12 +80,12 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
     # hyperparameters:
     # TODO: the final form of hyperparameters.yaml
-    N_EPOCHS = params[model]['N_EPOCHS']
-    BATCH_SIZE_TRAIN = params[model]['BATCH_SIZE_TRAIN']
-    BATCH_SIZE_TEST = params[model]['BATCH_SIZE_TEST']
+    N_EPOCHS = int(params[model]['N_EPOCHS'])
+    BATCH_SIZE_TRAIN = int(params[model]['BATCH_SIZE_TRAIN'])
+    BATCH_SIZE_TEST = int(params[model]['BATCH_SIZE_TEST'])
     OPTIMIZER = params[model]['OPTIMIZER']
-    LR = params[model]['LR']
-    WEIGHT_DECAY = params[model]['WEIGHT_DECAY']
+    LR = float(params[model]['LR'])
+    WEIGHT_DECAY = float(params[model]['WEIGHT_DECAY'])
 
     if augmentation:
         data_transform = transforms.Compose([
@@ -126,30 +126,30 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
     else:
         device = torch.device('cpu')
 
-    model = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
+    model_class = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
     parameter_grid = {}
-    parameter_grid["LR"] = LR
-    parameter_grid["WEIGHT_DECAY"] = WEIGHT_DECAY
+    parameter_grid["lr"] = LR
+    parameter_grid["weight_decay"] = WEIGHT_DECAY
 
     if OPTIMIZER == "SGD":
-        parameter_grid['DAMPENING'] = params[model]['DAMPENING']
-        parameter_grid['MOMENTUM'] = params[model]['MOMENTUM']
-        optimizer = optim.SGD(model.parameters(), lr=LR, **parameter_grid)  
+        parameter_grid['dampening'] = float(params[model]['DAMPENING'])
+        parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
+        optimizer = optim.SGD(model_class.parameters(), **parameter_grid)  
     else:
-        parameter_grid['EPS'] = params[model]['EPS']
+        parameter_grid['eps'] = float(params[model]['EPS'])
         if OPTIMIZER == "Adam":
-            parameter_grid['BETAS'] = params[model]['BETAS']
-            optimizer = optim.Adam(model.parameters(), lr=LR, **parameter_grid)
+            parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+            optimizer = optim.Adam(model_class.parameters(), **parameter_grid)
         elif OPTIMIZER == "AdamW":
-            parameter_grid['BETAS'] = params[model]['BETAS']
-            optimizer = optim.AdamW(model.parameters(), lr=LR, **parameter_grid)
+            parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+            optimizer = optim.AdamW(model_class.parameters(), **parameter_grid)
         elif OPTIMIZER == "AdaGrad":
-            parameter_grid['LR_DECAY'] = params[model]['LR_DECAY']
-            optimizer = optim.Adagrad(model.parameters(), lr=LR, **parameter_grid)
+            parameter_grid['lr_decay'] = float(params[model]['LR_DECAY'])
+            optimizer = optim.Adagrad(model_class.parameters(), **parameter_grid)
         elif OPTIMIZER == "RMSprop":
-            parameter_grid['MOMENTUM'] = params[model]['MOMENTUM']
-            parameter_grid['ALPHA'] = params[model]['ALPHA']
-            optimizer = optim.RMSprop(model.parameters(), lr=LR, **parameter_grid)
+            parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
+            parameter_grid['alpha'] = float(params[model]['ALPHA'])
+            optimizer = optim.RMSprop(model_class.parameters(), **parameter_grid)
 
     loss_function = torch.nn.CrossEntropyLoss()
 
@@ -176,7 +176,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
             optimizer.zero_grad()
 
-            output = model(data)
+            output = model_class(data)
             if (len(output) == 2):
                 output = output.logits
             train_loss = loss_function(output, target)
@@ -239,7 +239,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             if binary:
                 target = target.eq(3).type(torch.int64)
 
-            output = model(data)
+            output = model_class(data)
             test_loss += loss_function(output, target).item()
 
             pred = output.max(1, keepdim=True)[1]
@@ -292,7 +292,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
         # TODO: store hyperparams to other_json
         
         store_model_and_add_info_to_df(
-            model = model, 
+            model = model_class, 
             description = "",
             dataset = dataset,
             num_classes = NUM_CLASSES,

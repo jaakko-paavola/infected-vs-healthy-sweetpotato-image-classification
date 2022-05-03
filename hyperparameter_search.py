@@ -402,9 +402,8 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     # study.best_trial
     # study.best_params
     # study.best_trials
-    torch.save(test_dataset, f"{MODEL_NAME}_test_dataset_with_train+valid_best_value_{study.best_value}.pt") 
-    torch.save(model.state_dict(), f'{MODEL_NAME}_weights_with_train+valid_best_value_{study.best_value}.pt')
-    study.op
+    # torch.save(test_dataset, f"{MODEL_NAME}_test_dataset_with_train+valid_best_value_{study.best_value}.pt") 
+    # torch.save(model.state_dict(), f'{MODEL_NAME}_weights_with_train+valid_best_value_{study.best_value}.pt')
 
 if __name__ == "__main__":
     search_hyperparameters()
