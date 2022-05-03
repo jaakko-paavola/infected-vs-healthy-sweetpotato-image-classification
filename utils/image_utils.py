@@ -159,16 +159,16 @@ def img_to_patch(x, patch_size, flatten_channels=True):
 
 
 def plot_patches(num_images, dataset):
-  images = torch.stack([dataset[idx]['image'] for idx in range(num_images)], dim=0)
+    images = torch.stack([dataset[idx]['image'] for idx in range(num_images)], dim=0)
 
-  img_patches = img_to_patch(images, patch_size=32, flatten_channels=False)
+    img_patches = img_to_patch(images, patch_size=32, flatten_channels=False)
 
-  fig, ax = plt.subplots(images.shape[0], 1, figsize=(14,3))
-  fig.suptitle("Images as input sequences of patches")
-  for i in range(images.shape[0]):
-      img_grid = torchvision.utils.make_grid(img_patches[i], nrow=64, normalize=True, pad_value=0.9)
-      img_grid = img_grid.permute(1, 2, 0)
-      ax[i].imshow(img_grid)
-      ax[i].axis('off')
-  plt.show()
-  plt.close()
+    fig, ax = plt.subplots(images.shape[0], 1, figsize=(14,3))
+    fig.suptitle("Images as input sequences of patches")
+    for i in range(images.shape[0]):
+        img_grid = torchvision.utils.make_grid(img_patches[i], nrow=64, normalize=True, pad_value=0.9)
+        img_grid = img_grid.permute(1, 2, 0)
+        ax[i].imshow(img_grid)
+        ax[i].axis('off')
+    plt.show()
+    plt.close()
