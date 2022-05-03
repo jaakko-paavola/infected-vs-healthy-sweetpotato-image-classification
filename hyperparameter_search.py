@@ -50,7 +50,7 @@ def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, t
 
     if (NUM_CLASSES == 2):
         f1b = f1_score(target_all_batches.detach().cpu(), pred_all_batches.detach().cpu(), average = 'binary', zero_division=1)
-        print(f"{stage} binary F1 as per sklearn: {f1b}")
+        logger.info(f"{stage} binary F1 as per sklearn: {f1b}")
     else:
         f1b = 0
 
