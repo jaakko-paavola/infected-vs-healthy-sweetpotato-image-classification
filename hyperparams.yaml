@@ -39,3 +39,5 @@ vision_transformer:
   BETAS: 0
   LR_DECAY: 0
   ALPHA: 0
+  NUM_HEADS: 8
+  DROPOUT: 0.2
