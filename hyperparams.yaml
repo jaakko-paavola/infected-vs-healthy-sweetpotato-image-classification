@@ -41,3 +41,5 @@ vision_transformer:
   ALPHA: 0
   NUM_HEADS: 8
   DROPOUT: 0.2
+  NUM_HEADS: 8
+  DROPOUT: 0.2
