@@ -6,10 +6,10 @@ from typing import List
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from preprocessing_utils import fetch_image_data_from_trial_folder
-from separate_leaf.separate_leaves import segment
+from segmentation.separate_leaves import segment
 # %%
-pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', 50)
+pd.set_option('display.max_columns', 50)
 
 # %%
 load_dotenv()
@@ -50,7 +50,7 @@ leaf_master = leaf_master.reset_index()
 # %%
 file_name = "leaf_data.csv"
 file_path = os.path.join(DATA_FOLDER, file_name)
-leaf_master.to_csv(file_path)
+leaf_master.to_csv(file_path, index=False)
 
 # %% separate leaves and save leaf paths to df with original paths
 leaves_segmented = leaf_master.copy()
@@ -75,7 +75,26 @@ leaves_segmented = leaves_segmented.assign(
 
 leaves_segmented = leaves_segmented.apply(pd.Series.explode).reset_index()
 
+# %% Add categorical variables
+
+leaves_segmented['Label Category'] = pd.Categorical(leaves_segmented['Condition'])
+leaves_segmented['Label'] = leaves_segmented['Label Category'].cat.codes
+
+# %% Drop NaN column
+
+leaves_segmented.dropna(axis="index", inplace=True)
+
+# %% Rename columns
+
+leaves_segmented.rename(columns={
+    "segmented_masked_image_path": "Split masked image path",
+    "segmented_original_image_path": "Split original image path"
+}, inplace=True)
+
 # %%
-file_name = "leaves_segmented.csv"
+
+file_name = "leaves_segmented_master.csv"
 file_path = os.path.join(DATA_FOLDER, file_name)
-leaves_segmented.to_csv(file_path)
+leaves_segmented.to_csv(file_path, index=False)
+
+# %%
