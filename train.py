@@ -126,7 +126,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
     else:
         device = torch.device('cpu')
 
-    model = get_model_class(model, num_of_classes=NUM_CLASSES).to(device)
+    model = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
     parameter_grid = {}
     parameter_grid["LR"] = LR
     parameter_grid["WEIGHT_DECAY"] = WEIGHT_DECAY
