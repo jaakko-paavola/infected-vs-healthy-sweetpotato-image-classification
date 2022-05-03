@@ -8,9 +8,11 @@ resnet18:
   DAMPENING: 0
   MOMENTUM: 0
   EPS: 0
-  BETAS: 0
+  BETAS: (0.0, 0.0)
   LR_DECAY: 0
   ALPHA: 0
+  NUM_HEADS: 8
+  DROPOUT: 0.2
 inception_v3:
   OPTIMIZER: AdamW
   N_EPOCHS: 20
@@ -21,9 +23,11 @@ inception_v3:
   DAMPENING: 0
   MOMENTUM: 0
   EPS: 0
-  BETAS: 0
+  BETAS: (0.0, 0.0)
   LR_DECAY: 0
   ALPHA: 0
+  NUM_HEADS: 8
+  DROPOUT: 0.2
 vision_transformer:
   OPTIMIZER: AdamW
   N_EPOCHS: 20
@@ -34,7 +38,7 @@ vision_transformer:
   DAMPENING: 0
   MOMENTUM: 0
   EPS: 0
-  BETAS: 0
+  BETAS: (0.0, 0.0)
   LR_DECAY: 0
   ALPHA: 0
   NUM_HEADS: 8
