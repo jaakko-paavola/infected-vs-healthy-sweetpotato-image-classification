@@ -32,8 +32,8 @@ warnings.filterwarnings("ignore")
 # %%
 def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, true_positive,
         true_negative, false_positive, false_negative, target_all_batches, pred_all_batches, batch_num, no_of_batches, loss):
-    print(f"{stage}: Epoch {epoch} - Batch {batch_num + 1}/{no_of_batches}: Loss: {loss} | {stage} Acc: {100. * total_correct / total} ({total_correct}/{total})")
-    print(f"{stage} TP: {true_positive} TN: {true_negative} FP: {false_positive} FN: {false_negative}")
+    logger.info(f"{stage}: Epoch {epoch} - Batch {batch_num + 1}/{no_of_batches}: Loss: {loss} | {stage} Acc: {100. * total_correct / total} ({total_correct}/{total})")
+    logger.info(f"{stage} TP: {true_positive} TN: {true_negative} FP: {false_positive} FN: {false_negative}")
     recall = true_positive / (true_positive + false_negative + 1e-10)
     precision = true_positive / (true_positive + false_positive + 1e-10)
     logger.info(f"{stage} Recall: {recall}")
