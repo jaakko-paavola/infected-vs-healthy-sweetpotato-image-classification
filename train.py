@@ -1,19 +1,18 @@
 # %%
 import os
-from sklearn.preprocessing import binarize
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
 from dataloaders.gaussian_noise import GaussianNoise
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
-from torchvision import transforms, datasets
+from torchvision import transforms
 import torch
 import torch.optim as optim
-import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sn
 import pandas as pd
 import numpy as np
+
 import click
 import statistics
 from models.model_factory import get_model_class
@@ -79,11 +78,14 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             logger.error(f"Error while reading YAML: {exc}")
             raise exc
 
-    # hyperparameters
+    # hyperparameters:
+    # TODO: the final form of hyperparameters.yaml
     N_EPOCHS = params[model]['N_EPOCHS']
     BATCH_SIZE_TRAIN = params[model]['BATCH_SIZE_TRAIN']
     BATCH_SIZE_TEST = params[model]['BATCH_SIZE_TEST']
+    OPTIMIZER = params[model]['OPTIMIZER']
     LR = params[model]['LR']
+    WEIGHT_DECAY = params[model]['WEIGHT_DECAY']
 
     if augmentation:
         data_transform = transforms.Compose([
@@ -91,13 +93,13 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             transforms.Pad(50),
             transforms.RandomRotation(180),
             transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
-            transforms.Resize((256, 256)),
+            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
             # Values aquired from dataloaders/plant_master_dataset_stats.py
             # TODO: automatize the mean and std calculation
             transforms.Normalize(mean=[0.09872966, 0.11726899, 0.06568969],
                                 std=[0.1219357, 0.14506954, 0.08257045]),
-            GaussianNoise(0., 0.1),
+            # GaussianNoise(0., 0.1), # Should be commented out due to adverse effect?
         ])
     else:
         data_transform = None
@@ -124,8 +126,31 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
     else:
         device = torch.device('cpu')
 
-    model = get_model_class(model, num_of_classes=NUM_CLASSES).to(device)
-    optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.75)
+    model = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
+    parameter_grid = {}
+    parameter_grid["LR"] = LR
+    parameter_grid["WEIGHT_DECAY"] = WEIGHT_DECAY
+
+    if OPTIMIZER == "SGD":
+        parameter_grid['DAMPENING'] = params[model]['DAMPENING']
+        parameter_grid['MOMENTUM'] = params[model]['MOMENTUM']
+        optimizer = optim.SGD(model.parameters(), lr=LR, **parameter_grid)  
+    else:
+        parameter_grid['EPS'] = params[model]['EPS']
+        if OPTIMIZER == "Adam":
+            parameter_grid['BETAS'] = params[model]['BETAS']
+            optimizer = optim.Adam(model.parameters(), lr=LR, **parameter_grid)
+        elif OPTIMIZER == "AdamW":
+            parameter_grid['BETAS'] = params[model]['BETAS']
+            optimizer = optim.AdamW(model.parameters(), lr=LR, **parameter_grid)
+        elif OPTIMIZER == "AdaGrad":
+            parameter_grid['LR_DECAY'] = params[model]['LR_DECAY']
+            optimizer = optim.Adagrad(model.parameters(), lr=LR, **parameter_grid)
+        elif OPTIMIZER == "RMSprop":
+            parameter_grid['MOMENTUM'] = params[model]['MOMENTUM']
+            parameter_grid['ALPHA'] = params[model]['ALPHA']
+            optimizer = optim.RMSprop(model.parameters(), lr=LR, **parameter_grid)
+
     loss_function = torch.nn.CrossEntropyLoss()
 
     # %%
@@ -152,7 +177,8 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             optimizer.zero_grad()
 
             output = model(data)
-
+            if (len(output) == 2):
+                output = output.logits
             train_loss = loss_function(output, target)
             train_loss.backward()
             optimizer.step()

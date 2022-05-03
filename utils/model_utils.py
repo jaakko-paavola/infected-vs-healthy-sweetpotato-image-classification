@@ -22,7 +22,7 @@ MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
 
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
-AVAILABLE_MODELS = ["resnet18", "inception_v3"]
+AVAILABLE_MODELS = ["resnet18", "inception_v3", "vision_transformer"]
 
 CLASS_TO_MODEL_NAME_MAPPING = {
 	"ResNet": "resnet18",
