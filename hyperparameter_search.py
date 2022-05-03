@@ -36,9 +36,9 @@ def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, t
     print(f"{stage} TP: {true_positive} TN: {true_negative} FP: {false_positive} FN: {false_negative}")
     recall = true_positive / (true_positive + false_negative + 1e-10)
     precision = true_positive / (true_positive + false_positive + 1e-10)
-    print(f"{stage} Recall: {recall}")
-    print(f"{stage} Precision: {precision}")
-    print(f"{stage} F1: {2 * precision * recall / (precision + recall + 1e-10)}")
+    logger.info(f"{stage} Recall: {recall}")
+    logger.info(f"{stage} Precision: {precision}")
+    logger.info(f"{stage} F1: {2 * precision * recall / (precision + recall + 1e-10)}")
 
     f1m = f1_score(target_all_batches.detach().cpu(), pred_all_batches.detach().cpu(), average = 'macro', zero_division=1)
     f1w = f1_score(target_all_batches.detach().cpu(), pred_all_batches.detach().cpu(), average = 'weighted', zero_division=1)
