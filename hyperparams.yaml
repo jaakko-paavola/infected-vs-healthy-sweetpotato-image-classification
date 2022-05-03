@@ -24,6 +24,8 @@ inception_v3:
   BETAS: 0
   LR_DECAY: 0
   ALPHA: 0
+  NUM_HEADS: 0
+  DROPOUT: 0
 vision_transformer:
   OPTIMIZER: AdamW
   N_EPOCHS: 20
