@@ -240,7 +240,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
             early_stopping(avg_valid_losses[-1], model)
             # If the loss has not decreased for {patience} number of epochs, trigger early stop
             if early_stopping.early_stop:
-                print("Early stop")
+                logger.info("Early stop")
                 break
 
     # Training loss and accuracy average for all batches
