@@ -44,9 +44,9 @@ def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, t
     f1w = f1_score(target_all_batches.detach().cpu(), pred_all_batches.detach().cpu(), average = 'weighted', zero_division=1)
     f1mi = f1_score(target_all_batches.detach().cpu(), pred_all_batches.detach().cpu(), average = 'micro', zero_division=1)
 
-    print(f"{stage} unweighted macro F1 as per sklearn: {f1m}")
-    print(f"{stage} weighted macro F1 as per sklearn: {f1w}")
-    print(f"{stage} 'global' micro F1 as per sklearn: {f1mi}")
+    logger.info(f"{stage} unweighted macro F1 as per sklearn: {f1m}")
+    logger.info(f"{stage} weighted macro F1 as per sklearn: {f1w}")
+    logger.info(f"{stage} 'global' micro F1 as per sklearn: {f1mi}")
 
     if (NUM_CLASSES == 2):
         f1b = f1_score(target_all_batches.detach().cpu(), pred_all_batches.detach().cpu(), average = 'binary', zero_division=1)
