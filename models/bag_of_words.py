@@ -41,7 +41,7 @@ class BagOfWords:
         for index, row in data.iterrows():
             image_path = os.path.join(self.DATA_FOLDER_PATH, row['Split masked image path'])
             img = cv2.imread(image_path)
-            
+
             if feature_detection_algorithm == 'SIFT':
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -76,8 +76,8 @@ class BagOfWords:
         img_features = stdslr.transform(img_features)
 
         # image features needed for training the classifier
-        # k, voc and fitted standard scaler needed for prediction
-        return {'img_features': img_features, 'k': k, 'voc': voc, 'standard_scaler': stdslr}
+        # voc and fitted standard scaler needed for prediction
+        return {'features': img_features, 'voc': voc, 'standard_scaler': stdslr}
 
     def fit(self, data, img_features, parameters={}):
         if self.NUM_CLASSES == 2 and len(data['Label'].unique()) > 2:

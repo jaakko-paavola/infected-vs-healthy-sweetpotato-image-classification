@@ -1,6 +1,7 @@
 # %%
 import os
 from pathlib import Path
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import binarize
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
@@ -16,15 +17,16 @@ import pandas as pd
 import numpy as np
 import click
 import statistics
+from models.bag_of_words import BagOfWords
 from models.model_factory import get_model_class
-from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df, get_image_size
+from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df, get_image_size, store_object
 import logging
 from tqdm import tqdm
 import yaml
 from dataloaders.dataset_stats import get_normalization_mean_std
 from dataloaders.dataset_labels import get_dataset_labels
 
-logging.basicConfig() 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -46,7 +48,7 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 @click.option('-s/-nos', '--save/--no-save', show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 def train(model, dataset, data_csv, binary, binary_label, params_file, augmentation, save, verbose):
-    
+
     if verbose:
         logger.setLevel(logging.DEBUG)
 
@@ -62,9 +64,9 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaves_segmented_master.csv")
         elif dataset == 'plant_golden':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_golden.csv")
-        else:             
+        else:
             raise ValueError(f"Dataset {dataset} not defined. Accepted values: plant, plant_golden, leaf")
-        
+
         mean, std = get_normalization_mean_std(dataset=dataset)
     else:
         DATA_MASTER_PATH = data_csv
@@ -73,13 +75,13 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
         dataset = Path(data_csv).stem
 
     labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
-    
+
     if binary and not binary_label and len(labels) > 2:
         raise ValueError(f"You tried to do binary classification without binary label argument. You must give also binary-label (-bl or --binary-label) argument when using binary classification and the dataset contains more than two labels. We detected {len(labels)} number of labels.")
-    
+
     if binary:
         NUM_CLASSES = 2
-        
+
         if len(labels) > 2:
             # Convert the label names to one-vs-rest labels
             labels = [f'Non-{labels[binary_label]}', labels[binary_label]]
@@ -93,15 +95,6 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             logger.error(f"Error while reading YAML: {exc}")
             raise exc
 
-    # hyperparameters:
-    # TODO: the final form of hyperparameters.yaml
-    N_EPOCHS = int(params[model]['N_EPOCHS'])
-    BATCH_SIZE_TRAIN = int(params[model]['BATCH_SIZE_TRAIN'])
-    BATCH_SIZE_TEST = int(params[model]['BATCH_SIZE_TEST'])
-    OPTIMIZER = params[model]['OPTIMIZER']
-    LR = float(params[model]['LR'])
-    WEIGHT_DECAY = float(params[model]['WEIGHT_DECAY'])
-    
     image_size = get_image_size(model)
 
     if augmentation:
@@ -134,157 +127,172 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
     train_size = int(0.85 * len(master_dataset))
     test_size = len(master_dataset) - train_size
 
-    train_dataset, test_dataset = torch.utils.data.random_split(master_dataset, [train_size, test_size])
-
-    train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
-    test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
-
-    # %%
-
-    if torch.cuda.is_available():
-        device = torch.device('cuda')
+    if model == 'bag_of_words':
+        model_class, y_true, y_pred, test_accuracy, test_loss, other_json = train_bow(master_dataset.df, test_size, NUM_CLASSES, params, save)
+        train_accuracy = None
+        train_loss = None
     else:
-        device = torch.device('cpu')
+        # hyperparameters:
+        # TODO: the final form of hyperparameters.yaml
+        N_EPOCHS = int(params[model]['N_EPOCHS'])
+        BATCH_SIZE_TRAIN = int(params[model]['BATCH_SIZE_TRAIN'])
+        BATCH_SIZE_TEST = int(params[model]['BATCH_SIZE_TEST'])
+        OPTIMIZER = params[model]['OPTIMIZER']
+        LR = float(params[model]['LR'])
+        WEIGHT_DECAY = float(params[model]['WEIGHT_DECAY'])
 
-    model_class = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
-    parameter_grid = {}
-    parameter_grid["lr"] = LR
-    parameter_grid["weight_decay"] = WEIGHT_DECAY
+        train_dataset, test_dataset = torch.utils.data.random_split(master_dataset, [train_size, test_size])
 
-    if OPTIMIZER == "SGD":
-        parameter_grid['dampening'] = float(params[model]['DAMPENING'])
-        parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
-        optimizer = optim.SGD(model_class.parameters(), **parameter_grid)  
-    else:
-        parameter_grid['eps'] = float(params[model]['EPS'])
-        if OPTIMIZER == "Adam":
-            parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
-            optimizer = optim.Adam(model_class.parameters(), **parameter_grid)
-        elif OPTIMIZER == "AdamW":
-            parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
-            optimizer = optim.AdamW(model_class.parameters(), **parameter_grid)
-        elif OPTIMIZER == "AdaGrad":
-            parameter_grid['lr_decay'] = float(params[model]['LR_DECAY'])
-            optimizer = optim.Adagrad(model_class.parameters(), **parameter_grid)
-        elif OPTIMIZER == "RMSprop":
+        train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
+        test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
+        # %%
+
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+        else:
+            device = torch.device('cpu')
+
+        model_class = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
+        parameter_grid = {}
+        parameter_grid["lr"] = LR
+        parameter_grid["weight_decay"] = WEIGHT_DECAY
+
+        if OPTIMIZER == "SGD":
+            parameter_grid['dampening'] = float(params[model]['DAMPENING'])
             parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
-            parameter_grid['alpha'] = float(params[model]['ALPHA'])
-            optimizer = optim.RMSprop(model_class.parameters(), **parameter_grid)
+            optimizer = optim.SGD(model_class.parameters(), **parameter_grid)
+        else:
+            parameter_grid['eps'] = float(params[model]['EPS'])
+            if OPTIMIZER == "Adam":
+                parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+                optimizer = optim.Adam(model_class.parameters(), **parameter_grid)
+            elif OPTIMIZER == "AdamW":
+                parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+                optimizer = optim.AdamW(model_class.parameters(), **parameter_grid)
+            elif OPTIMIZER == "AdaGrad":
+                parameter_grid['lr_decay'] = float(params[model]['LR_DECAY'])
+                optimizer = optim.Adagrad(model_class.parameters(), **parameter_grid)
+            elif OPTIMIZER == "RMSprop":
+                parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
+                parameter_grid['alpha'] = float(params[model]['ALPHA'])
+                optimizer = optim.RMSprop(model_class.parameters(), **parameter_grid)
 
-    loss_function = torch.nn.CrossEntropyLoss()
+        loss_function = torch.nn.CrossEntropyLoss()
 
-    # %%
+        # %%
 
-    # training
+        # training
 
-    training_losses = []
-    training_accuracies = []
+        training_losses = []
+        training_accuracies = []
 
-    logger.info("Starting training cycle")
+        logger.info("Starting training cycle")
 
-    for epoch in tqdm(range(N_EPOCHS)):
-        total_train_loss = 0
-        train_correct = 0
+        for epoch in tqdm(range(N_EPOCHS)):
+            total_train_loss = 0
+            train_correct = 0
+            total = 0
+
+            for batch_num, batch in enumerate(train_plant_dataloader):
+                data, target = batch['image'].to(device), batch['label'].to(device)
+
+                # For binary classification, transform labels to one-vs-rest
+                if binary:
+                    target = target.eq(binary_label).type(torch.int64)
+
+                optimizer.zero_grad()
+
+                output = model_class(data)
+
+                if len(output) == 2:
+                    output = output.logits
+
+                train_loss = loss_function(output, target)
+                train_loss.backward()
+                optimizer.step()
+
+                pred = output.max(1, keepdim=True)[1]
+
+                correct = pred.eq(target.view_as(pred)).sum().item()
+                train_correct += correct
+                total += data.shape[0]
+                total_train_loss += train_loss.item()
+
+                if batch_num == len(train_plant_dataloader) - 1:
+                    logger.info('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' %
+                        (epoch, batch_num + 1, len(train_plant_dataloader), total_train_loss / (batch_num + 1),
+                        100. * train_correct / total, train_correct, total))
+
+
+            # Training loss average for all batches
+            training_losses.append(total_train_loss / len(train_plant_dataloader))
+            training_accuracies.append((100. * train_correct / total))
+
+        # Calculate train loss and accuracy as an average of the last min(5, N_EPOCHS) losses or accuracies
+        train_loss = statistics.mean(training_losses[-min(N_EPOCHS, 5):])
+        train_accuracy = statistics.mean(training_accuracies[-min(N_EPOCHS, 5):])
+
+        logger.info("Final training score: Loss: %.4f, Accuracy: %.3f%%" % (train_loss, train_accuracy))
+
+        plt.plot(range(N_EPOCHS), training_losses, label = "Training loss")
+        plt.xlabel('epoch')
+        plt.ylabel('loss')
+        plt.title('Loss')
+        plt.legend()
+        plt.show()
+
+        plt.plot(range(N_EPOCHS), training_accuracies, label = "Training accuracy")
+        plt.xlabel('epoch')
+        plt.ylabel('accuracy')
+        plt.title('Accuracy')
+        plt.legend()
+        plt.show()
+
+        # %%
+
+        # test
+        test_loss = 0
+        test_correct = 0
         total = 0
+        y_pred = []
+        y_true = []
 
-        for batch_num, batch in enumerate(train_plant_dataloader):
-            data, target = batch['image'].to(device), batch['label'].to(device)
+        logger.info("Starting testing cycle")
 
-            # For binary classification, transform labels to one-vs-rest
-            if binary:
-                target = target.eq(binary_label).type(torch.int64)
+        with torch.no_grad():
+            for batch_num, batch in enumerate(test_plant_dataloader):
+                data, target = batch['image'].to(device), batch['label'].to(device)
 
-            optimizer.zero_grad()
+                # For binary classification, transform labels to one-vs-rest
+                if binary:
+                    target = target.eq(binary_label).type(torch.int64)
 
-            output = model_class(data)
-            
-            if len(output) == 2:
-                output = output.logits
-                
-            train_loss = loss_function(output, target)
-            train_loss.backward()
-            optimizer.step()
-            
-            pred = output.max(1, keepdim=True)[1]
+                output = model_class(data)
 
-            correct = pred.eq(target.view_as(pred)).sum().item()
-            train_correct += correct
-            total += data.shape[0]
-            total_train_loss += train_loss.item()
+                if len(output) == 2:
+                    output = output.logits
 
-            if batch_num == len(train_plant_dataloader) - 1:
-                logger.info('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' % 
-                    (epoch, batch_num + 1, len(train_plant_dataloader), total_train_loss / (batch_num + 1), 
-                    100. * train_correct / total, train_correct, total))
+                test_loss += loss_function(output, target).item()
 
+                pred = output.max(1, keepdim=True)[1]
 
-        # Training loss average for all batches
-        training_losses.append(total_train_loss / len(train_plant_dataloader))        
-        training_accuracies.append((100. * train_correct / total))
+                correct = pred.eq(target.view_as(pred)).sum().item()
+                test_correct += correct
+                total += data.shape[0]
 
-    # Calculate train loss and accuracy as an average of the last min(5, N_EPOCHS) losses or accuracies
-    train_loss = statistics.mean(training_losses[-min(N_EPOCHS, 5):])
-    train_accuracy = statistics.mean(training_accuracies[-min(N_EPOCHS, 5):])
+                test_loss /= len(test_plant_dataloader.dataset)
 
-    logger.info("Final training score: Loss: %.4f, Accuracy: %.3f%%" % (train_loss, train_accuracy))
+                pred_list = torch.flatten(pred).cpu().numpy()
+                y_pred.extend(pred_list)
 
-    plt.plot(range(N_EPOCHS), training_losses, label = "Training loss")
-    plt.xlabel('epoch')
-    plt.ylabel('loss')
-    plt.title('Loss')
-    plt.legend()
-    plt.show()
+                target_list = target.cpu().numpy()
+                y_true.extend(target_list)
 
-    plt.plot(range(N_EPOCHS), training_accuracies, label = "Training accuracy")
-    plt.xlabel('epoch')
-    plt.ylabel('accuracy')
-    plt.title('Accuracy')
-    plt.legend()
-    plt.show()
+        test_accuracy = 100. * test_correct / total
 
-    # %%
+        logger.info("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, test_accuracy))
 
-    # test
-    test_loss = 0
-    test_correct = 0
-    total = 0
-    y_pred = []
-    y_true = []
-
-    logger.info("Starting testing cycle")
-
-    with torch.no_grad():
-        for batch_num, batch in enumerate(test_plant_dataloader):
-            data, target = batch['image'].to(device), batch['label'].to(device)
-
-            # For binary classification, transform labels to one-vs-rest
-            if binary:
-                target = target.eq(binary_label).type(torch.int64)
-
-            output = model_class(data)
-            
-            if len(output) == 2:
-                output = output.logits
-
-            test_loss += loss_function(output, target).item()
-
-            pred = output.max(1, keepdim=True)[1]
-
-            correct = pred.eq(target.view_as(pred)).sum().item()
-            test_correct += correct
-            total += data.shape[0]
-
-            test_loss /= len(test_plant_dataloader.dataset)
-
-            pred_list = torch.flatten(pred).cpu().numpy()
-            y_pred.extend(pred_list)
-            
-            target_list = target.cpu().numpy()
-            y_true.extend(target_list)
-
-    test_accuracy = 100. * test_correct / total
-
-    logger.info("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, test_accuracy))
+        other_json = {}
 
     # Print classification report
     cf_report = classification_report(y_true, y_pred, target_names=labels, output_dict=True)
@@ -295,13 +303,11 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
     if save:
         logger.info("Saving the model")
-        
-        other_json = {
-            'LABELS': labels
-        }
-        
+
+        other_json['LABELS'] = labels
+
         model_id = store_model_and_add_info_to_df(
-            model = model_class, 
+            model = model_class,
             description = "",
             dataset = dataset,
             num_classes = NUM_CLASSES,
@@ -316,8 +322,42 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             f1_score = f1_score,
             other_json = other_json,
         )
-        
+
         logger.info(f"Model saved with id {model_id}")
+
+def train_bow(df, test_size, num_classes, params, save):
+    train_df, test_df = train_test_split(df, test_size=test_size)
+
+    # hyperparameters
+    feature_detection = params['bag_of_words']['FEATURE_DETECTION']
+    classifier = params['bag_of_words']['CLASSIFIER']
+    if num_classes == 2:
+        num_classes_key = 'BINARY'
+    else:
+        num_classes_key = 'MULTICLASS'
+    specific_params = params['bag_of_words'][num_classes_key][feature_detection][classifier]
+    k = specific_params['K']
+
+    bow = BagOfWords(DATA_FOLDER_PATH, num_classes, feature_detection, classifier)
+
+    features, voc, standard_scaler = bow.detect_features(train_df, k)
+    clf = bow.fit(train_df, features, specific_params)
+
+    predicted_classes, accuracy, f1_score, loss = bow.predict(test_df, clf, k, voc, standard_scaler)
+
+    y_true = test_df['Label']
+    y_pred = predicted_classes
+    test_accuracy = accuracy
+    test_loss = loss
+
+    other_json = {
+        'feature_detection': feature_detection,
+        'k': k,
+        'voc': store_object(voc),
+        'standard_scaler': store_object(standard_scaler),
+    }
+
+    return (clf, y_true, y_pred, test_accuracy, test_loss, other_json)
 
 if __name__ == "__main__":
     train()

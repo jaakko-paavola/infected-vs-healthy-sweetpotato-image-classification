@@ -47,7 +47,7 @@ data_transform = transforms.Compose([
 ])
 
 plant_master_dataset = CSVDataLoader(
-  csv_file=PLANT_SPLIT_MASTER_PATH, 
+  csv_file=PLANT_SPLIT_MASTER_PATH,
   root_dir=DATA_FOLDER_PATH,
   image_path_col="Split masked image path",
   label_col="Label",
@@ -98,7 +98,7 @@ test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shu
 #         train_loss = loss_function(output, target)
 #         train_loss.backward()
 #         optimizer.step()
-        
+
 #         pred = output.max(1, keepdim=True)[1]
 
 #         correct = pred.eq(target.view_as(pred)).sum().item()
@@ -107,13 +107,13 @@ test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shu
 #         total_train_loss += train_loss.item()
 
 #         if batch_num == len(train_plant_dataloader) - 1:
-#             print('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' % 
-#                   (epoch, batch_num + 1, len(train_plant_dataloader), train_loss / (batch_num + 1), 
+#             print('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' %
+#                   (epoch, batch_num + 1, len(train_plant_dataloader), train_loss / (batch_num + 1),
 #                    100. * train_correct / total, train_correct, total))
 
 
 #     # Training loss average for all batches
-#     training_losses.append(total_train_loss / len(train_plant_dataloader))        
+#     training_losses.append(total_train_loss / len(train_plant_dataloader))
 #     training_accuracies.append((100. * train_correct / total))
 
 # plt.plot(range(N_EPOCHS), training_losses, label = "Training loss")
@@ -180,7 +180,7 @@ test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shu
 
 #         output = torch.flatten(output).cpu().numpy()
 #         y_pred.extend(output)
-        
+
 #         target = target.cpu().numpy()
 #         y_true.extend(target)
 
@@ -195,13 +195,17 @@ test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shu
 # cf_matrix = confusion_matrix(y_true, y_pred)
 
 # df_cm = pd.DataFrame(
-#     cf_matrix/np.sum(cf_matrix), 
+#     cf_matrix/np.sum(cf_matrix),
 #     index = [i for i in labels],
 #     columns = [i for i in labels]
 # )
 # plt.figure(figsize = (12,7))
 
 # sn.heatmap(df_cm, annot=True)
+
+# %%
+
+# %%
 
 # %%
 
