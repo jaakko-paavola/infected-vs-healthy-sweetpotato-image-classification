@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # %%
 
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
+
 # %%
 
 ## Set the paths here before running
@@ -75,10 +76,15 @@ def segment_plant(masked_image_path: str, original_image_path: str, output_path:
     """Segment plant image to multiple segmented masked and segmented un-masked images"""
     
     # TODO: regex matches \ character for filename that is used in Windows paths
-    filename = re.findall(r'[^\/]+(?=\.)', masked_image_path)[0]
-    pathname = os.path.join(output_path, filename)
+    masked_filename = re.findall(r'[^\/]+(?=\.)', masked_image_path)[0]
+    original_filename = re.findall(r'[^\/]+(?=\.)', original_image_path)[0]
+    
+    masked_filetype = os.path.splitext(masked_image_path)[1]
+    original_filetype = os.path.splitext(original_image_path)[1]
+    
+    pathname = os.path.join(output_path, masked_filename)
 
-    logger.info(f"Segmenting file {filename}")
+    logger.info(f"Segmenting file {masked_filename}")
     
     masked_segmented_paths = []
     original_segmented_paths = []
@@ -103,14 +109,19 @@ def segment_plant(masked_image_path: str, original_image_path: str, output_path:
         single_plant_original = cv2.bitwise_and(ROI_original, ROI_original, mask=plant_mask).copy()
         
         # Write masked single plant 
-        masked_segmented_path = os.path.join(pathname, f"{filename}_M_{contour_index}.png")
+        masked_segmented_path = os.path.join(pathname, f"{masked_filename}_M{contour_index}{masked_filetype}")
         masked_segmented_paths.append(masked_segmented_path)
         cv2.imwrite(masked_segmented_path, single_plant_masked)
 
         # Write non-masked single plant
-        original_segmented_path = os.path.join(pathname, f"{filename}_O_{contour_index}.png")
+        original_segmented_path = os.path.join(pathname, f"{original_filename}_O_{contour_index}{original_filetype}")
         original_segmented_paths.append(original_segmented_path)
         cv2.imwrite(original_segmented_path, single_plant_original)
+
+
+    # for now, save the original image in the same location as the segments, just for easy checking that the segmentation has gone right
+    cv2.imwrite(os.path.join(pathname, f"{masked_filename}{masked_filetype}"), masked_image)        
+    cv2.imwrite(os.path.join(pathname, f"{original_filename}{original_filetype}"), original_image)
 
     return masked_segmented_paths, original_segmented_paths
 

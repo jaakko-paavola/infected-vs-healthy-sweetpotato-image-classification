@@ -35,7 +35,7 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 
 @click.command()
 @click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
-@click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf', 'leaf_golden'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
+@click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
 @click.option('-p', '--params-file', type=str, default="hyperparams.yaml", help='Full file path to hyperparameter-file used during the training. File must be a YAMl file and similarly structured than hyperparams.yaml.')
@@ -58,9 +58,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
         elif dataset == 'leaf':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaf_data.csv")
         elif dataset == 'plant_golden':
-            raise NotImplementedError("Plant golden dataset not implemented yet")
-        elif dataset == 'leaf_golden':
-            raise NotImplementedError("Leaf golden dataset not implemented yet")
+            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_golden.csv")
     # TODO: give dataset name when using custom CSV for storing the model
     else:
         DATA_MASTER_PATH = data_csv
