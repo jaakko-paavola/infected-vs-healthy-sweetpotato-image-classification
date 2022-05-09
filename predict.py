@@ -12,7 +12,7 @@ import json
 load_dotenv()
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 
-logging.basicConfig() 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -24,13 +24,13 @@ logger.setLevel(logging.INFO)
 @click.option('-d', '--dataset', type=str, help='Name of the dataset model is trained on.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 def predict(input, identifier, model, num_classes, dataset, verbose):
-  
+
   if not any([input, identifier, model, num_classes, dataset, verbose]):
       print("""
           Usage: predict.py [OPTIONS]
           Try 'predict.py --help' for help.
       """)
-      
+
   if verbose:
     logger.setLevel(logging.DEBUG)
 

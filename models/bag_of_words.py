@@ -16,7 +16,7 @@ def to_binary(original_label):
     else:
         return 0
 class BagOfWords:
-    def __init__(self, data_folder_path, num_classes, feature_detection, classifier):
+    def __init__(self, data_folder_path, num_classes, feature_detection = 'SIFT', classifier = 'XGBoost'):
         self.NUM_CLASSES = num_classes
         self.feature_detection = feature_detection
         self.classifier = classifier
@@ -89,13 +89,13 @@ class BagOfWords:
 
         if classifier == 'RandomForest':
             logging.info('Using RandomForest classifier')
-            clf = RandomForestClassifier(n_estimators=parameters['n_estimators'], criterion=parameters['criterion'], max_depth=parameters['max_depth'], min_samples_split=parameters['min_samples_split'], random_state=self.RANDOM_STATE)
+            clf = RandomForestClassifier(n_estimators=parameters['N_ESTIMATORS'], criterion=parameters['CRITERION'], max_depth=parameters['MAX_DEPTH'], min_samples_split=parameters['MIN_SAMPLES_SPLIT'], random_state=self.RANDOM_STATE)
         elif classifier == 'XGBoost':
             logging.info('Using XGBoost classifier')
-            clf = xgb.XGBClassifier(learning_rate=parameters['learning_rate'], gamma=parameters['gamma'], max_depth=parameters['max_depth'], min_child_weight=parameters['min_child_weight'], random_state=self.RANDOM_STATE)
+            clf = xgb.XGBClassifier(learning_rate=parameters['LR'], gamma=parameters['GAMMA'], max_depth=parameters['MAX_DEPTH'], min_child_weight=parameters['MIN_CHILD_WEIGHT'], random_state=self.RANDOM_STATE)
         elif classifier == 'SVM':
             logging.info('Using SVM classifier')
-            clf = SVC(C=parameters['C'], kernel=parameters['kernel'], gamma=parameters['gamma'], random_state=self.RANDOM_STATE)
+            clf = SVC(C=parameters['C'], kernel=parameters['KERNEL'], gamma=parameters['GAMMA'], random_state=self.RANDOM_STATE)
         elif classifier == 'LinearSVM':
             logging.info('Using LinearSVM classifier')
             clf = LinearSVC(random_state=self.RANDOM_STATE)

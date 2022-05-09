@@ -32,7 +32,7 @@ def get_model_class(name: str, num_of_classes: int, **kwargs) -> Union[nn.Module
   elif name == 'inception_v3':
     return inception3(num_classes=num_of_classes)
   elif name == 'bag_of_words':
-    return BagOfWords(num_classes=num_of_classes)
+    return BagOfWords(DATA_FOLDER, num_classes=num_of_classes)
 
 
 def get_trained_model_by_id(id: str) -> nn.Module:
