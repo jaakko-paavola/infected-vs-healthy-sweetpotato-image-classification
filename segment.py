@@ -41,22 +41,22 @@ def segment(excel_path, type, output_path, verbose):
     logger.info(f'Segmented images can be found from {path_to_images}')
 
 def segment_plant_data(excel_path, output_path):
-    
+
     if output_path is None:
         output_path = DEFAULT_PLANT_OUTPUT_PATH
-        
+
     original_df = pd.read_excel(excel_path)
 
     # To check if segmentation produces a right number of images
     segmented_image_value_counts = original_df['Masked image path'].value_counts()
-    
+
     logger.debug('Creating a dataframe for segmented image data')
-    
+
     segmented_df = pd.DataFrame(columns=['Genotype', 'Condition', 'Masked image path', 'Original image path'])
 
     logger.info('Segmenting plant images')
 
-    # Store masked_image_path : number of found plants pairs in the dict 
+    # Store masked_image_path : number of found plants pairs in the dict
     image_path_to_plant_number_map = {}
     falsely_segmented_images = []
 
@@ -66,35 +66,35 @@ def segment_plant_data(excel_path, output_path):
         genotype = row['Genotype']
         condition = row['Condition']
         plant = row['Plant']
-        
+
         # Segment images if they have not been segmented already
         if masked_image_path not in image_path_to_plant_number_map.keys():
             logger.debug(f"Segmenting file {masked_image_path}")
-            segmented_masked_paths, segmented_original_paths = segment_plant(masked_image_path, original_image_path, output_path)  
-            
+            segmented_masked_paths, segmented_original_paths = segment_plant(masked_image_path, original_image_path, output_path)
+
             image_path_to_plant_number_map[masked_image_path] = len(segmented_masked_paths)
-            
+
             # Segmentation produced wrong number of results
-            if len(segmented_masked_paths) != segmented_image_value_counts[masked_image_path]:
+            if len(segmented_masked_paths) != segmented_image_value_counts[row['Masked image path']]:
                 # Store falsely segmented output folder
                 output_folder = os.path.join(output_path, re.findall(r'[^\/]+(?=\.)', masked_image_path)[0])
                 falsely_segmented_images.append(output_folder)
 
 
         # If segmentation succeeded
-        if image_path_to_plant_number_map[masked_image_path] == segmented_image_value_counts[masked_image_path]:
+        if image_path_to_plant_number_map[masked_image_path] == segmented_image_value_counts[row['Masked image path']]:
             masked_segmented_path = get_masked_plant_filename(masked_image_path, output_path, plant)
-            original_segmented_path = get_original_plant_filename(original_image_path, output_path, plant)                
+            original_segmented_path = get_original_plant_filename(original_image_path, output_path, plant)
         else:
             masked_segmented_path = get_masked_plant_filename(masked_image_path, output_path)
             original_segmented_path = get_original_plant_filename(original_image_path, output_path)
-        
+
         new_row = pd.DataFrame(data = {
                 'Genotype': [genotype],
                 'Condition': [condition],
                 'Masked image path': [masked_segmented_path],
                 'Original image path': [original_segmented_path],
-        }) 
+        })
 
         segmented_df = pd.concat([segmented_df, new_row], ignore_index=True)
 
@@ -130,9 +130,9 @@ def segment_leaf_data(excel_path, output_path):
     for index, row in original_df.iterrows():
         original_image_path = os.path.join(DATA_FOLDER_PATH, row['Original image path'])
         masked_image_path = os.path.join(DATA_FOLDER_PATH, row['Masked image path'])
-        
+
         # TODO: remove data-folder path from the segmented path
-        
+
         segmented_masked_paths, segmented_original_paths = segment_leaves(masked_image_path, original_image_path, output_path)
         for i in range(len(segmented_masked_paths)):
             segmented_row = pd.DataFrame(data = {
