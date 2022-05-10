@@ -8,6 +8,7 @@ import os
 import cv2
 import numpy as np
 import json
+from joblib import load
 
 load_dotenv()
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
@@ -61,13 +62,6 @@ def predict(input, identifier, model, num_classes, dataset, verbose):
 
     logger.debug(f"Using the model with id: {model_id}")
 
-
-  device = "cuda" if torch.cuda.is_available() else "cpu"
-
-  model.load_state_dict(torch.load(model_path))
-  model = model.to(device)
-  model.eval()
-
   # Preprocess image
 
   logger.info("Preprocessing the image")
@@ -95,15 +89,26 @@ def predict(input, identifier, model, num_classes, dataset, verbose):
   image = np.expand_dims(image, 0)
 
   image = torch.from_numpy(image)
-  image = image.to(device)
 
-  logits = model(image)
-  probabilities = torch.nn.Softmax(dim=-1)(logits).tolist()[0]
-  results = dict(zip(LABELS, probabilities))
+  if model_name == 'bag_of_words':
+    loaded_model = load(model_path)
+    loaded_model.detect_features(image)
+  else:
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-  print(results)
+    model.load_state_dict(torch.load(model_path))
+    model = model.to(device)
+    model.eval()
 
-  return results
+    image = image.to(device)
+
+    logits = model(image)
+    probabilities = torch.nn.Softmax(dim=-1)(logits).tolist()[0]
+    results = dict(zip(LABELS, probabilities))
+
+    print(results)
+
+    return results
 
 
 if __name__ == "__main__":

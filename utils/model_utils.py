@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 import os
+import time
+from models.bag_of_words import BagOfWords
 from utils.time_utils import now_to_str, str_to_datetime, datetime_to_str
 from torch import nn
 from pathlib import Path
@@ -12,6 +14,7 @@ from datetime import datetime
 import torch
 from functools import reduce
 from operator import and_
+from joblib import dump
 
 load_dotenv()
 
@@ -49,7 +52,11 @@ def get_model_file_name(id: str, model_name: str, timestamp: str) -> str:
 	if type(model_name) != str:
 		raise ValueError("Model name must be string")
 
-	model_file_name = f"{id}-{model_name}-{timestamp}.pt"
+	if model_name == 'bag_of_words':
+		model_file_name = f"{id}-{model_name}-{timestamp}.joblib"
+	else:
+		model_file_name = f"{id}-{model_name}-{timestamp}.pt"
+
 	return model_file_name
 
 
@@ -101,6 +108,26 @@ def save_torch_model(model: nn.Module) -> Tuple[str, str, datetime]:
 	)
 	model_file_path = os.path.join(MODEL_FOLDER, model_file_name)
 	torch.save(model.state_dict(), model_file_path)
+
+	return id, model_name, timestamp
+
+def save_sklearn_model(model: BagOfWords) -> Tuple[str, str, datetime]:
+	# If custom name attribute has been given, use it
+	if hasattr(model, "name"):
+		model_name = model.name
+	# Find class name and determine the model name
+	else:
+		model_name = type(model).__name__
+		model_name = CLASS_TO_MODEL_NAME_MAPPING[model_name]
+
+	id, timestamp = create_model_id_and_timestamp()
+	timestamp_str = datetime_to_str(timestamp)
+
+	model_file_name = get_model_file_name(
+		id=id, model_name=model_name, timestamp=timestamp_str
+	)
+	model_file_path = os.path.join(MODEL_FOLDER, model_file_name)
+	dump(model, model_file_path)
 
 	return id, model_name, timestamp
 
@@ -170,12 +197,10 @@ def store_model_and_add_info_to_df(model, **kwargs):
 	if issubclass(type(model), nn.Module):
 		id, model_name, timestamp = save_torch_model(model)
 	else:
-		raise NotImplementedError(
-			"Support for sklearn models has not been implemented yet"
-		)
+		id, model_name, timestamp = save_sklearn_model(model)
 
 	add_model_info_to_df(id=id, model_name=model_name, timestamp=timestamp, **kwargs)
- 
+
 	return id
 
 
@@ -225,6 +250,5 @@ def get_model_path(id: str) -> str:
 def get_image_size(model_name: str) -> int:
 	if model_name not in AVAILABLE_MODELS:
 		raise ValueError(f"Model name not recognized, available models: {AVAILABLE_MODELS}")
-  
+
 	return MODEL_INFO[model_name]['image_size']
-  
