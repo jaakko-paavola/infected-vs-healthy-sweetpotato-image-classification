@@ -122,11 +122,9 @@ def save_sklearn_model(model) -> Tuple[str, str, datetime]:
 		id=id, model_name=model_name, timestamp=timestamp_str
 	)
 	model_file_path = os.path.join(MODEL_FOLDER, model_file_name)
-
 	dump(model, model_file_path)
 
 	return id, model_name, timestamp
-
 
 def add_model_info_to_df(
 	id: str,
@@ -280,4 +278,3 @@ def get_image_size(model_name: str) -> int:
 		raise ValueError(f"Model name not recognized, available models: {AVAILABLE_MODELS}")
 
 	return MODEL_INFO[model_name]['image_size']
-

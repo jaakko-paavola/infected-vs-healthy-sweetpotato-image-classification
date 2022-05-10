@@ -11,6 +11,7 @@ import numpy as np
 import json
 from joblib import load
 import json
+from joblib import load
 
 load_dotenv()
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
