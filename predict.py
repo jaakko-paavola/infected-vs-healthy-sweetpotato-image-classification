@@ -73,6 +73,8 @@ def predict(input, identifier, model, num_classes, dataset, verbose):
   CROP_SIZE = get_image_size(model_name)
 
   image = cv2.imread(input)
+  image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+  image = cv2.resize(image, (CROP_SIZE, CROP_SIZE))
 
   if model_name == 'bag_of_words':
     model = load(model_path)
@@ -95,9 +97,6 @@ def predict(input, identifier, model, num_classes, dataset, verbose):
     model.load_state_dict(torch.load(model_path))
     model = model.to(device)
     model.eval()
-
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.resize(image, (CROP_SIZE, CROP_SIZE))
 
     # Convert pixel values to floats between 0 and 1
     image = image.astype("float32") / 255.0
