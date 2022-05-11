@@ -14,12 +14,13 @@ from datetime import datetime
 import torch
 from functools import reduce
 from operator import and_
-from joblib import dump
+from joblib import dump, load
 
 load_dotenv()
 
 DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
+OBJECTS_FOLDER = os.path.join(MODEL_FOLDER, "objects")
 
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
@@ -111,14 +112,8 @@ def save_torch_model(model: nn.Module) -> Tuple[str, str, datetime]:
 
 	return id, model_name, timestamp
 
-def save_sklearn_model(model: BagOfWords) -> Tuple[str, str, datetime]:
-	# If custom name attribute has been given, use it
-	if hasattr(model, "name"):
-		model_name = model.name
-	# Find class name and determine the model name
-	else:
-		model_name = type(model).__name__
-		model_name = CLASS_TO_MODEL_NAME_MAPPING[model_name]
+def save_sklearn_model(model) -> Tuple[str, str, datetime]:
+	model_name = "bag_of_words"
 
 	id, timestamp = create_model_id_and_timestamp()
 	timestamp_str = datetime_to_str(timestamp)
@@ -127,6 +122,7 @@ def save_sklearn_model(model: BagOfWords) -> Tuple[str, str, datetime]:
 		id=id, model_name=model_name, timestamp=timestamp_str
 	)
 	model_file_path = os.path.join(MODEL_FOLDER, model_file_name)
+
 	dump(model, model_file_path)
 
 	return id, model_name, timestamp
@@ -252,3 +248,27 @@ def get_image_size(model_name: str) -> int:
 		raise ValueError(f"Model name not recognized, available models: {AVAILABLE_MODELS}")
 
 	return MODEL_INFO[model_name]['image_size']
+
+def get_other_json(id):
+	row = MODEL_DF.loc[MODEL_DF['id'] == id]
+	other_json = json.loads(row['other_json'].item())
+	return other_json
+
+def store_object(to_be_stored):
+	id = "".join(
+		random.choice(string.ascii_lowercase + string.digits) for i in range(8)
+	)
+
+	if not os.path.exists(OBJECTS_FOLDER):
+		os.makedirs(OBJECTS_FOLDER)
+
+	object_file_name = f"{id}.joblib"
+	object_file_path = os.path.join(OBJECTS_FOLDER, object_file_name)
+	dump(to_be_stored, object_file_path)
+	return id
+
+def restore_object(id):
+	object_file_name = f"{id}.joblib"
+	object_file_path =  os.path.join(OBJECTS_FOLDER, object_file_name)
+	restored_object = load(object_file_path)
+	return restored_object

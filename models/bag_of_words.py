@@ -81,10 +81,6 @@ class BagOfWords:
         stdslr = StandardScaler().fit(img_features)
         img_features = stdslr.transform(img_features)
 
-        self.k = k
-        self.voc = voc
-        self.stdslr = stdslr
-
         # image features needed for training the classifier
         # voc and fitted standard scaler needed for prediction
         return (img_features, voc, stdslr)
@@ -111,8 +107,6 @@ class BagOfWords:
             raise Exception("Unknown classifier. Accepted values are 'SVM', 'RandomForest', 'XGBoost'.")
 
         clf.fit(img_features, np.array(data['Label']))
-
-        self.model = clf
 
         return clf
 
@@ -170,33 +164,32 @@ class BagOfWords:
         # data_test['pred'] are the predicted classes
         return (data_test['pred'], accuracy, f1, loss)
 
-    def predict_single_image(self, image):
-        feature_detection_algorithm = self.feature_detection
-        if feature_detection_algorithm == 'SIFT':
+    def predict_single_image(image, model, feature_detection, k, voc, stdslr):
+        if feature_detection == 'SIFT':
             detector = cv2.SIFT_create()
         else:
             detector = cv2.ORB_create()
 
-        descriptor_list_test = []
+        descriptor_list = []
 
-        img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-        if feature_detection_algorithm == 'SIFT':
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        keypoints_test, descriptor_test = detector.detectAndCompute(img, None)
-        if descriptor_test is None:
+        if feature_detection == 'SIFT':
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        keypoints, descriptor = detector.detectAndCompute(image, None)
+        if descriptor is None:
             logger.info('Could not detect features.')
             return None
         else:
-            descriptor_list_test.append((img, descriptor_test))
+            descriptor_list.append((image, descriptor))
 
-        test_features = np.zeros((1, self.k), "float32")
-        words, distance = vq(descriptor_list_test[0][1], self.voc)
+        features = np.zeros((1, k), "float32")
+        words, distance = vq(descriptor_list[0][1], voc)
         for w in words:
-            test_features[0][w]+= 1
+            features[0][w]+= 1
 
-        test_features = self.stdslr.transform(test_features)
+        features = stdslr.transform(features)
 
-        res = self.model.predict(test_features)
+        probs = model.predict_proba(features)
 
-        return res
+        probabilities = probs[0]
+
+        return probabilities
