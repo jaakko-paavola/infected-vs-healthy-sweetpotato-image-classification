@@ -122,6 +122,7 @@ def save_sklearn_model(model) -> Tuple[str, str, datetime]:
 		id=id, model_name=model_name, timestamp=timestamp_str
 	)
 	model_file_path = os.path.join(MODEL_FOLDER, model_file_name)
+
 	dump(model, model_file_path)
 
 	return id, model_name, timestamp
@@ -278,3 +279,26 @@ def get_image_size(model_name: str) -> int:
 		raise ValueError(f"Model name not recognized, available models: {AVAILABLE_MODELS}")
 
 	return MODEL_INFO[model_name]['image_size']
+def get_other_json(id):
+	row = MODEL_DF.loc[MODEL_DF['id'] == id]
+	other_json = json.loads(row['other_json'].item())
+	return other_json
+
+def store_object(to_be_stored):
+	id = "".join(
+		random.choice(string.ascii_lowercase + string.digits) for i in range(8)
+	)
+
+	if not os.path.exists(OBJECTS_FOLDER):
+		os.makedirs(OBJECTS_FOLDER)
+
+	object_file_name = f"{id}.joblib"
+	object_file_path = os.path.join(OBJECTS_FOLDER, object_file_name)
+	dump(to_be_stored, object_file_path)
+	return id
+
+def restore_object(id):
+	object_file_name = f"{id}.joblib"
+	object_file_path =  os.path.join(OBJECTS_FOLDER, object_file_name)
+	restored_object = load(object_file_path)
+	return restored_object
