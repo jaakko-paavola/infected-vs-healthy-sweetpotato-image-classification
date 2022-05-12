@@ -120,7 +120,7 @@ class BagOfWords:
         elif feature_detection_algorithm == 'ORB':
             detector = cv2.ORB_create()
         else:
-            raise Exception("Unknown feature detection algorithm. Accepted values are 'ORB', 'SIFT'.")
+            raise ValueError("Unknown feature detection algorithm. Accepted values are 'ORB', 'SIFT'.")
 
         descriptor_list_test = []
         to_be_removed_test = []
