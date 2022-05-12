@@ -12,7 +12,6 @@ from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sn
 import pandas as pd
 import numpy as np
-
 import click
 import statistics
 from models.model_factory import get_model_class
@@ -20,6 +19,7 @@ from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df
 import logging
 from tqdm import tqdm
 import yaml
+from dataloaders.dataset_stats import get_normalization_mean_std
 
 logging.basicConfig() 
 logger = logging.getLogger(__name__)
@@ -41,8 +41,9 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 @click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
+
+
 def train(model, dataset, data_csv, binary, params_file, augmentation, save, verbose):
-    
     if verbose:
         logger.setLevel(logging.DEBUG)
 
@@ -55,15 +56,16 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
         if dataset == 'plant':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
         elif dataset == 'leaf':
-            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaf_data.csv")
+            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaves_segmented_master.csv")
         elif dataset == 'plant_golden':
             raise NotImplementedError("Plant golden dataset not implemented yet")
         elif dataset == 'leaf_golden':
             raise NotImplementedError("Leaf golden dataset not implemented yet")
+        mean, std = get_normalization_mean_std(dataset=dataset)
     # TODO: give dataset name when using custom CSV for storing the model
     else:
         DATA_MASTER_PATH = data_csv
-
+        mean, std = get_normalization_mean_std(datasheet=data_csv)
 
     # TODO: automatize label counting from dataframe
     if binary:
@@ -95,16 +97,19 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
             transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
-            # Values aquired from dataloaders/plant_master_dataset_stats.py
-            # TODO: automatize the mean and std calculation
-            transforms.Normalize(mean=[0.09872966, 0.11726899, 0.06568969],
-                                std=[0.1219357, 0.14506954, 0.08257045]),
+            transforms.Normalize(mean=mean, std=std)
             # GaussianNoise(0., 0.1), # Should be commented out due to adverse effect?
         ])
     else:
-        data_transform = None
+        data_transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Pad(50),
+            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=mean, std=std)
+        ])
 
-    plant_master_dataset = CSVDataLoader(
+    master_dataset = CSVDataLoader(
         csv_file=DATA_MASTER_PATH,
         root_dir=DATA_FOLDER_PATH,
         image_path_col="Split masked image path",
@@ -112,13 +117,14 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
         transform=data_transform
     )
 
-    train_size = int(0.85 * len(plant_master_dataset))
-    test_size = len(plant_master_dataset) - train_size
+    train_size = int(0.85 * len(master_dataset))
+    test_size = len(master_dataset) - train_size
 
-    train_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, test_size])
+    train_dataset, test_dataset = torch.utils.data.random_split(master_dataset, [train_size, test_size])
 
     train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
     test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
+
     # %%
 
     if torch.cuda.is_available():
@@ -192,7 +198,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
             if batch_num == len(train_plant_dataloader) - 1:
                 logger.info('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' % 
-                    (epoch, batch_num + 1, len(train_plant_dataloader), train_loss / (batch_num + 1), 
+                    (epoch, batch_num + 1, len(train_plant_dataloader), total_train_loss / (batch_num + 1), 
                     100. * train_correct / total, train_correct, total))
 
 
