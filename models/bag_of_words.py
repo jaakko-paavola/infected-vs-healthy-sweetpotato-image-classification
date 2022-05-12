@@ -104,7 +104,7 @@ class BagOfWords:
             logger.info('Using LinearSVM classifier')
             clf = LinearSVC(random_state=self.RANDOM_STATE)
         else:
-            raise Exception("Unknown classifier. Accepted values are 'SVM', 'RandomForest', 'XGBoost'.")
+            raise ValueError("Unknown classifier. Accepted values are 'SVM', 'RandomForest', 'XGBoost'.")
 
         clf.fit(img_features, np.array(data['Label']))
 
