@@ -260,6 +260,8 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
     logger.info("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, test_accuracy))
 
+    # TODO detect labels automatically
+
     if binary:
         labels = ['Non-VD', 'VD']
     else:
