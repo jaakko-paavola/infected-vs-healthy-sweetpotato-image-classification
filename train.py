@@ -41,8 +41,6 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 @click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
-
-
 def train(model, dataset, data_csv, binary, params_file, augmentation, save, verbose):
     if verbose:
         logger.setLevel(logging.DEBUG)

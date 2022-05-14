@@ -18,6 +18,7 @@ from pytorchtools import EarlyStopping
 import warnings
 import logging
 from utils.model_utils import AVAILABLE_MODELS
+from dataloaders.dataset_stats import get_normalization_mean_std
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -26,7 +27,6 @@ logger.setLevel(logging.INFO)
 # %%
 load_dotenv()
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
-PLANT_SPLIT_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
 warnings.filterwarnings("ignore")
 
 # %%
@@ -320,14 +320,17 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
         if dataset == 'plant':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
         elif dataset == 'leaf':
-            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaf_data.csv")
+            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaves_segmented_master.csv")
         elif dataset == 'plant_golden':
             raise NotImplementedError("Plant golden dataset not implemented yet")
         elif dataset == 'leaf_golden':
             raise NotImplementedError("Leaf golden dataset not implemented yet")
+        mean, std = get_normalization_mean_std(dataset=dataset)
     # TODO: give dataset name when using custom CSV for storing the model
     else:
         DATA_MASTER_PATH = data_csv
+        mean, std = get_normalization_mean_std(datasheet=data_csv)
+
 
 
     # TODO: automatize label counting from dataframe
@@ -353,14 +356,17 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
             transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
             transforms.Resize((299, 299)) if MODEL_NAME == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
-            # Values aquired from dataloaders/plant_master_dataset_stats.py
-            # TODO: automatize the mean and std calculation
-            transforms.Normalize(mean=[0.09872966, 0.11726899, 0.06568969],
-                                std=[0.1219357, 0.14506954, 0.08257045]),
+            transforms.Normalize(mean=mean, std=std),
             # GaussianNoise(0., 0.1),
         ])
     else:
-        data_transform = None
+        data_transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Pad(50),
+            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=mean, std=std)
+        ])
 
     ## TODO: selection of the optimizer space (possible via a commandline argument)
     OPTIMIZER_SEARCH_SPACE = []
@@ -371,7 +377,7 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     # OPTIMIZER_SEARCH_SPACE.append("Adagrad")
 
     plant_master_dataset = CSVDataLoader(
-        csv_file=PLANT_SPLIT_MASTER_PATH,
+        csv_file=DATA_MASTER_PATH,
         root_dir=DATA_FOLDER_PATH,
         image_path_col="Split masked image path",
         label_col="Label",
