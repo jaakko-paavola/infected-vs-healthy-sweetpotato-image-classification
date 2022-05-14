@@ -114,7 +114,7 @@ def segment_plant(masked_image_path: str, original_image_path: str, output_path:
         cv2.imwrite(masked_segmented_path, single_plant_masked)
 
         # Write non-masked single plant
-        original_segmented_path = os.path.join(pathname, f"{original_filename}_O_{contour_index}{original_filetype}")
+        original_segmented_path = os.path.join(pathname, f"{original_filename}_O{contour_index}{original_filetype}")
         original_segmented_paths.append(original_segmented_path)
         cv2.imwrite(original_segmented_path, single_plant_original)
 
@@ -183,7 +183,7 @@ def test_segmentation():
         condition = re.match(regex_pattern_for_plant_info_gc, file).group(4)
         plants = re.match(regex_pattern_for_plant_info_gc, file).group(5)
         subfolder_name = f'{prefix} - {tray} - TV - {genotype}-{condition} - {plants}'
-        if(not os.path.exists(f'{DATA_FOLDER_PATH}/{output_path_for_separated_plants_gc}/{subfolder_name}')):
+        if (not os.path.exists(f'{DATA_FOLDER_PATH}/{output_path_for_separated_plants_gc}/{subfolder_name}')):
             pathlib.Path(f'{DATA_FOLDER_PATH}/{output_path_for_separated_plants_gc}/{subfolder_name}').mkdir(parents=True, exist_ok=True)
         cv2.imwrite(f'{DATA_FOLDER_PATH}/{output_path_for_separated_plants_gc}/{subfolder_name}/' + file, img)
 
@@ -239,5 +239,3 @@ def test_segmentation():
     # %%
 
     split_gc_df.to_csv(f'{DATA_FOLDER_PATH}/growth_chamber_plant_data_split.csv')
-
-    # %%
