@@ -196,6 +196,8 @@ def store_model_and_add_info_to_df(model, **kwargs):
 		id, model_name, timestamp = save_sklearn_model(model)
 
 	add_model_info_to_df(id=id, model_name=model_name, timestamp=timestamp, **kwargs)
+ 
+	return id
 
 	return id
 
