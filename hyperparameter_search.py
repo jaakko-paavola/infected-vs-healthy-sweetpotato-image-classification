@@ -298,7 +298,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 @click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
 @click.option('-e', '--no_of_epochs', type=int, default=20, help='Number of epochs in training loop.')
 @click.option('-t', '--no_of_trials', type=int, default=50, help='Number of hyperparamter search trials in training loop.')
-@click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf', 'leaf_golden'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
+@click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
 @click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
@@ -322,15 +322,12 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
         elif dataset == 'leaf':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaves_segmented_master.csv")
         elif dataset == 'plant_golden':
-            raise NotImplementedError("Plant golden dataset not implemented yet")
-        elif dataset == 'leaf_golden':
-            raise NotImplementedError("Leaf golden dataset not implemented yet")
+            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_golden.csv")
         mean, std = get_normalization_mean_std(dataset=dataset)
     # TODO: give dataset name when using custom CSV for storing the model
     else:
         DATA_MASTER_PATH = data_csv
         mean, std = get_normalization_mean_std(datasheet=data_csv)
-
 
 
     # TODO: automatize label counting from dataframe

@@ -161,6 +161,8 @@ def store_model_and_add_info_to_df(model, **kwargs):
 		)
 
 	add_model_info_to_df(id=id, model_name=model_name, timestamp=timestamp, **kwargs)
+ 
+	return id
 
 
 def get_model_info(id: str) -> pd.Series:

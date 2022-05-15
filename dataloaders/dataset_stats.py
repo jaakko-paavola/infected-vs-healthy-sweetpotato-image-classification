@@ -1,5 +1,6 @@
 # %%
 
+from multiprocessing.sharedctypes import Value
 import os
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
@@ -19,8 +20,12 @@ def get_normalization_mean_std(dataset: str = None, datasheet : str = None):
     if dataset:
         if dataset == 'leaf':
             DATA_PATH = "leaves_segmented_master.csv"
-        else:
+        elif data == 'plant':
             DATA_PATH = "plant_data_split_master.csv"
+        elif data == 'plant_golden':
+            DATA_PATH = "plant_data_split_golden.csv"
+        else:
+            raise ValueError(f"Dataset {dataset} not defined. Accepted values: plant, plant_golden, leaf")
         MASTER_PATH = os.path.join(DATA_FOLDER_PATH, DATA_PATH)
 
     transform = transforms.Compose([

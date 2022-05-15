@@ -10,6 +10,7 @@ import cv2
 load_dotenv()
 
 # %%
+
 DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 
 # %%
@@ -17,12 +18,16 @@ leaf_df_path = os.path.join(DATA_FOLDER, "leaf_data.csv")
 plant_df_path = os.path.join(DATA_FOLDER, "plant_data.csv")
 growth_chamber_plant_df_path = os.path.join(DATA_FOLDER, "growth_chamber_plant_data.csv")
 plant_df_split_master_path = os.path.join(DATA_FOLDER, "plant_data_split_master.csv")
+leaf_df_split_master_path = os.path.join(DATA_FOLDER, "leaves_segmented_master.csv")
+plant_golden_df_path = os.path.join(DATA_FOLDER, "plant_data_split_golden.csv")
 
 # %%
 leaf_df = pd.read_csv(leaf_df_path)
 plant_df = pd.read_csv(plant_df_path)
 growth_chamber_plant_df = pd.read_csv(growth_chamber_plant_df_path)
 plant_df_split_master = pd.read_csv(plant_df_split_master_path)
+leaf_df_split_master = pd.read_csv(leaf_df_split_master_path)
+plant_df_split_golden = pd.read_csv(plant_golden_df_path)
 
 # %%
 def parse_img_path(path):
@@ -97,16 +102,42 @@ for image_path in plant_df['Original image path'].unique():
 # Create temporary column for sum counts of each label
 plant_df_split_master['Label Frequency'] = 1 
 label_frequency = plant_df_split_master.groupby(["Condition"]).sum()[["Label Frequency"]]
-
-# %%
 label_frequency = label_frequency.reset_index()
-# %%
 fg = sns.factorplot(x='Condition', y='Label Frequency', data=label_frequency, kind='bar')
 fg.set_xlabels('')
 # %%
 
-plant_df_split_master['Label'].value_counts()
+print(plant_df_split_master['Label'].value_counts())
+print(plant_df_split_master['Label'].value_counts(normalize=True))
 
 # %% 
 
 print(len(plant_df_split_master))
+
+# %% 
+
+leaf_df_split_master['Label Frequency'] = 1 
+label_frequency = leaf_df_split_master.groupby(["Condition"]).sum()[["Label Frequency"]]
+label_frequency = label_frequency.reset_index()
+fg = sns.factorplot(x='Condition', y='Label Frequency', data=label_frequency, kind='bar')
+fg.set_xlabels('')
+# %%
+
+print(len(leaf_df_split_master))
+print(leaf_df_split_master['Label'].value_counts())
+print(leaf_df_split_master['Label'].value_counts(normalize=True))
+
+# %%
+
+plant_df_split_golden['Label Frequency'] = 1 
+label_frequency = plant_df_split_golden.groupby(["Condition"]).sum()[["Label Frequency"]]
+label_frequency = label_frequency.reset_index()
+fg = sns.factorplot(x='Condition', y='Label Frequency', data=label_frequency, kind='bar')
+fg.set_xlabels('')
+# %%
+
+print(len(plant_df_split_golden))
+print(plant_df_split_golden['Label'].value_counts(normalize=True))
+print(plant_df_split_golden['Label'].value_counts(normalize=True))
+
+# %%
