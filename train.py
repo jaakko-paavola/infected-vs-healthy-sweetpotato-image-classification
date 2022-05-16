@@ -42,8 +42,8 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
 @click.option('-bl', '--binary-label', type=int, help='Binary label when dataset has more than two labels. Classification is done using one-vs-rest, where the binary label corresponds to the one compared to other labels.')
 @click.option('-p', '--params-file', type=str, default="hyperparams.yaml", help='Full file path to hyperparameter-file used during the training. File must be a YAMl file and similarly structured than hyperparams.yaml.')
-@click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
-@click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
+@click.option('-aug/-no-aug', '--augmentation/--no-augmentation', show_default=True, default=True, help='Use data-augmentation for the training.')
+@click.option('-s/-nos', '--save/--no-save', show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 def train(model, dataset, data_csv, binary, binary_label, params_file, augmentation, save, verbose):
     
@@ -74,10 +74,15 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
     labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
     
+    if binary and not binary_label and len(labels) > 2:
+        raise ValueError(f"You tried to do binary classification without binary label argument. You must give also binary-label (-bl or --binary-label) argument when using binary classification and the dataset contains more than two labels. We detected {len(labels)} number of labels.")
+    
     if binary:
         NUM_CLASSES = 2
-        # Convert the labels values to one-vs-rest labels
-        labels = [f'Non-{labels[binary_label]}', labels[binary_label]]
+        
+        if len(labels) > 2:
+            # Convert the label names to one-vs-rest labels
+            labels = [f'Non-{labels[binary_label]}', labels[binary_label]]
     else:
         NUM_CLASSES = len(labels)
 
