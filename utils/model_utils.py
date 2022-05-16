@@ -1,4 +1,5 @@
 from operator import mod
+from xml.parsers.expat import model
 from dotenv import load_dotenv
 import os
 import time
@@ -28,6 +29,18 @@ CLASS_TO_MODEL_NAME_MAPPING = {
 	"ResNet": "resnet18",
 	"Inception3": "inception_v3",
 	"VisionTransformer": "vision_transformer",
+}
+
+MODEL_INFO = {
+	"resnet18": {
+		"image_size": (256, 256)
+	},
+ "inception_v3": {
+	 	"image_size": (299, 299)
+ },
+ "vision_transformer": {
+		"image_size": (256, 256)
+ }
 }
 
 
@@ -206,3 +219,11 @@ def get_model_path(id: str) -> str:
 	model_path = os.path.join(MODEL_FOLDER, model_file_name)
 
 	return model_path
+
+
+def get_image_size(model_name: str) -> int:
+	if model_name not in AVAILABLE_MODELS:
+		raise ValueError(f"Model name not recognized, available models: {AVAILABLE_MODELS}")
+  
+	return MODEL_INFO[model_name]['image_size']
+  

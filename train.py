@@ -1,10 +1,7 @@
 # %%
 import os
-<<<<<<< HEAD
 from pathlib import Path
 from sklearn.preprocessing import binarize
-=======
->>>>>>> 8707efd43b5e19981da7261106a457ecd665c4ff
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
 from dataloaders.gaussian_noise import GaussianNoise
@@ -20,11 +17,12 @@ import numpy as np
 import click
 import statistics
 from models.model_factory import get_model_class
-from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df
+from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df, get_image_size
 import logging
 from tqdm import tqdm
 import yaml
 from dataloaders.dataset_stats import get_normalization_mean_std
+from dataloaders.dataset_labels import get_dataset_labels
 
 logging.basicConfig() 
 logger = logging.getLogger(__name__)
@@ -74,11 +72,14 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
         # To give the dataset name when storing the model
         dataset = Path(data_csv).stem
 
-    # TODO: automatize label counting from dataframe
+    labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
+    
     if binary:
         NUM_CLASSES = 2
+        # Convert the labels values to one-vs-rest labels
+        labels = [f'Non-{labels[binary_label]}', labels[binary_label]]
     else:
-        NUM_CLASSES = 4
+        NUM_CLASSES = len(labels)
 
     with open(params_file, "r") as stream:
         try:
@@ -95,6 +96,8 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
     OPTIMIZER = params[model]['OPTIMIZER']
     LR = float(params[model]['LR'])
     WEIGHT_DECAY = float(params[model]['WEIGHT_DECAY'])
+    
+    image_size = get_image_size(model)
 
     if augmentation:
         data_transform = transforms.Compose([
@@ -102,16 +105,15 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             transforms.Pad(50),
             transforms.RandomRotation(180),
             transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
-            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
-            # GaussianNoise(0., 0.1), # Should be commented out due to adverse effect?
         ])
     else:
         data_transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Pad(50),
-            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ])
@@ -185,7 +187,7 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
             # For binary classification, transform labels to one-vs-rest
             if binary:
-                target = target.eq(3).type(torch.int64)
+                target = target.eq(binary_label).type(torch.int64)
 
             optimizer.zero_grad()
 
@@ -252,7 +254,7 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
             # For binary classification, transform labels to one-vs-rest
             if binary:
-                target = target.eq(3).type(torch.int64)
+                target = target.eq(binary_label).type(torch.int64)
 
             output = model_class(data)
             
@@ -279,13 +281,6 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
     logger.info("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, test_accuracy))
 
-    # TODO detect labels automatically
-
-    if binary:
-        labels = ['Non-VD', 'VD']
-    else:
-        labels = ['CSV', 'FMV', 'Healthy', 'VD']
-
     # Print classification report
     cf_report = classification_report(y_true, y_pred, target_names=labels, output_dict=True)
 
@@ -296,7 +291,9 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
     if save:
         logger.info("Saving the model")
         
-        # TODO: store hyperparams to other_json
+        other_json = {
+            'LABELS': labels
+        }
         
         model_id = store_model_and_add_info_to_df(
             model = model_class, 
@@ -312,7 +309,7 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             test_accuracy = test_accuracy,
             test_loss = test_loss,
             f1_score = f1_score,
-            other_json = None,
+            other_json = other_json,
         )
         
         logger.info(f"Model saved with id {model_id}")

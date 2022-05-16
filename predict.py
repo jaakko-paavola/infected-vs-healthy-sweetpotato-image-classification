@@ -1,12 +1,13 @@
 import torch
 import click
-from utils.model_utils import AVAILABLE_MODELS, get_model_info, get_model_info_by_attributes, get_model_path
+from utils.model_utils import AVAILABLE_MODELS, get_model_info, get_model_info_by_attributes, get_model_path, get_image_size
 from models.model_factory import get_model_class
 import logging
 from dotenv import load_dotenv
 import os
 import cv2
 import numpy as np
+import json
 
 load_dotenv()
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
@@ -71,9 +72,8 @@ def predict(input, identifier, model, num_classes, dataset, verbose):
 
   logger.info("Preprocessing the image")
 
-  # TODO: add model-spesific image size and labels
-  LABELS = ('CSV', 'FMV', 'Healthy', 'VD') if num_classes == 4 else ('Non-VD', 'VD')
-  CROP_SIZE = 256
+  LABELS = json.loads(model_data['other_json'].item())['LABELS']
+  CROP_SIZE = get_image_size(model_name)
 
   image = cv2.imread(input)
 
