@@ -83,5 +83,5 @@ original_plant_village_df.to_csv(original_file_path)
 
 segmented_file_name = "dummy_segmented_plant_village_data.csv"
 segmented_file_path = os.path.join(DATA_FOLDER, segmented_file_name)
-segmented_plant_village_df.to_csv(segmented_file_path)
+segmented_plant_village_df.to_csv(segmented_file_path, index=False)
 # %%

@@ -24,7 +24,7 @@ logger.setLevel(logging.INFO)
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 def predict(input, identifier, model, num_classes, dataset, verbose):
   
-  if (not any([input, identifier, model, num_classes, dataset, verbose])):
+  if not any([input, identifier, model, num_classes, dataset, verbose]):
       print("""
           Usage: predict.py [OPTIONS]
           Try 'predict.py --help' for help.

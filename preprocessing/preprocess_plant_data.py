@@ -110,4 +110,4 @@ plant_master = plant_master.reset_index()
 # %%
 file_name = "plant_data.csv"
 file_path = os.path.join(DATA_FOLDER, file_name)
-plant_master.to_csv(file_path)
+plant_master.to_csv(file_path, index=False)

@@ -22,7 +22,7 @@ MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
 
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
-AVAILABLE_MODELS = ["resnet18", "inception_v3"]
+AVAILABLE_MODELS = ["resnet18", "inception_v3", "vision_transformer"]
 
 CLASS_TO_MODEL_NAME_MAPPING = {
 	"ResNet": "resnet18",
@@ -161,6 +161,8 @@ def store_model_and_add_info_to_df(model, **kwargs):
 		)
 
 	add_model_info_to_df(id=id, model_name=model_name, timestamp=timestamp, **kwargs)
+ 
+	return id
 
 
 def get_model_info(id: str) -> pd.Series:

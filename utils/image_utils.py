@@ -11,6 +11,8 @@ from skimage.color import rgba2rgb
 from skimage import data, io
 import math
 from typing import Tuple, Type, Union
+import torch
+import torchvision
 # %%
 
 load_dotenv()
@@ -137,3 +139,36 @@ def convert_color_to_another(image, color1=[255, 255, 255], color2=[0, 0, 0]):
 
   return data
 # %%
+
+def img_to_patch(x, patch_size, flatten_channels=True):
+    """from https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial15/Vision_Transformer.html
+    Inputs:
+        x - torch.Tensor representing the image of shape [B, C, H, W]
+        patch_size - Number of pixels per dimension of the patches (integer)
+        flatten_channels - If True, the patches will be returned in a flattened format
+                           as a feature vector instead of a image grid.
+    """
+    B, C, H, W = x.shape
+    x = x.reshape(B, C, H//patch_size, patch_size, W//patch_size, patch_size)
+    x = x.permute(0, 2, 4, 1, 3, 5) # [B, H', W', C, p_H, p_W]
+    x = x.flatten(1,2)              # [B, H'*W', C, p_H, p_W]
+    if flatten_channels:
+        x = x.flatten(2,4)          # [B, H'*W', C*p_H*p_W]
+    # print(x.shape)
+    return x
+
+
+def plot_patches(num_images, dataset):
+    images = torch.stack([dataset[idx]['image'] for idx in range(num_images)], dim=0)
+
+    img_patches = img_to_patch(images, patch_size=32, flatten_channels=False)
+
+    fig, ax = plt.subplots(images.shape[0], 1, figsize=(14,3))
+    fig.suptitle("Images as input sequences of patches")
+    for i in range(images.shape[0]):
+        img_grid = torchvision.utils.make_grid(img_patches[i], nrow=64, normalize=True, pad_value=0.9)
+        img_grid = img_grid.permute(1, 2, 0)
+        ax[i].imshow(img_grid)
+        ax[i].axis('off')
+    plt.show()
+    plt.close()

@@ -107,7 +107,6 @@ def segment_plant_data(excel_path, output_path):
     logger.debug(f'Writing segmentation results to {file_path}')
     segmented_df.to_csv(file_path, index=False)
 
-
     print(f"Incorrectly segmented folders:")
     pprint(falsely_segmented_images)
 

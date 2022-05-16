@@ -40,6 +40,6 @@ for index, row in plant_df.iterrows():
         plant_df.loc[index, 'Split masked image path'] = relative_path
 # %%
 
-plant_df.to_csv(f'{DATA_FOLDER_PATH}/plant_data_split.csv')
+plant_df.to_csv(f'{DATA_FOLDER_PATH}/plant_data_split.csv', index=False)
 
 # %%

@@ -1,16 +1,18 @@
 # %%
 import os
+<<<<<<< HEAD
 from pathlib import Path
 from sklearn.preprocessing import binarize
+=======
+>>>>>>> 8707efd43b5e19981da7261106a457ecd665c4ff
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
 from dataloaders.gaussian_noise import GaussianNoise
 from dotenv import load_dotenv
 import matplotlib.pyplot as plt
-from torchvision import transforms, datasets
+from torchvision import transforms
 import torch
 import torch.optim as optim
-import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sn
 import pandas as pd
@@ -22,6 +24,7 @@ from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df
 import logging
 from tqdm import tqdm
 import yaml
+from dataloaders.dataset_stats import get_normalization_mean_std
 
 logging.basicConfig() 
 logger = logging.getLogger(__name__)
@@ -58,14 +61,18 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
         if dataset == 'plant':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_master.csv")
         elif dataset == 'leaf':
-            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaf_data.csv")
+            DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaves_segmented_master.csv")
         elif dataset == 'plant_golden':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_golden.csv")
+        else:             
+            raise ValueError(f"Dataset {dataset} not defined. Accepted values: plant, plant_golden, leaf")
+        
+        mean, std = get_normalization_mean_std(dataset=dataset)
     else:
         DATA_MASTER_PATH = data_csv
+        mean, std = get_normalization_mean_std(datasheet=data_csv)
         # To give the dataset name when storing the model
         dataset = Path(data_csv).stem
-
 
     # TODO: automatize label counting from dataframe
     if binary:
@@ -80,11 +87,14 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             logger.error(f"Error while reading YAML: {exc}")
             raise exc
 
-    # hyperparameters
-    N_EPOCHS = params[model]['N_EPOCHS']
-    BATCH_SIZE_TRAIN = params[model]['BATCH_SIZE_TRAIN']
-    BATCH_SIZE_TEST = params[model]['BATCH_SIZE_TEST']
-    LR = params[model]['LR']
+    # hyperparameters:
+    # TODO: the final form of hyperparameters.yaml
+    N_EPOCHS = int(params[model]['N_EPOCHS'])
+    BATCH_SIZE_TRAIN = int(params[model]['BATCH_SIZE_TRAIN'])
+    BATCH_SIZE_TEST = int(params[model]['BATCH_SIZE_TEST'])
+    OPTIMIZER = params[model]['OPTIMIZER']
+    LR = float(params[model]['LR'])
+    WEIGHT_DECAY = float(params[model]['WEIGHT_DECAY'])
 
     if augmentation:
         data_transform = transforms.Compose([
@@ -92,18 +102,21 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             transforms.Pad(50),
             transforms.RandomRotation(180),
             transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
-            transforms.Resize((256, 256)),
+            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
-            # Values aquired from dataloaders/plant_master_dataset_stats.py
-            # TODO: automatize the mean and std calculation
-            transforms.Normalize(mean=[0.09872966, 0.11726899, 0.06568969],
-                                std=[0.1219357, 0.14506954, 0.08257045]),
-            GaussianNoise(0., 0.1),
+            transforms.Normalize(mean=mean, std=std)
+            # GaussianNoise(0., 0.1), # Should be commented out due to adverse effect?
         ])
     else:
-        data_transform = None
+        data_transform = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Pad(50),
+            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=mean, std=std)
+        ])
 
-    plant_master_dataset = CSVDataLoader(
+    master_dataset = CSVDataLoader(
         csv_file=DATA_MASTER_PATH,
         root_dir=DATA_FOLDER_PATH,
         image_path_col="Split masked image path",
@@ -111,13 +124,14 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
         transform=data_transform
     )
 
-    train_size = int(0.85 * len(plant_master_dataset))
-    test_size = len(plant_master_dataset) - train_size
+    train_size = int(0.85 * len(master_dataset))
+    test_size = len(master_dataset) - train_size
 
-    train_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, test_size])
+    train_dataset, test_dataset = torch.utils.data.random_split(master_dataset, [train_size, test_size])
 
     train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
     test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
+
     # %%
 
     if torch.cuda.is_available():
@@ -125,8 +139,31 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
     else:
         device = torch.device('cpu')
 
-    model = get_model_class(model, num_of_classes=NUM_CLASSES).to(device)
-    optimizer = optim.SGD(model.parameters(), lr=LR, momentum=0.75)
+    model_class = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
+    parameter_grid = {}
+    parameter_grid["lr"] = LR
+    parameter_grid["weight_decay"] = WEIGHT_DECAY
+
+    if OPTIMIZER == "SGD":
+        parameter_grid['dampening'] = float(params[model]['DAMPENING'])
+        parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
+        optimizer = optim.SGD(model_class.parameters(), **parameter_grid)  
+    else:
+        parameter_grid['eps'] = float(params[model]['EPS'])
+        if OPTIMIZER == "Adam":
+            parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+            optimizer = optim.Adam(model_class.parameters(), **parameter_grid)
+        elif OPTIMIZER == "AdamW":
+            parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+            optimizer = optim.AdamW(model_class.parameters(), **parameter_grid)
+        elif OPTIMIZER == "AdaGrad":
+            parameter_grid['lr_decay'] = float(params[model]['LR_DECAY'])
+            optimizer = optim.Adagrad(model_class.parameters(), **parameter_grid)
+        elif OPTIMIZER == "RMSprop":
+            parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
+            parameter_grid['alpha'] = float(params[model]['ALPHA'])
+            optimizer = optim.RMSprop(model_class.parameters(), **parameter_grid)
+
     loss_function = torch.nn.CrossEntropyLoss()
 
     # %%
@@ -152,8 +189,11 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
             optimizer.zero_grad()
 
-            output = model(data)
-
+            output = model_class(data)
+            
+            if len(output) == 2:
+                output = output.logits
+                
             train_loss = loss_function(output, target)
             train_loss.backward()
             optimizer.step()
@@ -167,7 +207,7 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
             if batch_num == len(train_plant_dataloader) - 1:
                 logger.info('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' % 
-                    (epoch, batch_num + 1, len(train_plant_dataloader), train_loss / (batch_num + 1), 
+                    (epoch, batch_num + 1, len(train_plant_dataloader), total_train_loss / (batch_num + 1), 
                     100. * train_correct / total, train_correct, total))
 
 
@@ -176,8 +216,8 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
         training_accuracies.append((100. * train_correct / total))
 
     # Calculate train loss and accuracy as an average of the last min(5, N_EPOCHS) losses or accuracies
-    train_loss = statistics.mean(training_losses[min(-N_EPOCHS, -5):])
-    train_accuracy = statistics.mean(training_accuracies[min(-N_EPOCHS, -5):])
+    train_loss = statistics.mean(training_losses[-min(N_EPOCHS, 5):])
+    train_accuracy = statistics.mean(training_accuracies[-min(N_EPOCHS, 5):])
 
     logger.info("Final training score: Loss: %.4f, Accuracy: %.3f%%" % (train_loss, train_accuracy))
 
@@ -214,7 +254,11 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             if binary:
                 target = target.eq(3).type(torch.int64)
 
-            output = model(data)
+            output = model_class(data)
+            
+            if len(output) == 2:
+                output = output.logits
+
             test_loss += loss_function(output, target).item()
 
             pred = output.max(1, keepdim=True)[1]
@@ -235,6 +279,8 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
     logger.info("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, test_accuracy))
 
+    # TODO detect labels automatically
+
     if binary:
         labels = ['Non-VD', 'VD']
     else:
@@ -247,27 +293,13 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
     recall = cf_report['weighted avg']['recall']
     f1_score = cf_report['weighted avg']['f1-score']
 
-    # Build confusion matrix
-    cf_matrix = confusion_matrix(y_true, y_pred)
-
-    df_cm = pd.DataFrame(
-        cf_matrix/np.sum(cf_matrix), 
-        index = [i for i in labels],
-        columns = [i for i in labels]
-    )
-    plt.figure(figsize = (12,7))
-
-    # TODO: make seaborn to use PyQT5
-
-    sn.heatmap(df_cm, annot=True)
-
     if save:
-        logger.info("Saving to model")
+        logger.info("Saving the model")
         
         # TODO: store hyperparams to other_json
         
-        store_model_and_add_info_to_df(
-            model = model, 
+        model_id = store_model_and_add_info_to_df(
+            model = model_class, 
             description = "",
             dataset = dataset,
             num_classes = NUM_CLASSES,
@@ -282,7 +314,8 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             f1_score = f1_score,
             other_json = None,
         )
-
+        
+        logger.info(f"Model saved with id {model_id}")
 
 if __name__ == "__main__":
     train()

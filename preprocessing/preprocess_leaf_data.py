@@ -77,10 +77,28 @@ def process_and_segment_leaves():
 
     leaves_segmented = leaves_segmented.apply(pd.Series.explode).reset_index()
 
+    # %% Add categorical variables
+
+    leaves_segmented['Label Category'] = pd.Categorical(leaves_segmented['Condition'])
+    leaves_segmented['Label'] = leaves_segmented['Label Category'].cat.codes
+
+    # %% Drop NaN column
+
+    leaves_segmented.dropna(axis="index", inplace=True)
+
+    # %% Rename columns
+
+    leaves_segmented.rename(columns={
+        "segmented_masked_image_path": "Split masked image path",
+        "segmented_original_image_path": "Split original image path"
+    }, inplace=True)
+
     # %%
-    file_name = "leaves_segmented.csv"
+
+    file_name = "leaves_segmented_master.csv"
     file_path = os.path.join(DATA_FOLDER, file_name)
-    leaves_segmented.to_csv(file_path)
+    leaves_segmented.to_csv(file_path, index=False)
+
 
 def preprocess_leaf_data(excel_path, output_path = None):
     DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
