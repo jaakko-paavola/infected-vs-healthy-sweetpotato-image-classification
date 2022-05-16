@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import pandas as pd
 from typing import Tuple, List
 import logging
+from pathlib import Path
 # %%
 
 load_dotenv()
@@ -75,9 +76,8 @@ def find_contours(img):
 def segment_plant(masked_image_path: str, original_image_path: str, output_path: str) -> Tuple[List[str], List[str]]:
     """Segment plant image to multiple segmented masked and segmented un-masked images"""
     
-    # TODO: regex matches \ character for filename that is used in Windows paths
-    masked_filename = re.findall(r'[^\/]+(?=\.)', masked_image_path)[0]
-    original_filename = re.findall(r'[^\/]+(?=\.)', original_image_path)[0]
+    masked_filename = Path(masked_image_path).stem
+    original_filename = Path(original_image_path).stem
     
     masked_filetype = os.path.splitext(masked_image_path)[1]
     original_filetype = os.path.splitext(original_image_path)[1]

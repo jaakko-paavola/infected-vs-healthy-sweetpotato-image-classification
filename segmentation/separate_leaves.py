@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import os
 import re
+from pathlib import Path
 
 #%%
 def find_contours(img):
@@ -67,18 +68,19 @@ def cut(img, bounding_boxes, is_masked=True):
     
 
 def write(segments, path, img_original, output_path):
-    # TODO: regex matches \ character for filename that is used in Windows paths
-    filename = re.findall(r'[^\/]+(?=\.)', path)[0]
+    filename = Path(path).stem
     pathname = os.path.join(output_path, filename)
+    
+    original_filetype = os.path.splitext(path)[1]
+
 
     segmented_paths = []
     
     if not os.path.exists(pathname):
         os.makedirs(pathname)
     
-    # TODO: remove saving original image?
     # for now, save the original image in the same location as the segments, just for easy checking that the segmentation has gone right
-    cv2.imwrite(os.path.join(pathname, f"{filename}.png"), img_original)
+    cv2.imwrite(os.path.join(pathname, f"{filename}{original_filetype}"), img_original)
 
     for i, segment in enumerate(segments):
         segmented_path = os.path.join(pathname, f"{filename}_{i}.png")
