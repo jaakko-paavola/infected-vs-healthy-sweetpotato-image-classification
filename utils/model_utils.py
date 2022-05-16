@@ -1,3 +1,5 @@
+from operator import mod
+from xml.parsers.expat import model
 from dotenv import load_dotenv
 import os
 import time
@@ -196,7 +198,7 @@ def store_model_and_add_info_to_df(model, **kwargs):
 		id, model_name, timestamp = save_sklearn_model(model)
 
 	add_model_info_to_df(id=id, model_name=model_name, timestamp=timestamp, **kwargs)
- 
+
 	return id
 
 	return id
@@ -274,3 +276,10 @@ def restore_object(id):
 	object_file_path =  os.path.join(OBJECTS_FOLDER, object_file_name)
 	restored_object = load(object_file_path)
 	return restored_object
+
+def get_image_size(model_name: str) -> int:
+	if model_name not in AVAILABLE_MODELS:
+		raise ValueError(f"Model name not recognized, available models: {AVAILABLE_MODELS}")
+
+	return MODEL_INFO[model_name]['image_size']
+
