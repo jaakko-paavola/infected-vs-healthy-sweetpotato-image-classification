@@ -1,5 +1,3 @@
-from operator import mod
-from xml.parsers.expat import model
 from dotenv import load_dotenv
 import os
 import time
