@@ -1,5 +1,7 @@
 import os
 import re
+from utils.path_utils import get_relative_path_to_data_folder
+
 
 def get_masked_plant_filename(masked_image_path, output_path, plant_index: int = None):
 
@@ -13,7 +15,9 @@ def get_masked_plant_filename(masked_image_path, output_path, plant_index: int =
   
   filepath = os.path.join(pathname, f"{masked_filename}_M{plant_index}{masked_filetype}")
   
-  return filepath
+  relative_path = get_relative_path_to_data_folder(filepath)
+  
+  return relative_path
 
 def get_original_plant_filename(original_image_path, output_path, plant_index: int = None):
   
@@ -27,4 +31,6 @@ def get_original_plant_filename(original_image_path, output_path, plant_index: i
   
   filepath = os.path.join(pathname, f"{original_filename}_O{plant_index}{original_filetype}")
   
-  return filepath
+  relative_path = get_relative_path_to_data_folder(filepath)
+
+  return relative_path

@@ -9,6 +9,7 @@ from segmentation.separate_leaves import segment as segment_leaves
 from segmentation.separate_to_plants import segment_plant
 from preprocessing.preprocess_leaf_data import preprocess_leaf_data
 from segmentation.segmentation_utils import get_masked_plant_filename, get_original_plant_filename
+from utils.path_utils import get_relative_path_to_data_folder
 from pprint import pprint
 
 logging.basicConfig()
@@ -113,33 +114,42 @@ def segment_plant_data(excel_path, output_path):
     return file_path, output_path
 
 def segment_leaf_data(excel_path, output_path):
-    # TODO: Fix this commented stuff to generate leaf_data.csv if parameter is a data folder
-    # logger.debug('Creating a CSV from the data')
-    # leaf_csv_path = preprocess_leaf_data(data_path)
-    # original_df = pd.read_csv(leaf_csv_path)
-
+    
     if output_path is None:
         output_path = DEFAULT_LEAF_OUTPUT_PATH
 
     original_df = pd.read_excel(excel_path)
 
+    # To check if segmentation produces a right number of images
+    segmented_image_value_counts = original_df['Masked image path'].value_counts()
+
     logger.debug('Creating a dataframe for segmented image data')
     segmented_df = pd.DataFrame(columns=['Genotype', 'Condition', 'Masked image path', 'Original image path'])
 
     logger.info('Segmenting leaf images')
+    
+    # Store masked_image_path : number of found plants pairs in the dict
+    image_path_to_plant_number_map = {}
+    falsely_segmented_images = set()
+
     for index, row in original_df.iterrows():
         original_image_path = os.path.join(DATA_FOLDER_PATH, row['Original image path'])
         masked_image_path = os.path.join(DATA_FOLDER_PATH, row['Masked image path'])
 
-        # TODO: remove data-folder path from the segmented path
-
         segmented_masked_paths, segmented_original_paths = segment_leaves(masked_image_path, original_image_path, output_path)
+        
+        if masked_image_path not in image_path_to_plant_number_map:
+            image_path_to_plant_number_map[masked_image_path] = len(segmented_masked_paths)
+
+        if image_path_to_plant_number_map[masked_image_path] != segmented_image_value_counts[row['Masked image path']]:
+            falsely_segmented_images.add(masked_image_path)
+        
         for i in range(len(segmented_masked_paths)):
             segmented_row = pd.DataFrame(data = {
                 'Genotype': [row['Genotype']],
                 'Condition': [row['Condition']],
-                'Masked image path': [segmented_masked_paths[i]],
-                'Original image path': [segmented_original_paths[i]],
+                'Masked image path': [get_relative_path_to_data_folder(segmented_masked_paths[i])],
+                'Original image path': [get_relative_path_to_data_folder(segmented_original_paths[i])],
             })
             segmented_df = pd.concat([segmented_df, segmented_row], ignore_index=True)
 
@@ -149,6 +159,9 @@ def segment_leaf_data(excel_path, output_path):
     file_path = os.path.join(output_path, file_name)
     logger.debug(f'Writing segmentation results to {file_path}')
     segmented_df.to_csv(file_path, index=False)
+    
+    print(f"Incorrectly segmented folders:")
+    pprint(list(falsely_segmented_images))
 
     return file_path, output_path
 
