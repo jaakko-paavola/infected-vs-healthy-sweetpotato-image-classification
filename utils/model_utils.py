@@ -1,8 +1,5 @@
-from operator import mod
-from xml.parsers.expat import model
 from dotenv import load_dotenv
 import os
-import time
 from utils.time_utils import now_to_str, str_to_datetime, datetime_to_str
 from torch import nn
 from pathlib import Path
@@ -35,12 +32,12 @@ MODEL_INFO = {
 	"resnet18": {
 		"image_size": (256, 256)
 	},
- "inception_v3": {
-	 	"image_size": (299, 299)
- },
- "vision_transformer": {
+	"inception_v3": {
+		"image_size": (299, 299)
+	},
+	"vision_transformer": {
 		"image_size": (256, 256)
- }
+	}
 }
 
 
