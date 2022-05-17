@@ -1,4 +1,6 @@
+from typing import Union
 from torch import nn
+from models.bag_of_words import BagOfWords
 from models.resnet import resnet18
 from models.inception import inception3
 from models.vision_transformer import VisionTransformer, vision_transformer
@@ -17,7 +19,7 @@ DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
-def get_model_class(name: str, num_of_classes: int, **kwargs) -> nn.Module:
+def get_model_class(name: str, num_of_classes: int, **kwargs) -> Union[nn.Module, BagOfWords]:
 
   if name not in AVAILABLE_MODELS:
     raise ValueError(f"Model type not supported, available models: {AVAILABLE_MODELS}")
@@ -29,6 +31,8 @@ def get_model_class(name: str, num_of_classes: int, **kwargs) -> nn.Module:
     return vision_transformer(num_classes=num_of_classes, **kwargs)
   elif name == 'inception_v3':
     return inception3(num_classes=num_of_classes)
+  elif name == 'bag_of_words':
+    return BagOfWords(DATA_FOLDER, num_classes=num_of_classes)
 
 
 def get_trained_model_by_id(id: str) -> nn.Module:
@@ -87,7 +91,7 @@ def get_trained_model(name: str, latest: bool = True, timestamp: str = None) -> 
     model_weight_path = os.path.join(MODEL_FOLDER, latest_model)
 
   else:
-    
+
     model_id = None
     timestamp_model = None
 
@@ -111,16 +115,3 @@ def get_trained_model(name: str, latest: bool = True, timestamp: str = None) -> 
   model_class.eval()
 
   return model_class
-
-
-
-  
-
-    
-
-
-
-    
-
-    
-

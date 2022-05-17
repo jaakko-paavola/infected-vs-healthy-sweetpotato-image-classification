@@ -75,26 +75,26 @@ def find_contours(img):
 
 def segment_plant(masked_image_path: str, original_image_path: str, output_path: str) -> Tuple[List[str], List[str]]:
     """Segment plant image to multiple segmented masked and segmented un-masked images"""
-    
+
     masked_filename = Path(masked_image_path).stem
     original_filename = Path(original_image_path).stem
-    
+
     masked_filetype = os.path.splitext(masked_image_path)[1]
     original_filetype = os.path.splitext(original_image_path)[1]
-    
+
     pathname = os.path.join(output_path, masked_filename)
 
     logger.info(f"Segmenting file {masked_filename}")
-    
+
     masked_segmented_paths = []
     original_segmented_paths = []
-    
+
     if not os.path.exists(pathname):
         os.makedirs(pathname)
 
     masked_image = cv2.imread(masked_image_path)
     original_image = cv2.imread(original_image_path)
-    
+
     cnts = find_contours(masked_image)
     sorted_cnts = sorted(cnts, key=cmp_to_key(contour_sort))
     for contour_index, c in enumerate(sorted_cnts):
@@ -107,8 +107,8 @@ def segment_plant(masked_image_path: str, original_image_path: str, output_path:
         plant_mask = mask_plant_parts(ROI_masked, return_only_mask=True)
         single_plant_masked = cv2.bitwise_and(ROI_masked, ROI_masked, mask=plant_mask).copy()
         single_plant_original = cv2.bitwise_and(ROI_original, ROI_original, mask=plant_mask).copy()
-        
-        # Write masked single plant 
+
+        # Write masked single plant
         masked_segmented_path = os.path.join(pathname, f"{masked_filename}_M{contour_index}{masked_filetype}")
         masked_segmented_paths.append(masked_segmented_path)
         cv2.imwrite(masked_segmented_path, single_plant_masked)
@@ -120,7 +120,7 @@ def segment_plant(masked_image_path: str, original_image_path: str, output_path:
 
 
     # for now, save the original image in the same location as the segments, just for easy checking that the segmentation has gone right
-    cv2.imwrite(os.path.join(pathname, f"{masked_filename}{masked_filetype}"), masked_image)        
+    cv2.imwrite(os.path.join(pathname, f"{masked_filename}{masked_filetype}"), masked_image)
     cv2.imwrite(os.path.join(pathname, f"{original_filename}{original_filetype}"), original_image)
 
     return masked_segmented_paths, original_segmented_paths
@@ -162,7 +162,7 @@ def test_segmentation():
 
             # Write the split plant in a file
             cv2.imwrite(f'{output_path_for_separated_plants}/{subfolder_name}/plant_index_{idx2+1}.png', result)
-        
+
     # %%
 
     gc_df = pd.read_csv(os.path.join(DATA_FOLDER_PATH, 'growth_chamber_plant_data.csv'))

@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 import os
+import time
+from models.bag_of_words import BagOfWords
 from utils.time_utils import now_to_str, str_to_datetime, datetime_to_str
 from torch import nn
 from pathlib import Path
@@ -12,20 +14,23 @@ from datetime import datetime
 import torch
 from functools import reduce
 from operator import and_
+from joblib import dump, load
 
 load_dotenv()
 
 DATA_FOLDER = os.getenv("DATA_FOLDER_PATH")
 MODEL_FOLDER = os.path.join(DATA_FOLDER, "models")
+OBJECTS_FOLDER = os.path.join(MODEL_FOLDER, "objects")
 
 MODEL_DF = pd.read_csv(os.path.join(DATA_FOLDER, "models.csv"))
 
-AVAILABLE_MODELS = ["resnet18", "inception_v3", "vision_transformer"]
+AVAILABLE_MODELS = ["resnet18", "inception_v3", "vision_transformer", "bag_of_words"]
 
 CLASS_TO_MODEL_NAME_MAPPING = {
 	"ResNet": "resnet18",
 	"Inception3": "inception_v3",
 	"VisionTransformer": "vision_transformer",
+	"BagOfWords": "bag_of_words",
 }
 
 MODEL_INFO = {
@@ -48,7 +53,11 @@ def get_model_file_name(id: str, model_name: str, timestamp: str) -> str:
 	if type(model_name) != str:
 		raise ValueError("Model name must be string")
 
-	model_file_name = f"{id}-{model_name}-{timestamp}.pt"
+	if model_name == 'bag_of_words':
+		model_file_name = f"{id}-{model_name}-{timestamp}.joblib"
+	else:
+		model_file_name = f"{id}-{model_name}-{timestamp}.pt"
+
 	return model_file_name
 
 
@@ -103,6 +112,20 @@ def save_torch_model(model: nn.Module) -> Tuple[str, str, datetime]:
 
 	return id, model_name, timestamp
 
+def save_sklearn_model(model) -> Tuple[str, str, datetime]:
+	model_name = "bag_of_words"
+
+	id, timestamp = create_model_id_and_timestamp()
+	timestamp_str = datetime_to_str(timestamp)
+
+	model_file_name = get_model_file_name(
+		id=id, model_name=model_name, timestamp=timestamp_str
+	)
+	model_file_path = os.path.join(MODEL_FOLDER, model_file_name)
+
+	dump(model, model_file_path)
+
+	return id, model_name, timestamp
 
 def add_model_info_to_df(
 	id: str,
@@ -169,14 +192,11 @@ def store_model_and_add_info_to_df(model, **kwargs):
 	if issubclass(type(model), nn.Module):
 		id, model_name, timestamp = save_torch_model(model)
 	else:
-		raise NotImplementedError(
-			"Support for sklearn models has not been implemented yet"
-		)
+		id, model_name, timestamp = save_sklearn_model(model)
 
 	add_model_info_to_df(id=id, model_name=model_name, timestamp=timestamp, **kwargs)
- 
-	return id
 
+	return id
 
 def get_model_info(id: str) -> pd.Series:
 	row = MODEL_DF.loc[MODEL_DF["id"] == id]
@@ -224,6 +244,29 @@ def get_model_path(id: str) -> str:
 def get_image_size(model_name: str) -> int:
 	if model_name not in AVAILABLE_MODELS:
 		raise ValueError(f"Model name not recognized, available models: {AVAILABLE_MODELS}")
-  
+
 	return MODEL_INFO[model_name]['image_size']
-  
+
+def get_other_json(id):
+	row = MODEL_DF.loc[MODEL_DF['id'] == id]
+	other_json = json.loads(row['other_json'].item())
+	return other_json
+
+def store_object(to_be_stored):
+	id = "".join(
+		random.choice(string.ascii_lowercase + string.digits) for i in range(8)
+	)
+
+	if not os.path.exists(OBJECTS_FOLDER):
+		os.makedirs(OBJECTS_FOLDER)
+
+	object_file_name = f"{id}.joblib"
+	object_file_path = os.path.join(OBJECTS_FOLDER, object_file_name)
+	dump(to_be_stored, object_file_path)
+	return id
+
+def restore_object(id):
+	object_file_name = f"{id}.joblib"
+	object_file_path =  os.path.join(OBJECTS_FOLDER, object_file_name)
+	restored_object = load(object_file_path)
+	return restored_object
