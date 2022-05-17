@@ -87,10 +87,6 @@ def predict(input, identifier, model, num_classes, dataset, verbose):
     probabilities = BagOfWords.predict_single_image(image, model, feature_detection, k, voc, stdslr)
 
     results = dict(zip(LABELS, probabilities))
-
-    print(results)
-
-    return results
   else:
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -123,7 +119,10 @@ def predict(input, identifier, model, num_classes, dataset, verbose):
     print(results)
 
     return results
-
+Put the repeating rows that are common for both BoW and NN's outside the if-else:
+    results = dict(zip(LABELS, probabilities))
+    print(results)
+    return results
 
 if __name__ == "__main__":
     predict()
