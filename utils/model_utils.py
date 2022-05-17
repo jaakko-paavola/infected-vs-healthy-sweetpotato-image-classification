@@ -38,7 +38,7 @@ MODEL_INFO = {
 	"vision_transformer": {
 		"image_size": (256, 256)
 	},
- "bag_of_words": {
+	"bag_of_words": {
 		"image_size": (256, 256)
 	}
 }
