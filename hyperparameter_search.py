@@ -1,5 +1,6 @@
 # %%
 import os
+from time import time, strftime, gmtime
 import click
 from sklearn.metrics import f1_score
 from torch.utils.data import DataLoader
@@ -17,7 +18,7 @@ import optuna
 from pytorchtools import EarlyStopping
 import warnings
 import logging
-from utils.model_utils import AVAILABLE_MODELS
+from utils.model_utils import AVAILABLE_MODELS, save_dataset_of_torch_model
 from dataloaders.dataset_stats import get_normalization_mean_std
 
 logging.basicConfig()
@@ -360,7 +361,7 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
         data_transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Pad(50),
-            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.Resize((299, 299)) if MODEL_NAME == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ])
@@ -394,6 +395,10 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
+
+    model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES).to(device)
+    id, model_name, timestamp = save_dataset_of_torch_model(model_class, test_dataset, "test_dataset")
+
     study = optuna.create_study(direction='minimize')
     study.optimize(func=lambda trial: objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE),\
@@ -401,12 +406,15 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
 
     ## TODO: how to save n best models/hyperparameter configurations, how to save the unseen test dataset,
     ## which can then be used in train.py to evaluate the model.
-    # study.trials_dataframe()
-    # study.best_trial
-    # study.best_params
-    # study.best_trials
-    # torch.save(test_dataset, f"{MODEL_NAME}_test_dataset_with_train+valid_best_value_{study.best_value}.pt") 
-    # torch.save(model.state_dict(), f'{MODEL_NAME}_weights_with_train+valid_best_value_{study.best_value}.pt')
+    df = study.trials_dataframe()
+    df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
+
+    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_at_{timestamp}.csv')
+    with open(filename, "w") as f:
+        f.write(f"{id}-{model_name}-{timestamp}\n")
+
+    df.to_csv(filename, mode='a', header=False)
 
 if __name__ == "__main__":
     search_hyperparameters()

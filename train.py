@@ -1,6 +1,6 @@
 # %%
 import os
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 from dataloaders.csv_data_loader import CSVDataLoader
 from dataloaders.gaussian_noise import GaussianNoise
 from dotenv import load_dotenv
@@ -15,13 +15,14 @@ import numpy as np
 import click
 import statistics
 from models.model_factory import get_model_class
-from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df
+from utils.model_utils import AVAILABLE_MODELS, load_dataset_of_torch_model, store_model_and_add_info_to_df
 import logging
 from tqdm import tqdm
 import yaml
 from dataloaders.dataset_stats import get_normalization_mean_std
+from torch.utils.data._utils.collate import default_collate, default_convert
 
-logging.basicConfig() 
+logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -42,6 +43,9 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 def train(model, dataset, data_csv, binary, params_file, augmentation, save, verbose):
+
+    MODEL_NAME = model
+
     if verbose:
         logger.setLevel(logging.DEBUG)
 
@@ -57,7 +61,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "leaves_segmented_master.csv")
         elif dataset == 'plant_golden':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_golden.csv")
-        else:             
+        else:
             raise ValueError(f"Dataset {dataset} not defined. Accepted values: plant, plant_golden, leaf")
 
         mean, std = get_normalization_mean_std(dataset=dataset)
@@ -81,12 +85,12 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
     # hyperparameters:
     # TODO: the final form of hyperparameters.yaml
-    N_EPOCHS = int(params[model]['N_EPOCHS'])
-    BATCH_SIZE_TRAIN = int(params[model]['BATCH_SIZE_TRAIN'])
-    BATCH_SIZE_TEST = int(params[model]['BATCH_SIZE_TEST'])
-    OPTIMIZER = params[model]['OPTIMIZER']
-    LR = float(params[model]['LR'])
-    WEIGHT_DECAY = float(params[model]['WEIGHT_DECAY'])
+    N_EPOCHS = int(params[MODEL_NAME]['N_EPOCHS'])
+    BATCH_SIZE_TRAIN = int(params[MODEL_NAME]['BATCH_SIZE_TRAIN'])
+    BATCH_SIZE_TEST = int(params[MODEL_NAME]['BATCH_SIZE_TEST'])
+    OPTIMIZER = params[MODEL_NAME]['OPTIMIZER']
+    LR = float(params[MODEL_NAME]['LR'])
+    WEIGHT_DECAY = float(params[MODEL_NAME]['WEIGHT_DECAY'])
 
     if augmentation:
         data_transform = transforms.Compose([
@@ -94,7 +98,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             transforms.Pad(50),
             transforms.RandomRotation(180),
             transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
-            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.Resize((299, 299)) if MODEL_NAME == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
             # GaussianNoise(0., 0.1), # Should be commented out due to adverse effect?
@@ -103,7 +107,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
         data_transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Pad(50),
-            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.Resize((299, 299)) if MODEL_NAME == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ])
@@ -115,15 +119,6 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
         label_col="Label",
         transform=data_transform
     )
-
-    train_size = int(0.85 * len(master_dataset))
-    test_size = len(master_dataset) - train_size
-
-    train_dataset, test_dataset = torch.utils.data.random_split(master_dataset, [train_size, test_size])
-
-    train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
-    test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
-
     # %%
 
     if torch.cuda.is_available():
@@ -131,29 +126,59 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
     else:
         device = torch.device('cpu')
 
-    model_class = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
+    # %%
+    # train_plant_dataloader = torch.utils.data.DataLoader(master_dataset, collate_fn=default_collate)
+    
+    # Put the all the data from the master_dataset to a Pandas dataframe
+    image_column = pd.Series([master_dataset.__getitem__(i)['image'].numpy() for i in range(master_dataset.__len__())])
+    label_column = pd.Series([master_dataset.__getitem__(i)['label'].numpy() for i in range(master_dataset.__len__())])
+    master_dataset_df = pd.DataFrame({"image": image_column, "label": label_column})
+
+    # Load the hold-out test set that was reserved for this model during hyperparameter search...
+    test_dataset_array = load_dataset_of_torch_model(params[MODEL_NAME]['HYPERPARAM_SEARCH_ID'], "test_dataset")
+    # ... and convert to a Pandas dataframe
+    image_column = pd.Series([i['image'].numpy() for i in test_dataset_array])
+    label_column = pd.Series([i['label'].numpy() for i in test_dataset_array])
+    test_dataset_df = pd.DataFrame({"image": image_column, "label": label_column})
+
+    # Exclude the test dataset from the training dataset
+    train_dataset_df = master_dataset_df[~master_dataset_df.index.isin(test_dataset_df.index)]
+
+   # Make a dataloader for the train dataset
+    train_dataset_image = torch.tensor(train_dataset_df['image'].values.astype(np.float32)).to(device)
+    train_dataset_label = torch.tensor(train_dataset_df['label'].values.astype(np.float32)).to(device)
+    train_dataset = TensorDataset(train_dataset_image, train_dataset_label)
+    train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
+
+    # Make a dataloader for the test dataset
+    test_dataset_image = torch.tensor(test_dataset_df['image'].values.astype(np.float32)).to(device)
+    test_dataset_label = torch.tensor(test_dataset_df['label'].values.astype(np.float32)).to(device)
+    test_dataset = TensorDataset(test_dataset_image, test_dataset_label)
+    test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
+
+    model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES, num_heads=params[MODEL_NAME]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
     parameter_grid = {}
     parameter_grid["lr"] = LR
     parameter_grid["weight_decay"] = WEIGHT_DECAY
 
     if OPTIMIZER == "SGD":
-        parameter_grid['dampening'] = float(params[model]['DAMPENING'])
-        parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
-        optimizer = optim.SGD(model_class.parameters(), **parameter_grid)  
+        parameter_grid['dampening'] = float(params[MODEL_NAME]['DAMPENING'])
+        parameter_grid['momentum'] = float(params[MODEL_NAME]['MOMENTUM'])
+        optimizer = optim.SGD(model_class.parameters(), **parameter_grid)
     else:
-        parameter_grid['eps'] = float(params[model]['EPS'])
+        parameter_grid['eps'] = float(params[MODEL_NAME]['EPS'])
         if OPTIMIZER == "Adam":
-            parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+            parameter_grid['betas'] = tuple(float(x) for x in params[MODEL_NAME]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
             optimizer = optim.Adam(model_class.parameters(), **parameter_grid)
         elif OPTIMIZER == "AdamW":
-            parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+            parameter_grid['betas'] = tuple(float(x) for x in params[MODEL_NAME]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
             optimizer = optim.AdamW(model_class.parameters(), **parameter_grid)
         elif OPTIMIZER == "AdaGrad":
-            parameter_grid['lr_decay'] = float(params[model]['LR_DECAY'])
+            parameter_grid['lr_decay'] = float(params[MODEL_NAME]['LR_DECAY'])
             optimizer = optim.Adagrad(model_class.parameters(), **parameter_grid)
         elif OPTIMIZER == "RMSprop":
-            parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
-            parameter_grid['alpha'] = float(params[model]['ALPHA'])
+            parameter_grid['momentum'] = float(params[MODEL_NAME]['MOMENTUM'])
+            parameter_grid['alpha'] = float(params[MODEL_NAME]['ALPHA'])
             optimizer = optim.RMSprop(model_class.parameters(), **parameter_grid)
 
     loss_function = torch.nn.CrossEntropyLoss()
@@ -182,14 +207,14 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             optimizer.zero_grad()
 
             output = model_class(data)
-            
+
             if len(output) == 2:
                 output = output.logits
-                
+
             train_loss = loss_function(output, target)
             train_loss.backward()
             optimizer.step()
-            
+
             pred = output.max(1, keepdim=True)[1]
 
             correct = pred.eq(target.view_as(pred)).sum().item()
@@ -198,13 +223,13 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             total_train_loss += train_loss.item()
 
             if batch_num == len(train_plant_dataloader) - 1:
-                logger.info('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' % 
-                    (epoch, batch_num + 1, len(train_plant_dataloader), total_train_loss / (batch_num + 1), 
+                logger.info('Training: Epoch %d - Batch %d/%d: Loss: %.4f | Train Acc: %.3f%% (%d/%d)' %
+                    (epoch, batch_num + 1, len(train_plant_dataloader), total_train_loss / (batch_num + 1),
                     100. * train_correct / total, train_correct, total))
 
 
         # Training loss average for all batches
-        training_losses.append(total_train_loss / len(train_plant_dataloader))        
+        training_losses.append(total_train_loss / len(train_plant_dataloader))
         training_accuracies.append((100. * train_correct / total))
 
     # Calculate train loss and accuracy as an average of the last min(5, N_EPOCHS) losses or accuracies
@@ -247,7 +272,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
                 target = target.eq(3).type(torch.int64)
 
             output = model_class(data)
-            
+
             if len(output) == 2:
                 output = output.logits
 
@@ -263,7 +288,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
             pred_list = torch.flatten(pred).cpu().numpy()
             y_pred.extend(pred_list)
-            
+
             target_list = target.cpu().numpy()
             y_true.extend(target_list)
 
@@ -287,11 +312,11 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
     if save:
         logger.info("Saving the model")
-        
+
         # TODO: store hyperparams to other_json
-        
+
         model_id = store_model_and_add_info_to_df(
-            model = model_class, 
+            model = model_class,
             description = "",
             dataset = dataset,
             num_classes = NUM_CLASSES,
@@ -306,7 +331,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             f1_score = f1_score,
             other_json = None,
         )
-        
+
         logger.info(f"Model saved with id {model_id}")
 
 if __name__ == "__main__":
