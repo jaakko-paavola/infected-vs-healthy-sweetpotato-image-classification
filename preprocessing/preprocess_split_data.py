@@ -10,11 +10,6 @@ import cv2
 def preprocess_split_data():
     # %%
 
-    pd.set_option('display.max_rows', 100)
-    pd.set_option('display.max_columns', 30)
-    pd.options.display.max_colwidth = 100
-    # %%
-
     load_dotenv()
 
     # %%
@@ -30,11 +25,9 @@ def preprocess_split_data():
     # %%
 
     plant_df_split = plant_df_split[["Trial", "Dataset", "Genotype", "Condition", "Original image path", "Masked image path", "Split masked image path"]]
-    plant_df_split
     # %%
 
     growth_plant_df_split = growth_plant_df_split[["Trial", "Dataset", "Genotype", "Condition", "Original image path", "Masked image path", "Split masked image path"]]
-    growth_plant_df_split
 
     # %%
 
@@ -46,15 +39,11 @@ def preprocess_split_data():
     # %%
 
     plant_df_split_master = pd.concat([plant_df_split, growth_plant_df_split])
+
     # %%
 
-    plant_df_split_master
-    # %%
-
-    plant_df_split_master['Label Category'] = pd.Categorical(plant_df_split_master['Condition'])
     plant_df_split_master['Label Category'] = pd.Categorical(plant_df_split_master['Condition'])
     plant_df_split_master['Label'] = plant_df_split_master['Label Category'].cat.codes
-    plant_df_split_master
 
     # %%
 
@@ -68,7 +57,6 @@ def preprocess_split_data():
 # %%
 
 def condition_to_label(df):
-    df['Label Category'] = pd.Categorical(df['Condition'])
     df['Label Category'] = pd.Categorical(df['Condition'])
     df['Label'] = df['Label Category'].cat.codes
     return df
