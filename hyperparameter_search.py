@@ -298,6 +298,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 @click.command()
 @click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
 @click.option('-e', '--no_of_epochs', type=int, default=20, help='Number of epochs in training loop.')
+@click.option('-es', '--early_stopping_counter', type=int, help='Number of consequtive epochs with no improvement in loss until trial is stopped. Default: ~one third of no of epochs.')
 @click.option('-t', '--no_of_trials', type=int, default=50, help='Number of hyperparamter search trials in training loop.')
 @click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
@@ -305,9 +306,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 @click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
-def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose):
-
-    MODEL_NAME = model
+@click.option('-o', '--optimizers', type=str, default='adam,adamw', help='Which optimizer algorithms to include in the hyperparameter search. Give a comma-separated list of optimizers, e.g.: adam,adamw,rmsprop,sgd,adagrad.  Default: adam,adamw')
+def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose, OPTIMIZERS):
 
     if verbose:
         logger.setLevel(logging.DEBUG)
@@ -330,22 +330,23 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
         DATA_MASTER_PATH = data_csv
         mean, std = get_normalization_mean_std(datasheet=data_csv)
 
-
     # TODO: automatize label counting from dataframe
     if binary:
         NUM_CLASSES = 2
     else:
         NUM_CLASSES = 4
 
-
     N_EPOCHS = no_of_epochs
     N_TRIALS = no_of_trials # Number of trials for hyperparameter optimization
     BATCH_SIZE_TRAIN = 64
     BATCH_SIZE_VALID = 64
-    BATCH_SIZE_TEST = 64
     FLAG_EARLYSTOPPING = True # Set to True to enable early stopping
-    EARLYSTOPPING_PATIENCE = N_EPOCHS//3 # Let early stopping patience (i.e. the number of consequtive epochs with no decrease in training loss) be a third (rounded down) of the number of epochs
+    if early_stopping_counter:
+        EARLYSTOPPING_PATIENCE = early_stopping_counter
+    else:
+        EARLYSTOPPING_PATIENCE = N_EPOCHS//3 # By default early stopping patience (i.e. the number of consequtive epochs with no decrease in training loss) is a third (rounded down) of the number of epochs
 
+    MODEL_NAME = model
     if augmentation:
         data_transform = transforms.Compose([
             transforms.ToPILImage(),
@@ -355,7 +356,6 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
             transforms.Resize((299, 299)) if MODEL_NAME == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
-            # GaussianNoise(0., 0.1),
         ])
     else:
         data_transform = transforms.Compose([
@@ -366,13 +366,18 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
             transforms.Normalize(mean=mean, std=std)
         ])
 
-    ## TODO: selection of the optimizer space (possible via a commandline argument)
+    OPTIMIZERS = [x.strip() for x in OPTIMIZERS.split(',')]
     OPTIMIZER_SEARCH_SPACE = []
-    OPTIMIZER_SEARCH_SPACE.append("Adam")
-    OPTIMIZER_SEARCH_SPACE.append("AdamW")
-    # OPTIMIZER_SEARCH_SPACE.append("RMSprop")
-    # OPTIMIZER_SEARCH_SPACE.append("SGD")
-    # OPTIMIZER_SEARCH_SPACE.append("Adagrad")
+    if ("adam" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("Adam")
+    if ("adamw" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("AdamW")
+    if ("rmsprop" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("RMSprop")
+    if ("sgd" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("SGD")
+    if ("adagrad" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("Adagrad")
 
     plant_master_dataset = CSVDataLoader(
         csv_file=DATA_MASTER_PATH,
@@ -386,7 +391,8 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     val_size = (len(plant_master_dataset) - train_size)//2
     test_size = len(plant_master_dataset) - train_size - val_size
 
-    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, val_size, test_size])
+    # Use a given seed for the random split so that the test split data can be kept unseen during hyperparameter optimization, until the test is performed in train.py
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, val_size, test_size], generator=torch.Generator().manual_seed(42))
 
     train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
     val_plant_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE_VALID, shuffle=True, num_workers=0)
@@ -396,23 +402,22 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     else:
         device = torch.device('cpu')
 
-    model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES).to(device)
-    id, model_name, timestamp = save_dataset_of_torch_model(model_class, test_dataset, "test_dataset")
+    # Save the test dataset on disk:
+    # model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES).to(device)
+    # id, model_name, timestamp = save_dataset_of_torch_model(model_class, test_dataset, "test_dataset")
 
     study = optuna.create_study(direction='minimize')
     study.optimize(func=lambda trial: objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE),\
         n_trials=N_TRIALS)
 
-    ## TODO: how to save n best models/hyperparameter configurations, how to save the unseen test dataset,
-    ## which can then be used in train.py to evaluate the model.
     df = study.trials_dataframe()
     df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
 
     timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_at_{timestamp}.csv')
     with open(filename, "w") as f:
-        f.write(f"{id}-{model_name}-{timestamp}\n")
+        f.write(f"{id}-{MODEL_NAME}-{timestamp}\n")
 
     df.to_csv(filename, mode='a', header=False)
 

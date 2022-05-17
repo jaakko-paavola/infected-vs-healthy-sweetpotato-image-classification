@@ -127,34 +127,16 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
         device = torch.device('cpu')
 
     # %%
-    # train_plant_dataloader = torch.utils.data.DataLoader(master_dataset, collate_fn=default_collate)
-    
-    # Put the all the data from the master_dataset to a Pandas dataframe
-    image_column = pd.Series([master_dataset.__getitem__(i)['image'].numpy() for i in range(master_dataset.__len__())])
-    label_column = pd.Series([master_dataset.__getitem__(i)['label'].numpy() for i in range(master_dataset.__len__())])
-    master_dataset_df = pd.DataFrame({"image": image_column, "label": label_column})
+    train_size = int(0.80 * len(master_dataset))
+    val_size = (len(master_dataset) - train_size)//2
+    test_size = len(master_dataset) - train_size - val_size
 
-    # Load the hold-out test set that was reserved for this model during hyperparameter search...
-    test_dataset_array = load_dataset_of_torch_model(params[MODEL_NAME]['HYPERPARAM_SEARCH_ID'], "test_dataset")
-    # ... and convert to a Pandas dataframe
-    image_column = pd.Series([i['image'].numpy() for i in test_dataset_array])
-    label_column = pd.Series([i['label'].numpy() for i in test_dataset_array])
-    test_dataset_df = pd.DataFrame({"image": image_column, "label": label_column})
+    train_dataset, test_dataset = torch.utils.data.random_split(dataset=master_dataset,
+                                    lengths=[train_size + val_size, test_size],
+                                    generator=torch.Generator().manual_seed(42))
 
-    # Exclude the test dataset from the training dataset
-    train_dataset_df = master_dataset_df[~master_dataset_df.index.isin(test_dataset_df.index)]
-
-   # Make a dataloader for the train dataset
-    train_dataset_image = torch.tensor(train_dataset_df['image'].values.astype(np.float32)).to(device)
-    train_dataset_label = torch.tensor(train_dataset_df['label'].values.astype(np.float32)).to(device)
-    train_dataset = TensorDataset(train_dataset_image, train_dataset_label)
     train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
-
-    # Make a dataloader for the test dataset
-    test_dataset_image = torch.tensor(test_dataset_df['image'].values.astype(np.float32)).to(device)
-    test_dataset_label = torch.tensor(test_dataset_df['label'].values.astype(np.float32)).to(device)
-    test_dataset = TensorDataset(test_dataset_image, test_dataset_label)
-    test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
+    test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
 
     model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES, num_heads=params[MODEL_NAME]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
     parameter_grid = {}
