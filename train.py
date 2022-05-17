@@ -128,7 +128,7 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
     test_size = len(master_dataset) - train_size
 
     if model == 'bag_of_words':
-        model_class, y_true, y_pred, test_accuracy, test_loss, other_json = train_bow(master_dataset.df, test_size, NUM_CLASSES, params, save)
+        model_class, y_true, y_pred, test_accuracy, test_loss, other_json = train_bow(master_dataset.df, test_size, NUM_CLASSES, params, save, binary_label)
         train_accuracy = None
         train_loss = None
     else:
@@ -325,7 +325,7 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
         logger.info(f"Model saved with id {model_id}")
 
-def train_bow(df, test_size, num_classes, params, save):
+def train_bow(df, test_size, num_classes, params, save, binary_label):
     train_df, test_df = train_test_split(df, test_size=test_size)
 
     # hyperparameters
@@ -341,9 +341,9 @@ def train_bow(df, test_size, num_classes, params, save):
     bow = BagOfWords(DATA_FOLDER_PATH, num_classes, feature_detection, classifier)
 
     features, voc, standard_scaler = bow.detect_features(train_df, k)
-    clf = bow.fit(train_df, features, specific_params)
+    clf = bow.fit(train_df, features, binary_label, specific_params)
 
-    predicted_classes, accuracy, f1_score, loss = bow.predict(test_df, clf, k, voc, standard_scaler)
+    predicted_classes, accuracy, f1_score, loss = bow.predict(test_df, clf, k, voc, standard_scaler, binary_label)
 
     y_true = test_df['Label']
     y_pred = predicted_classes

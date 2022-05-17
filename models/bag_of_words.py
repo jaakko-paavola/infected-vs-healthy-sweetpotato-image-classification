@@ -13,6 +13,12 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# TODO: Use this earlier in training and predicting scripts for all models
+def to_binary(original_label, binary_label):
+    if original_label == binary_label: # VD or co-infected is 3 in both leaf and plant datasets
+        return 1
+    else:
+        return 0
 class BagOfWords:
     def __init__(self, data_folder_path, num_classes, feature_detection = 'SIFT', classifier = 'XGBoost', name = None):
         self.NUM_CLASSES = num_classes
@@ -78,7 +84,10 @@ class BagOfWords:
         # voc and fitted standard scaler needed for prediction
         return (img_features, voc, stdslr)
 
-    def fit(self, data, img_features, parameters={}):
+    def fit(self, data, img_features, binary_label, parameters={}):
+        if self.NUM_CLASSES == 2 and len(data['Label'].unique()) > 2:
+            data['Label'] = data['Label'].apply(lambda x: to_binary(x, binary_label))
+
         classifier = self.classifier
 
         if classifier == 'RandomForest':
@@ -100,7 +109,10 @@ class BagOfWords:
 
         return clf
 
-    def predict(self, data_test, classifier, k, voc, stdslr):
+    def predict(self, data_test, classifier, k, voc, stdslr, binary_label):
+        if self.NUM_CLASSES == 2 and len(data_test['Label'].unique()) > 2:
+            data_test['Label'] = data_test['Label'].apply(lambda x: to_binary(x, binary_label))
+
         feature_detection_algorithm = self.feature_detection
         if feature_detection_algorithm == 'SIFT':
             detector = cv2.SIFT_create()
