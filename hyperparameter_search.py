@@ -18,7 +18,7 @@ import optuna
 from pytorchtools import EarlyStopping
 import warnings
 import logging
-from utils.model_utils import AVAILABLE_MODELS, save_dataset_of_torch_model
+from utils.model_utils import AVAILABLE_MODELS, create_model_id_and_timestamp, save_dataset_of_torch_model
 from dataloaders.dataset_stats import get_normalization_mean_std
 
 logging.basicConfig()
@@ -307,7 +307,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 @click.option('-o', '--optimizers', type=str, default='adam,adamw', help='Which optimizer algorithms to include in the hyperparameter search. Give a comma-separated list of optimizers, e.g.: adam,adamw,rmsprop,sgd,adagrad.  Default: adam,adamw')
-def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose, OPTIMIZERS):
+def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose, optimizers):
 
     if verbose:
         logger.setLevel(logging.DEBUG)
@@ -366,7 +366,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
             transforms.Normalize(mean=mean, std=std)
         ])
 
-    OPTIMIZERS = [x.strip() for x in OPTIMIZERS.split(',')]
+    OPTIMIZERS = [x.strip() for x in optimizers.split(',')]
     OPTIMIZER_SEARCH_SPACE = []
     if ("adam" in OPTIMIZERS):
         OPTIMIZER_SEARCH_SPACE.append("Adam")
@@ -416,6 +416,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
 
     timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_at_{timestamp}.csv')
+    id, timestamp = create_model_id_and_timestamp()
     with open(filename, "w") as f:
         f.write(f"{id}-{MODEL_NAME}-{timestamp}\n")
 

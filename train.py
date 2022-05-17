@@ -20,7 +20,6 @@ import logging
 from tqdm import tqdm
 import yaml
 from dataloaders.dataset_stats import get_normalization_mean_std
-from torch.utils.data._utils.collate import default_collate, default_convert
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -84,7 +83,6 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             raise exc
 
     # hyperparameters:
-    # TODO: the final form of hyperparameters.yaml
     N_EPOCHS = int(params[MODEL_NAME]['N_EPOCHS'])
     BATCH_SIZE_TRAIN = int(params[MODEL_NAME]['BATCH_SIZE_TRAIN'])
     BATCH_SIZE_TEST = int(params[MODEL_NAME]['BATCH_SIZE_TEST'])
