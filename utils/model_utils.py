@@ -198,9 +198,6 @@ def store_model_and_add_info_to_df(model, **kwargs):
 
 	return id
 
-	return id
-
-
 def get_model_info(id: str) -> pd.Series:
 	row = MODEL_DF.loc[MODEL_DF["id"] == id]
 	return row
@@ -250,35 +247,6 @@ def get_image_size(model_name: str) -> int:
 
 	return MODEL_INFO[model_name]['image_size']
 
-def get_other_json(id):
-	row = MODEL_DF.loc[MODEL_DF['id'] == id]
-	other_json = json.loads(row['other_json'].item())
-	return other_json
-
-def store_object(to_be_stored):
-	id = "".join(
-		random.choice(string.ascii_lowercase + string.digits) for i in range(8)
-	)
-
-	if not os.path.exists(OBJECTS_FOLDER):
-		os.makedirs(OBJECTS_FOLDER)
-
-	object_file_name = f"{id}.joblib"
-	object_file_path = os.path.join(OBJECTS_FOLDER, object_file_name)
-	dump(to_be_stored, object_file_path)
-	return id
-
-def restore_object(id):
-	object_file_name = f"{id}.joblib"
-	object_file_path =  os.path.join(OBJECTS_FOLDER, object_file_name)
-	restored_object = load(object_file_path)
-	return restored_object
-
-def get_image_size(model_name: str) -> int:
-	if model_name not in AVAILABLE_MODELS:
-		raise ValueError(f"Model name not recognized, available models: {AVAILABLE_MODELS}")
-
-	return MODEL_INFO[model_name]['image_size']
 def get_other_json(id):
 	row = MODEL_DF.loc[MODEL_DF['id'] == id]
 	other_json = json.loads(row['other_json'].item())

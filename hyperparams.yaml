@@ -44,8 +44,8 @@ vision_transformer:
   NUM_HEADS: 8
   DROPOUT: 0.0
 bag_of_words:
-  FEATURE_DETECTION: 'SIFT'
-  CLASSIFIER: 'XGBoost'
+  FEATURE_DETECTION: 'SIFT' # SIFT is better for both plant and leaf data for both binary and multiclass
+  CLASSIFIER: 'XGBoost' # XGBoost is generally the best, but RandomForest seemed slightly better for multiclass classification on leaf data
   BINARY:
     SIFT:
       XGBoost: # accuracy ~0.91, f1 score ~0.91

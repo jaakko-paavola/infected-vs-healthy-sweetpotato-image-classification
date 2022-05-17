@@ -13,12 +13,6 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# TODO: Use this earlier in training and predicting scripts for all models
-def to_binary(original_label):
-    if original_label == 3:
-        return 1
-    else:
-        return 0
 class BagOfWords:
     def __init__(self, data_folder_path, num_classes, feature_detection = 'SIFT', classifier = 'XGBoost', name = None):
         self.NUM_CLASSES = num_classes
@@ -85,9 +79,6 @@ class BagOfWords:
         return (img_features, voc, stdslr)
 
     def fit(self, data, img_features, parameters={}):
-        if self.NUM_CLASSES == 2 and len(data['Label'].unique()) > 2:
-            data['Label'] = data['Label'].apply(lambda x: to_binary(x))
-
         classifier = self.classifier
 
         if classifier == 'RandomForest':
@@ -98,7 +89,7 @@ class BagOfWords:
             clf = xgb.XGBClassifier(learning_rate=parameters['LR'], gamma=parameters['GAMMA'], max_depth=parameters['MAX_DEPTH'], min_child_weight=parameters['MIN_CHILD_WEIGHT'], random_state=self.RANDOM_STATE)
         elif classifier == 'SVM':
             logger.info('Using SVM classifier')
-            clf = SVC(C=parameters['C'], kernel=parameters['KERNEL'], gamma=parameters['GAMMA'], random_state=self.RANDOM_STATE)
+            clf = SVC(C=parameters['C'], kernel=parameters['KERNEL'], gamma=parameters['GAMMA'], probability=True, random_state=self.RANDOM_STATE)
         elif classifier == 'LinearSVM':
             logger.info('Using LinearSVM classifier')
             clf = LinearSVC(random_state=self.RANDOM_STATE)
@@ -110,9 +101,6 @@ class BagOfWords:
         return clf
 
     def predict(self, data_test, classifier, k, voc, stdslr):
-        if self.NUM_CLASSES == 2 and len(data_test['Label'].unique()) > 2:
-            data_test['Label'] = data_test['Label'].apply(lambda x: to_binary(x))
-
         feature_detection_algorithm = self.feature_detection
         if feature_detection_algorithm == 'SIFT':
             detector = cv2.SIFT_create()
