@@ -1,5 +1,7 @@
 # %%
 import os
+from pathlib import Path
+from sklearn.preprocessing import binarize
 from torch.utils.data import DataLoader
 from dataloaders.csv_data_loader import CSVDataLoader
 from dataloaders.gaussian_noise import GaussianNoise
@@ -15,11 +17,12 @@ import numpy as np
 import click
 import statistics
 from models.model_factory import get_model_class
-from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df
+from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df, get_image_size
 import logging
 from tqdm import tqdm
 import yaml
 from dataloaders.dataset_stats import get_normalization_mean_std
+from dataloaders.dataset_labels import get_dataset_labels
 
 logging.basicConfig() 
 logger = logging.getLogger(__name__)
@@ -37,11 +40,13 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 @click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
+@click.option('-bl', '--binary-label', type=int, help='Binary label when dataset has more than two labels. Classification is done using one-vs-rest, where the binary label corresponds to the one compared to other labels.')
 @click.option('-p', '--params-file', type=str, default="hyperparams.yaml", help='Full file path to hyperparameter-file used during the training. File must be a YAMl file and similarly structured than hyperparams.yaml.')
-@click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
-@click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
+@click.option('-aug/-no-aug', '--augmentation/--no-augmentation', show_default=True, default=True, help='Use data-augmentation for the training.')
+@click.option('-s/-nos', '--save/--no-save', show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
-def train(model, dataset, data_csv, binary, params_file, augmentation, save, verbose):
+def train(model, dataset, data_csv, binary, binary_label, params_file, augmentation, save, verbose):
+    
     if verbose:
         logger.setLevel(logging.DEBUG)
 
@@ -59,18 +64,27 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_golden.csv")
         else:             
             raise ValueError(f"Dataset {dataset} not defined. Accepted values: plant, plant_golden, leaf")
-
+        
         mean, std = get_normalization_mean_std(dataset=dataset)
-    # TODO: give dataset name when using custom CSV for storing the model
     else:
         DATA_MASTER_PATH = data_csv
         mean, std = get_normalization_mean_std(datasheet=data_csv)
+        # To give the dataset name when storing the model
+        dataset = Path(data_csv).stem
 
-    # TODO: automatize label counting from dataframe
+    labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
+    
+    if binary and not binary_label and len(labels) > 2:
+        raise ValueError(f"You tried to do binary classification without binary label argument. You must give also binary-label (-bl or --binary-label) argument when using binary classification and the dataset contains more than two labels. We detected {len(labels)} number of labels.")
+    
     if binary:
         NUM_CLASSES = 2
+        
+        if len(labels) > 2:
+            # Convert the label names to one-vs-rest labels
+            labels = [f'Non-{labels[binary_label]}', labels[binary_label]]
     else:
-        NUM_CLASSES = 4
+        NUM_CLASSES = len(labels)
 
     with open(params_file, "r") as stream:
         try:
@@ -87,6 +101,8 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
     OPTIMIZER = params[model]['OPTIMIZER']
     LR = float(params[model]['LR'])
     WEIGHT_DECAY = float(params[model]['WEIGHT_DECAY'])
+    
+    image_size = get_image_size(model)
 
     if augmentation:
         data_transform = transforms.Compose([
@@ -94,16 +110,15 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             transforms.Pad(50),
             transforms.RandomRotation(180),
             transforms.RandomAffine(translate=(0.1, 0.1), degrees=0),
-            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
-            # GaussianNoise(0., 0.1), # Should be commented out due to adverse effect?
         ])
     else:
         data_transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Pad(50),
-            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.Resize(image_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ])
@@ -177,7 +192,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
             # For binary classification, transform labels to one-vs-rest
             if binary:
-                target = target.eq(3).type(torch.int64)
+                target = target.eq(binary_label).type(torch.int64)
 
             optimizer.zero_grad()
 
@@ -244,7 +259,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
             # For binary classification, transform labels to one-vs-rest
             if binary:
-                target = target.eq(3).type(torch.int64)
+                target = target.eq(binary_label).type(torch.int64)
 
             output = model_class(data)
             
@@ -271,13 +286,6 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
 
     logger.info("Final test score: Loss: %.4f, Accuracy: %.3f%%" % (test_loss, test_accuracy))
 
-    # TODO detect labels automatically
-
-    if binary:
-        labels = ['Non-VD', 'VD']
-    else:
-        labels = ['CSV', 'FMV', 'Healthy', 'VD']
-
     # Print classification report
     cf_report = classification_report(y_true, y_pred, target_names=labels, output_dict=True)
 
@@ -288,7 +296,9 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
     if save:
         logger.info("Saving the model")
         
-        # TODO: store hyperparams to other_json
+        other_json = {
+            'LABELS': labels
+        }
         
         model_id = store_model_and_add_info_to_df(
             model = model_class, 
@@ -304,7 +314,7 @@ def train(model, dataset, data_csv, binary, params_file, augmentation, save, ver
             test_accuracy = test_accuracy,
             test_loss = test_loss,
             f1_score = f1_score,
-            other_json = None,
+            other_json = other_json,
         )
         
         logger.info(f"Model saved with id {model_id}")

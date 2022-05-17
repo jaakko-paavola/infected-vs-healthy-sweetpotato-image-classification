@@ -19,6 +19,7 @@ import warnings
 import logging
 from utils.model_utils import AVAILABLE_MODELS
 from dataloaders.dataset_stats import get_normalization_mean_std
+from dataloaders.dataset_labels import get_dataset_labels
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -324,17 +325,16 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
         elif dataset == 'plant_golden':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_golden.csv")
         mean, std = get_normalization_mean_std(dataset=dataset)
-    # TODO: give dataset name when using custom CSV for storing the model
     else:
         DATA_MASTER_PATH = data_csv
         mean, std = get_normalization_mean_std(datasheet=data_csv)
 
+    labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
 
-    # TODO: automatize label counting from dataframe
     if binary:
         NUM_CLASSES = 2
     else:
-        NUM_CLASSES = 4
+        NUM_CLASSES = len(labels)
 
 
     N_EPOCHS = no_of_epochs
