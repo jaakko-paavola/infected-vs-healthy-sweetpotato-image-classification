@@ -8,15 +8,15 @@ from dotenv import load_dotenv
 import numpy as np
 from torchvision import transforms
 
+load_dotenv()
+
+DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 
 def get_normalization_mean_std(dataset: str = None, datasheet : str = None):
-    load_dotenv()
-
-    DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 
     if datasheet:
         MASTER_PATH = datasheet
-    
+
     if dataset:
         if dataset == 'leaf':
             DATA_PATH = "leaves_segmented_master.csv"
@@ -26,6 +26,7 @@ def get_normalization_mean_std(dataset: str = None, datasheet : str = None):
             DATA_PATH = "plant_data_split_golden.csv"
         else:
             raise ValueError(f"Dataset {dataset} not defined. Accepted values: plant, plant_golden, leaf")
+
         MASTER_PATH = os.path.join(DATA_FOLDER_PATH, DATA_PATH)
 
     transform = transforms.Compose([
@@ -35,7 +36,7 @@ def get_normalization_mean_std(dataset: str = None, datasheet : str = None):
     ])
 
     master_dataset = CSVDataLoader(
-        csv_file=MASTER_PATH, 
+        csv_file=MASTER_PATH,
         root_dir=DATA_FOLDER_PATH,
         image_path_col="Split masked image path",
         label_col="Label",

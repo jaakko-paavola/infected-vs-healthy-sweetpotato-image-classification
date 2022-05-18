@@ -7,7 +7,7 @@ from skimage import io
 class CSVDataLoader(Dataset):
     """CSV data loader."""
 
-    def __init__(self, csv_file, root_dir, image_path_col: str = "image_path", label_col: str = "label", transform=None):
+    def __init__(self, csv_file, root_dir, image_path_col: str = "Split masked image path", label_col: str = "Label", transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
