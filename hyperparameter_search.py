@@ -20,6 +20,7 @@ import warnings
 import logging
 from utils.model_utils import AVAILABLE_MODELS, create_model_id_and_timestamp, save_dataset_of_torch_model
 from dataloaders.dataset_stats import get_normalization_mean_std
+from dataloaders.dataset_labels import get_dataset_labels
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -325,16 +326,17 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
         elif dataset == 'plant_golden':
             DATA_MASTER_PATH = os.path.join(DATA_FOLDER_PATH, "plant_data_split_golden.csv")
         mean, std = get_normalization_mean_std(dataset=dataset)
-    # TODO: give dataset name when using custom CSV for storing the model
     else:
         DATA_MASTER_PATH = data_csv
         mean, std = get_normalization_mean_std(datasheet=data_csv)
 
-    # TODO: automatize label counting from dataframe
+
+    labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
+
     if binary:
         NUM_CLASSES = 2
     else:
-        NUM_CLASSES = 4
+        NUM_CLASSES = len(labels)
 
     N_EPOCHS = no_of_epochs
     N_TRIALS = no_of_trials # Number of trials for hyperparameter optimization
@@ -411,6 +413,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE),\
         n_trials=N_TRIALS)
 
+
     df = study.trials_dataframe()
     df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
 
@@ -421,6 +424,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
         f.write(f"{id}-{MODEL_NAME}-{timestamp}\n")
 
     df.to_csv(filename, mode='a', header=False)
+
 
 if __name__ == "__main__":
     search_hyperparameters()
