@@ -297,16 +297,16 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 
 @click.command()
 @click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
-@click.option('-e', '--no_of_epochs', type=int, default=20, help='Number of epochs in training loop.')
+@click.option('-e', '--no_of_epochs', type=int, show_default=True, default=20, help='Number of epochs in training loop.')
 @click.option('-es', '--early_stopping_counter', type=int, help='Number of consequtive epochs with no improvement in loss until trial is stopped. Default: ~one third of no of epochs.')
-@click.option('-t', '--no_of_trials', type=int, default=50, help='Number of hyperparamter search trials in training loop.')
+@click.option('-t', '--no_of_trials', type=int, show_default=True, default=20, help='Number of hyperparamter search trials in training loop.')
 @click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
 @click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
-@click.option('-o', '--optimizers', type=str, default='adam,adamw', help='Which optimizer algorithms to include in the hyperparameter search. Give a comma-separated list of optimizers, e.g.: adam,adamw,rmsprop,sgd,adagrad.  Default: adam,adamw')
+@click.option('-o', '--optimizers', type=str, show_default=True, default='adam,adamw', help='Which optimizer algorithms to include in the hyperparameter search. Give a comma-separated list of optimizers, e.g.: adam,adamw,rmsprop,sgd,adagrad.')
 def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose, optimizers):
 
     if verbose:
@@ -402,7 +402,8 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
     else:
         device = torch.device('cpu')
 
-    # Save the test dataset on disk:
+    # Save the test dataset on disk to be loaded and used in train.py. This is to make sure the train set is kept unseend until the testing step in train.py.
+    # This is currently commented out if favor of using a seed given to random_split to achieve the same thing.
     # model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES).to(device)
     # id, model_name, timestamp = save_dataset_of_torch_model(model_class, test_dataset, "test_dataset")
 
@@ -420,7 +421,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
     with open(filename, "w") as f:
         f.write(f"{id}-{MODEL_NAME}-{timestamp}\n")
 
-    df.to_csv(filename, mode='a', header=False)
+    df.to_csv(filename, mode='a', header=True, index=False)
 
 if __name__ == "__main__":
     search_hyperparameters()
