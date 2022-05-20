@@ -404,11 +404,6 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
     else:
         device = torch.device('cpu')
 
-    # Save the test dataset on disk to be loaded and used in train.py. This is to make sure the train set is kept unseend until the testing step in train.py.
-    # This is currently commented out if favor of using a seed given to random_split to achieve the same thing.
-    # model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES).to(device)
-    # id, model_name, timestamp = save_dataset_of_torch_model(model_class, test_dataset, "test_dataset")
-
     study = optuna.create_study(direction='minimize')
     study.optimize(func=lambda trial: objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE),\
@@ -416,7 +411,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
 
 
     df = study.trials_dataframe()
-    df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
+    df = df.sort_values(by=['value'], ascending=False).iloc[0:9,:]
 
     timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_at_{timestamp}.csv')
