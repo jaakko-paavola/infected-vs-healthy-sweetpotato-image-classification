@@ -411,7 +411,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
 
 
     df = study.trials_dataframe()
-    df = df.sort_values(by=['value'], ascending=False).iloc[0:9,:]
+    df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
 
     timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_at_{timestamp}.csv')
