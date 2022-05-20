@@ -142,7 +142,6 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
     train_size = int(0.80 * len(master_dataset))
     val_size = (len(master_dataset) - train_size)//2
     test_size = len(master_dataset) - train_size - val_size
-<<<<<<< HEAD
 
     train_dataset, test_dataset = torch.utils.data.random_split(dataset=master_dataset,
                                     lengths=[train_size + val_size, test_size],
@@ -151,39 +150,6 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
     train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
     test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
-
-    # %%
-    ## This block is an alternative to to using the seed for ascertaining the splits are the same as in hyperparamer search
-    # assuming the test dataset was saved on disk in hyperparameter search, but commented out for now (also, the code has some unresolved issue).
-    
-    # # Put the all the data from the master_dataset to a Pandas dataframe
-    # image_column = pd.Series([master_dataset.__getitem__(i)['image'].numpy() for i in range(master_dataset.__len__())])
-    # label_column = pd.Series([master_dataset.__getitem__(i)['label'].numpy() for i in range(master_dataset.__len__())])
-    # master_dataset_df = pd.DataFrame({"image": image_column, "label": label_column})
-
-    # # Load the hold-out test set that was reserved for this model and saved to disk during hyperparameter search...
-    # test_dataset_array = load_dataset_of_torch_model(params[MODEL_NAME]['HYPERPARAM_SEARCH_ID'], "test_dataset")
-    # # ... and convert to a Pandas dataframe
-    # image_column = pd.Series([i['image'].numpy() for i in test_dataset_array])
-    # label_column = pd.Series([i['label'].numpy() for i in test_dataset_array])
-    # test_dataset_df = pd.DataFrame({"image": image_column, "label": label_column})
-
-    # # Exclude the test dataset from the training dataset
-    # train_dataset_df = master_dataset_df[~master_dataset_df.index.isin(test_dataset_df.index)]
-
-    # #Make a dataloader for the train dataset
-    # train_dataset_image = torch.tensor(train_dataset_df['image'].values.astype(np.float32)).to(device)
-    # train_dataset_label = torch.tensor(train_dataset_df['label'].values.astype(np.float32)).to(device)
-    # train_dataset = TensorDataset(train_dataset_image, train_dataset_label)
-    # train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
-
-    # # Make a dataloader for the test dataset
-    # test_dataset_image = torch.tensor(test_dataset_df['image'].values.astype(np.float32)).to(device)
-    # test_dataset_label = torch.tensor(test_dataset_df['label'].values.astype(np.float32)).to(device)
-    # test_dataset = TensorDataset(test_dataset_image, test_dataset_label)
-    # test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
-
-    # %%
 
     model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES, num_heads=params[MODEL_NAME]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
     parameter_grid = {}
@@ -194,13 +160,12 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
         parameter_grid['dampening'] = float(params[MODEL_NAME]['DAMPENING'])
         parameter_grid['momentum'] = float(params[MODEL_NAME]['MOMENTUM'])
         optimizer = optim.SGD(model_class.parameters(), **parameter_grid)
-=======
     
     if model == 'bag_of_words':
         model_class, y_true, y_pred, test_accuracy, test_loss, other_json = train_bow(master_dataset.df, test_size, NUM_CLASSES, params, save, binary_label)
         train_accuracy = None
         train_loss = None
->>>>>>> cb0716d121897bb2463d55ac10218bd0c717783f
+
     else:
         N_EPOCHS = int(params[model]['N_EPOCHS'])
         BATCH_SIZE_TRAIN = int(params[model]['BATCH_SIZE_TRAIN'])
@@ -244,6 +209,11 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
         training_losses = []
         training_accuracies = []
+        
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+        else:
+            device = torch.device('cpu')
 
         logger.info("Starting training cycle")
 
