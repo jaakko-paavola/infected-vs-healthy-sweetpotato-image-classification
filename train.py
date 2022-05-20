@@ -1,5 +1,6 @@
 # %%
 import os
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import binarize
@@ -19,7 +20,7 @@ import click
 import statistics
 from models.bag_of_words import BagOfWords
 from models.model_factory import get_model_class
-from utils.model_utils import AVAILABLE_MODELS, store_model_and_add_info_to_df, get_image_size, store_object
+from utils.model_utils import AVAILABLE_MODELS, load_dataset_of_torch_model, store_model_and_add_info_to_df, get_image_size, store_object
 import logging
 from tqdm import tqdm
 import yaml
@@ -47,7 +48,10 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 @click.option('-aug/-no-aug', '--augmentation/--no-augmentation', show_default=True, default=True, help='Use data-augmentation for the training.')
 @click.option('-s/-nos', '--save/--no-save', show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
+
 def train(model, dataset, data_csv, binary, binary_label, params_file, augmentation, save, verbose):
+
+    MODEL_NAME = model
 
     if verbose:
         logger.setLevel(logging.DEBUG)
@@ -95,6 +99,14 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
             logger.error(f"Error while reading YAML: {exc}")
             raise exc
 
+
+    # hyperparameters:
+    N_EPOCHS = int(params[MODEL_NAME]['N_EPOCHS'])
+    BATCH_SIZE_TRAIN = int(params[MODEL_NAME]['BATCH_SIZE_TRAIN'])
+    BATCH_SIZE_TEST = int(params[MODEL_NAME]['BATCH_SIZE_TEST'])
+    OPTIMIZER = params[MODEL_NAME]['OPTIMIZER']
+    LR = float(params[MODEL_NAME]['LR'])
+    WEIGHT_DECAY = float(params[MODEL_NAME]['WEIGHT_DECAY'])
     image_size = get_image_size(model)
 
     if augmentation:
@@ -124,67 +136,84 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
         transform=data_transform
     )
 
-    train_size = int(0.85 * len(master_dataset))
-    test_size = len(master_dataset) - train_size
+    # %%
+    # With random_split use a seed that should be the same as that was used in hyperparameter search in order to
+    # make sure the test dataset is kept unseen and without data leakage during training and model selection.
+    train_size = int(0.80 * len(master_dataset))
+    val_size = (len(master_dataset) - train_size)//2
+    test_size = len(master_dataset) - train_size - val_size
 
+    train_dataset, test_dataset = torch.utils.data.random_split(dataset=master_dataset,
+                                    lengths=[train_size + val_size, test_size],
+                                    generator=torch.Generator().manual_seed(42))
+
+
+    train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
+    test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
+
+    model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES, num_heads=params[MODEL_NAME]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
+    parameter_grid = {}
+    parameter_grid["lr"] = LR
+    parameter_grid["weight_decay"] = WEIGHT_DECAY
+
+    if OPTIMIZER == "SGD":
+        parameter_grid['dampening'] = float(params[MODEL_NAME]['DAMPENING'])
+        parameter_grid['momentum'] = float(params[MODEL_NAME]['MOMENTUM'])
+        optimizer = optim.SGD(model_class.parameters(), **parameter_grid)
+    
     if model == 'bag_of_words':
         model_class, y_true, y_pred, test_accuracy, test_loss, other_json = train_bow(master_dataset.df, test_size, NUM_CLASSES, params, save, binary_label)
         train_accuracy = None
         train_loss = None
+
     else:
-        # hyperparameters:
-        # TODO: the final form of hyperparameters.yaml
         N_EPOCHS = int(params[model]['N_EPOCHS'])
         BATCH_SIZE_TRAIN = int(params[model]['BATCH_SIZE_TRAIN'])
         BATCH_SIZE_TEST = int(params[model]['BATCH_SIZE_TEST'])
         OPTIMIZER = params[model]['OPTIMIZER']
         LR = float(params[model]['LR'])
         WEIGHT_DECAY = float(params[model]['WEIGHT_DECAY'])
-
+        train_dataset, test_dataset = torch.utils.data.random_split(dataset=master_dataset,
+                                        lengths=[train_size + val_size, test_size],
+                                        generator=torch.Generator().manual_seed(42))
         train_dataset, test_dataset = torch.utils.data.random_split(master_dataset, [train_size, test_size])
-
         train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
         test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
-        # %%
 
-        if torch.cuda.is_available():
-            device = torch.device('cuda')
-        else:
-            device = torch.device('cpu')
-
-        model_class = get_model_class(model, num_of_classes=NUM_CLASSES, num_heads=params[model]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
+        model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES, num_heads=params[MODEL_NAME]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
         parameter_grid = {}
         parameter_grid["lr"] = LR
         parameter_grid["weight_decay"] = WEIGHT_DECAY
 
         if OPTIMIZER == "SGD":
-            parameter_grid['dampening'] = float(params[model]['DAMPENING'])
-            parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
+            parameter_grid['dampening'] = float(params[MODEL_NAME]['DAMPENING'])
+            parameter_grid['momentum'] = float(params[MODEL_NAME]['MOMENTUM'])
             optimizer = optim.SGD(model_class.parameters(), **parameter_grid)
         else:
-            parameter_grid['eps'] = float(params[model]['EPS'])
+            parameter_grid['eps'] = float(params[MODEL_NAME]['EPS'])
             if OPTIMIZER == "Adam":
-                parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+                parameter_grid['betas'] = tuple(float(x) for x in params[MODEL_NAME]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
                 optimizer = optim.Adam(model_class.parameters(), **parameter_grid)
             elif OPTIMIZER == "AdamW":
-                parameter_grid['betas'] = tuple(float(x) for x in params[model]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
+                parameter_grid['betas'] = tuple(float(x) for x in params[MODEL_NAME]['BETAS'][1:-1].replace("(", "").replace(")", "").strip().split(","))
                 optimizer = optim.AdamW(model_class.parameters(), **parameter_grid)
             elif OPTIMIZER == "AdaGrad":
-                parameter_grid['lr_decay'] = float(params[model]['LR_DECAY'])
+                parameter_grid['lr_decay'] = float(params[MODEL_NAME]['LR_DECAY'])
                 optimizer = optim.Adagrad(model_class.parameters(), **parameter_grid)
             elif OPTIMIZER == "RMSprop":
-                parameter_grid['momentum'] = float(params[model]['MOMENTUM'])
-                parameter_grid['alpha'] = float(params[model]['ALPHA'])
+                parameter_grid['momentum'] = float(params[MODEL_NAME]['MOMENTUM'])
+                parameter_grid['alpha'] = float(params[MODEL_NAME]['ALPHA'])
                 optimizer = optim.RMSprop(model_class.parameters(), **parameter_grid)
 
-        loss_function = torch.nn.CrossEntropyLoss()
-
-        # %%
-
-        # training
+          loss_function = torch.nn.CrossEntropyLoss()
 
         training_losses = []
         training_accuracies = []
+        
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+        else:
+            device = torch.device('cpu')
 
         logger.info("Starting training cycle")
 
@@ -213,6 +242,16 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
                 pred = output.max(1, keepdim=True)[1]
 
+                output = model_class(data)
+
+                if len(output) == 2:
+                    output = output.logits
+
+                train_loss = loss_function(output, target)
+                train_loss.backward()
+                optimizer.step()
+
+                pred = output.max(1, keepdim=True)[1]
                 correct = pred.eq(target.view_as(pred)).sum().item()
                 train_correct += correct
                 total += data.shape[0]
@@ -223,10 +262,13 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
                         (epoch, batch_num + 1, len(train_plant_dataloader), total_train_loss / (batch_num + 1),
                         100. * train_correct / total, train_correct, total))
 
-
             # Training loss average for all batches
             training_losses.append(total_train_loss / len(train_plant_dataloader))
             training_accuracies.append((100. * train_correct / total))
+
+        ## Training loss average for all batches
+        training_losses.append(total_train_loss / len(train_plant_dataloader))
+        training_accuracies.append((100. * train_correct / total))
 
         # Calculate train loss and accuracy as an average of the last min(5, N_EPOCHS) losses or accuracies
         train_loss = statistics.mean(training_losses[-min(N_EPOCHS, 5):])

@@ -14,6 +14,8 @@ from datetime import datetime
 import torch
 from functools import reduce
 from operator import and_
+from torch.utils.data import DataLoader
+import numpy as np
 from joblib import dump, load
 
 load_dotenv()
@@ -58,6 +60,13 @@ def get_model_file_name(id: str, model_name: str, timestamp: str) -> str:
 	else:
 		model_file_name = f"{id}-{model_name}-{timestamp}.pt"
 
+	return model_file_name
+
+def get_dataset_file_name(id: str, model_name: str, timestamp: str, prefix: str) -> str:
+	if type(model_name) != str:
+		raise ValueError("Model name must be string")
+
+	model_file_name = f"{id}-{model_name}-{timestamp}-{prefix}.npy"
 	return model_file_name
 
 
@@ -112,11 +121,31 @@ def save_torch_model(model: nn.Module) -> Tuple[str, str, datetime]:
 
 	return id, model_name, timestamp
 
+def save_dataset_of_torch_model(model: nn.Module, dataset: DataLoader, prefix: str) -> Tuple[str, str, datetime]:
+	# If custom name attribute has been given, use it
+	if hasattr(model, "name"):
+		model_name = model.name
+	# Find class name and determine the model name
+	else:
+		model_name = type(model).__name__
+		model_name = CLASS_TO_MODEL_NAME_MAPPING[model_name]
+
+	dataset_file_name = get_dataset_file_name(
+		id=id, model_name=model_name, timestamp=timestamp_str, prefix="test_dataset")
+
+	dataset_file_path = os.path.join(MODEL_FOLDER, dataset_file_name)
+	np.save(dataset_file_path, dataset, allow_pickle = True)
+
+	return id, model_name, timestamp_str
+
 def save_sklearn_model(model) -> Tuple[str, str, datetime]:
 	model_name = "bag_of_words"
 
 	id, timestamp = create_model_id_and_timestamp()
 	timestamp_str = datetime_to_str(timestamp)
+
+def load_dataset_of_torch_model(hyperparam_search_id: str, prefix: str) -> Tuple[str, str, datetime]:
+	return np.load(os.path.join(MODEL_FOLDER, f"{hyperparam_search_id}-{prefix}.npy"), allow_pickle=True)
 
 	model_file_name = get_model_file_name(
 		id=id, model_name=model_name, timestamp=timestamp_str

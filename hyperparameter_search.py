@@ -1,5 +1,6 @@
 # %%
 import os
+from time import time, strftime, gmtime
 import click
 from sklearn.metrics import f1_score
 from torch.utils.data import DataLoader
@@ -17,10 +18,10 @@ import optuna
 from pytorchtools import EarlyStopping
 import warnings
 import logging
-from utils.model_utils import AVAILABLE_MODELS
+from utils.model_utils import AVAILABLE_MODELS, create_model_id_and_timestamp, save_dataset_of_torch_model
 from dataloaders.dataset_stats import get_normalization_mean_std
 from dataloaders.dataset_labels import get_dataset_labels
-
+import math
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -297,17 +298,17 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 
 @click.command()
 @click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
-@click.option('-e', '--no_of_epochs', type=int, default=20, help='Number of epochs in training loop.')
-@click.option('-t', '--no_of_trials', type=int, default=50, help='Number of hyperparamter search trials in training loop.')
+@click.option('-e', '--no_of_epochs', type=int, show_default=True, default=20, help='Number of epochs in training loop.')
+@click.option('-es', '--early_stopping_counter', type=int, help='Number of consequtive epochs with no improvement in loss until trial is stopped. Default: ~one third of no of epochs.')
+@click.option('-t', '--no_of_trials', type=int, show_default=True, default=20, help='Number of hyperparamter search trials in training loop.')
 @click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
 @click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
-def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose):
-
-    MODEL_NAME = model
+@click.option('-o', '--optimizers', type=str, show_default=True, default='adam,adamw', help='Which optimizer algorithms to include in the hyperparameter search. Give a comma-separated list of optimizers, e.g.: adam,adamw,rmsprop,sgd,adagrad.')
+def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose, optimizers):
 
     if verbose:
         logger.setLevel(logging.DEBUG)
@@ -329,6 +330,7 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
         DATA_MASTER_PATH = data_csv
         mean, std = get_normalization_mean_std(datasheet=data_csv)
 
+
     labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
 
     if binary:
@@ -336,15 +338,17 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     else:
         NUM_CLASSES = len(labels)
 
-
     N_EPOCHS = no_of_epochs
     N_TRIALS = no_of_trials # Number of trials for hyperparameter optimization
     BATCH_SIZE_TRAIN = 64
     BATCH_SIZE_VALID = 64
-    BATCH_SIZE_TEST = 64
     FLAG_EARLYSTOPPING = True # Set to True to enable early stopping
-    EARLYSTOPPING_PATIENCE = N_EPOCHS//3 # Let early stopping patience (i.e. the number of consequtive epochs with no decrease in training loss) be a third (rounded down) of the number of epochs
+    if early_stopping_counter:
+        EARLYSTOPPING_PATIENCE = early_stopping_counter
+    else:
+        EARLYSTOPPING_PATIENCE = N_EPOCHS//3 # By default early stopping patience (i.e. the number of consequtive epochs with no decrease in training loss) is a third (rounded down) of the number of epochs
 
+    MODEL_NAME = model
     if augmentation:
         data_transform = transforms.Compose([
             transforms.ToPILImage(),
@@ -354,24 +358,28 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
             transforms.Resize((299, 299)) if MODEL_NAME == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
-            # GaussianNoise(0., 0.1),
         ])
     else:
         data_transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Pad(50),
-            transforms.Resize((299, 299)) if model == "inception_v3" else transforms.Resize((256, 256)),
+            transforms.Resize((299, 299)) if MODEL_NAME == "inception_v3" else transforms.Resize((256, 256)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ])
 
-    ## TODO: selection of the optimizer space (possible via a commandline argument)
+    OPTIMIZERS = [x.strip() for x in optimizers.split(',')]
     OPTIMIZER_SEARCH_SPACE = []
-    OPTIMIZER_SEARCH_SPACE.append("Adam")
-    OPTIMIZER_SEARCH_SPACE.append("AdamW")
-    # OPTIMIZER_SEARCH_SPACE.append("RMSprop")
-    # OPTIMIZER_SEARCH_SPACE.append("SGD")
-    # OPTIMIZER_SEARCH_SPACE.append("Adagrad")
+    if ("adam" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("Adam")
+    if ("adamw" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("AdamW")
+    if ("rmsprop" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("RMSprop")
+    if ("sgd" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("SGD")
+    if ("adagrad" in OPTIMIZERS):
+        OPTIMIZER_SEARCH_SPACE.append("Adagrad")
 
     plant_master_dataset = CSVDataLoader(
         csv_file=DATA_MASTER_PATH,
@@ -385,7 +393,8 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
     val_size = (len(plant_master_dataset) - train_size)//2
     test_size = len(plant_master_dataset) - train_size - val_size
 
-    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, val_size, test_size])
+    # Use a given seed for the random split so that the test split data can be kept unseen during hyperparameter optimization, until the test is performed in train.py
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(plant_master_dataset, [train_size, val_size, test_size], generator=torch.Generator().manual_seed(42))
 
     train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
     val_plant_dataloader = DataLoader(val_dataset, batch_size=BATCH_SIZE_VALID, shuffle=True, num_workers=0)
@@ -394,19 +403,24 @@ def search_hyperparameters(model, no_of_epochs, no_of_trials, dataset, data_csv,
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
+
     study = optuna.create_study(direction='minimize')
     study.optimize(func=lambda trial: objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE),\
         n_trials=N_TRIALS)
 
-    ## TODO: how to save n best models/hyperparameter configurations, how to save the unseen test dataset,
-    ## which can then be used in train.py to evaluate the model.
-    # study.trials_dataframe()
-    # study.best_trial
-    # study.best_params
-    # study.best_trials
-    # torch.save(test_dataset, f"{MODEL_NAME}_test_dataset_with_train+valid_best_value_{study.best_value}.pt")
-    # torch.save(model.state_dict(), f'{MODEL_NAME}_weights_with_train+valid_best_value_{study.best_value}.pt')
+
+    df = study.trials_dataframe()
+    df = df.sort_values(by=['value'], ascending=False).iloc[0:9,:]
+
+    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_at_{timestamp}.csv')
+    id, timestamp = create_model_id_and_timestamp()
+    with open(filename, "w") as f:
+        f.write(f"{id}-{MODEL_NAME}-{timestamp}\n")
+
+    df.to_csv(filename, mode='a', header=True, index=False)
+
 
 if __name__ == "__main__":
     search_hyperparameters()
