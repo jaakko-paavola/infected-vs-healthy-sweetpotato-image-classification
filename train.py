@@ -205,7 +205,7 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
                 parameter_grid['alpha'] = float(params[MODEL_NAME]['ALPHA'])
                 optimizer = optim.RMSprop(model_class.parameters(), **parameter_grid)
 
-          loss_function = torch.nn.CrossEntropyLoss()
+        loss_function = torch.nn.CrossEntropyLoss()
 
         training_losses = []
         training_accuracies = []
