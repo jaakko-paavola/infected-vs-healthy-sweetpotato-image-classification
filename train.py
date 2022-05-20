@@ -43,16 +43,10 @@ DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 @click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
-<<<<<<< HEAD
-@click.option('-p', '--params-file', type=str, show_default=True, default="hyperparams.yaml", help='Full file path to hyperparameter-file used during the training. File must be a YAMl file and similarly structured than hyperparams.yaml.')
-@click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
-@click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
-=======
 @click.option('-bl', '--binary-label', type=int, help='Binary label when dataset has more than two labels. Classification is done using one-vs-rest, where the binary label corresponds to the one compared to other labels.')
 @click.option('-p', '--params-file', type=str, default="hyperparams.yaml", help='Full file path to hyperparameter-file used during the training. File must be a YAMl file and similarly structured than hyperparams.yaml.')
 @click.option('-aug/-no-aug', '--augmentation/--no-augmentation', show_default=True, default=True, help='Use data-augmentation for the training.')
 @click.option('-s/-nos', '--save/--no-save', show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
->>>>>>> cb0716d121897bb2463d55ac10218bd0c717783f
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 
 def train(model, dataset, data_csv, binary, binary_label, params_file, augmentation, save, verbose):
