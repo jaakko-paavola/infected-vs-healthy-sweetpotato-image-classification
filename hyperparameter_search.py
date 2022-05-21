@@ -414,7 +414,11 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
     df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
 
     timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_at_{timestamp}.csv')
+    if binary:
+        target_variable_type = "binary"
+    else:
+        target_variable_type = "multiclass"
+    filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_for_{dataset}_{target_variable_type}_at_{timestamp}.csv')
     id, timestamp = create_model_id_and_timestamp()
     with open(filename, "w") as f:
         f.write(f"{id}-{MODEL_NAME}-{timestamp}\n")
