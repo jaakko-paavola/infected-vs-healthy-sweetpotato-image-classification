@@ -150,6 +150,11 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
     train_plant_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE_TRAIN, shuffle=True, num_workers=0)
     test_plant_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE_TEST, shuffle=False, num_workers=0)
+    
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
 
     model_class = get_model_class(MODEL_NAME, num_of_classes=NUM_CLASSES, num_heads=params[MODEL_NAME]['NUM_HEADS'], dropout=params[model]['DROPOUT']).to(device)
     parameter_grid = {}
@@ -209,11 +214,6 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
         training_losses = []
         training_accuracies = []
-        
-        if torch.cuda.is_available():
-            device = torch.device('cuda')
-        else:
-            device = torch.device('cpu')
 
         logger.info("Starting training cycle")
 
