@@ -80,7 +80,7 @@ def train(model, dataset, data_csv, binary, binary_label, params_file, augmentat
 
     labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
 
-    if binary and not binary_label and len(labels) > 2:
+    if binary and binary_label is None and len(labels) > 2:
         raise ValueError(f"You tried to do binary classification without binary label argument. You must give also binary-label (-bl or --binary-label) argument when using binary classification and the dataset contains more than two labels. We detected {len(labels)} number of labels.")
 
     if binary:
