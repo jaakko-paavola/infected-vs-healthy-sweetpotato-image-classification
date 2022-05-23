@@ -30,6 +30,7 @@ logger.setLevel(logging.INFO)
 load_dotenv()
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 warnings.filterwarnings("ignore")
+optimal_no_of_epochs_in_each_trial = None
 
 # %%
 def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, true_positive,
@@ -75,7 +76,7 @@ def evaluate_predictions(total_correct, true_positive, true_negative, false_posi
 # %%
 # Define an objective function to be minimized by Optuna.
 def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, device, train_plant_dataloader, val_plant_dataloader, \
-    FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE, test_plant_dataloader=None):
+    FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE):
     if MODEL_NAME == "vision_transformer":
         num_heads = trial.suggest_categorical('num_heads', [4, 8, 16])
         dropout = trial.suggest_uniform('dropout', 0.0, 0.2)
@@ -149,6 +150,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     valid_unweighted_macro_F1s = []
     valid_weighted_macro_F1s = []
     valid_binary_F1s = []
+
+    global optimal_no_of_epochs_in_each_trial
 
     early_stopping = EarlyStopping(patience=EARLYSTOPPING_PATIENCE, verbose=True, delta=1e-4)
 
@@ -287,6 +290,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     plt.legend()
     plt.show()
 
+    optimal_no_of_epochs_in_each_trial[trial._trial_id] = epoch
+
     # load the last checkpoint with the best model
     model.load_state_dict(torch.load('checkpoint.pt'))
 
@@ -295,7 +300,6 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 
 # %%
 # Hyperparameter search
-
 @click.command()
 @click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
 @click.option('-e', '--no_of_epochs', type=int, show_default=True, default=20, help='Number of epochs in training loop.')
@@ -405,12 +409,15 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
         device = torch.device('cpu')
 
     study = optuna.create_study(direction='minimize')
+    global optimal_no_of_epochs_in_each_trial
+    optimal_no_of_epochs_in_each_trial = [None]*N_TRIALS
     study.optimize(func=lambda trial: objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE),\
         n_trials=N_TRIALS)
 
 
     df = study.trials_dataframe()
+    df['best_epoch'] = optimal_no_of_epochs_in_each_trial
     df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
 
     timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
