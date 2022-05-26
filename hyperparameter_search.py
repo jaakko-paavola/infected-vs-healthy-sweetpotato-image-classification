@@ -1,6 +1,6 @@
 # %%
 import os
-from time import time, strftime, gmtime
+from time import strftime, gmtime
 import click
 from sklearn.metrics import f1_score
 from torch.utils.data import DataLoader
@@ -18,10 +18,9 @@ import optuna
 from pytorchtools import EarlyStopping
 import warnings
 import logging
-from utils.model_utils import AVAILABLE_MODELS, create_model_id_and_timestamp, save_dataset_of_torch_model
+from utils.model_utils import AVAILABLE_MODELS, create_model_id_and_timestamp
 from dataloaders.dataset_stats import get_normalization_mean_std
 from dataloaders.dataset_labels import get_dataset_labels
-import math
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -30,7 +29,8 @@ logger.setLevel(logging.INFO)
 load_dotenv()
 DATA_FOLDER_PATH = os.getenv("DATA_FOLDER_PATH")
 warnings.filterwarnings("ignore")
-optimal_no_of_epochs_in_each_trial = None
+study = None
+
 
 # %%
 def compute_and_print_metrics(stage, NUM_CLASSES, epoch, total_correct, total, true_positive,
@@ -75,8 +75,9 @@ def evaluate_predictions(total_correct, true_positive, true_negative, false_posi
 
 # %%
 # Define an objective function to be minimized by Optuna.
-def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, device, train_plant_dataloader, val_plant_dataloader, \
-    FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE):
+def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
+        device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE, \
+        binary, dataset, timestamp, optimal_no_of_epochs_in_each_trial):
     if MODEL_NAME == "vision_transformer":
         num_heads = trial.suggest_categorical('num_heads', [4, 8, 16])
         dropout = trial.suggest_uniform('dropout', 0.0, 0.2)
@@ -150,8 +151,6 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     valid_unweighted_macro_F1s = []
     valid_weighted_macro_F1s = []
     valid_binary_F1s = []
-
-    global optimal_no_of_epochs_in_each_trial
 
     early_stopping = EarlyStopping(patience=EARLYSTOPPING_PATIENCE, verbose=True, delta=1e-4)
 
@@ -290,7 +289,9 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     plt.legend()
     plt.show()
 
-    optimal_no_of_epochs_in_each_trial[trial._trial_id] = epoch
+    optimal_no_of_epochs_in_each_trial.append(epoch)
+    print_search_results_to_file(dataset, binary, MODEL_NAME, \
+        optimal_no_of_epochs_in_each_trial, timestamp)
 
     # load the last checkpoint with the best model
     model.load_state_dict(torch.load('checkpoint.pt'))
@@ -408,25 +409,27 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
     else:
         device = torch.device('cpu')
 
+    global study
     study = optuna.create_study(direction='minimize')
-    global optimal_no_of_epochs_in_each_trial
-    optimal_no_of_epochs_in_each_trial = [None]*N_TRIALS
+    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    optimal_no_of_epochs_in_each_trial = []
     study.optimize(func=lambda trial: objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
-        device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE),\
-        n_trials=N_TRIALS)
+        device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE, \
+        binary, dataset, timestamp, optimal_no_of_epochs_in_each_trial), n_trials=N_TRIALS)
 
-
+def print_search_results_to_file(dataset, binary, MODEL_NAME, \
+    optimal_no_of_epochs_in_each_trial, timestamp):
+    global study
     df = study.trials_dataframe()
     df['best_epoch'] = optimal_no_of_epochs_in_each_trial
     df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
 
-    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     if binary:
         target_variable_type = "binary"
     else:
         target_variable_type = "multiclass"
     filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_for_{dataset}_{target_variable_type}_at_{timestamp}.csv')
-    id, timestamp = create_model_id_and_timestamp()
+    id, t = create_model_id_and_timestamp()
     with open(filename, "w") as f:
         f.write(f"{id}-{MODEL_NAME}-{timestamp}\n")
 
