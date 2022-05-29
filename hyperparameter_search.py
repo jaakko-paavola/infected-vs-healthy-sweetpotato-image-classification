@@ -18,7 +18,7 @@ import optuna
 from pytorchtools import EarlyStopping
 import warnings
 import logging
-from utils.model_utils import AVAILABLE_MODELS, create_model_id_and_timestamp
+from utils.model_utils import AVAILABLE_MODELS
 from dataloaders.dataset_stats import get_normalization_mean_std
 from dataloaders.dataset_labels import get_dataset_labels
 logging.basicConfig()
@@ -77,7 +77,9 @@ def evaluate_predictions(total_correct, true_positive, true_negative, false_posi
 # Define an objective function to be minimized by Optuna.
 def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE, \
-        binary, dataset, timestamp, optimal_no_of_epochs_in_each_trial):
+        binary, dataset, timestamp, best_epoch_in_each_trial, best_validation_accuracy_in_each_trial, \
+        best_validation_F1_in_each_trial, best_validation_loss_in_each_trial, direction, sort_ascending, \
+        objective_function):
     if MODEL_NAME == "vision_transformer":
         num_heads = trial.suggest_categorical('num_heads', [4, 8, 16])
         dropout = trial.suggest_uniform('dropout', 0.0, 0.2)
@@ -94,12 +96,6 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
         "betas": trial.suggest_categorical("betas", [(0.9, 0.99), (0.95, 0.999), (0.9, 0.949)]),
         "eps": trial.suggest_uniform("eps", 1e-8, 1e-4),
         "weight_decay": trial.suggest_uniform("weight_decay", 1e-03, 0.1),
-    }
-
-    parameter_grid_adamw_dict = {
-        "betas": trial.suggest_categorical("betas", [(0.9, 0.99), (0.95, 0.999), (0.9, 0.949)]),
-        "eps": trial.suggest_uniform("eps", 1e-8, 1e-4),
-        "weight_decay": trial.suggest_uniform("weight_decay", 1e-03, 0.1)
     }
 
     parameter_grid_rmsprop_dict = {
@@ -123,10 +119,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 
     if optimizer_name == "SGD":
         parameter_grid = parameter_grid_sgd_dict
-    elif optimizer_name == "Adam":
+    elif optimizer_name == "Adam" or optimizer_name == "AdamW":
         parameter_grid = parameter_grid_adam_dict
-    elif optimizer_name == "AdamW":
-        parameter_grid = parameter_grid_adamw_dict
     elif optimizer_name == "RMSprop":
         parameter_grid = parameter_grid_rmsprop_dict
     elif optimizer_name == "Adagrad":
@@ -141,18 +135,20 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     # Training of the model.
     avg_training_losses = []
     training_accuracies = []
-    avg_valid_losses = []
-    valid_accuracies = []
+    avg_validation_losses = []
+    validation_accuracies = []
     train_F1s = []
     train_unweighted_macro_F1s = []
     train_weighted_macro_F1s = []
     train_binary_F1s = []
-    valid_F1s = []
-    valid_unweighted_macro_F1s = []
-    valid_weighted_macro_F1s = []
-    valid_binary_F1s = []
+    validation_F1s = []
+    validation_unweighted_macro_F1s = []
+    validation_weighted_macro_F1s = []
+    validation_binary_F1s = []
 
     early_stopping = EarlyStopping(patience=EARLYSTOPPING_PATIENCE, verbose=True, delta=1e-4)
+    best_epoch = 1
+    best_validation_objective_function = None
 
     for epoch in range(1, N_EPOCHS + 1):
         # Training
@@ -200,7 +196,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
         training_accuracies.append(100. * total_correct / total)
 
         # Validation
-        total_valid_loss = 0
+        total_validation_loss = 0
         total_correct = 0
         total = 0
         true_positive = 0
@@ -221,35 +217,64 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
                     target = target.eq(3).type(torch.int64) # For binary classification, transform labels to one-vs-rest
                 total += data.shape[0]
                 output = model(data)
-                valid_loss = loss_function(output, target)
-                total_valid_loss += valid_loss.item()
+                validation_loss = loss_function(output, target)
+                total_validation_loss += validation_loss.item()
                 target_all_batches, pred_all_batches, true_positive, true_negative, false_positive, false_negative, \
                     total_correct = evaluate_predictions(total_correct, true_positive, true_negative, false_positive, \
                         false_negative, target_all_batches, pred_all_batches, target, output)
 
         recall, precision, f1m, f1w, f1mi, f1b = compute_and_print_metrics("Validation", NUM_CLASSES, epoch, total_correct,
             total, true_positive, true_negative, false_positive, false_negative, target_all_batches, pred_all_batches,
-            batch_num, len(val_plant_dataloader), total_valid_loss / (batch_num + 1))
+            batch_num, len(val_plant_dataloader), total_validation_loss / (batch_num + 1))
 
-        valid_unweighted_macro_F1s.append(f1m)
-        valid_weighted_macro_F1s.append(f1w)
-        valid_binary_F1s.append(f1b)
-        valid_F1s.append(2 * precision * recall / (precision + recall + 1e-10))
-        avg_valid_losses.append(total_valid_loss / (batch_num + 1))
-        valid_accuracies.append(100. * total_correct / total)
+        validation_unweighted_macro_F1s.append(f1m)
+        validation_weighted_macro_F1s.append(f1w)
+        validation_binary_F1s.append(f1b)
+        validation_F1s.append(2 * precision * recall / (precision + recall + 1e-10))
+        validation_accuracies.append(100. * total_correct / total)
+        avg_validation_losses.append(total_validation_loss / (batch_num + 1))
+
+        if objective_function == 'F1_score':
+            if NUM_CLASSES == 2:
+                validation_objective_function = validation_binary_F1s
+            else:
+                validation_objective_function = validation_weighted_macro_F1s
+            best_validation_objective_function = 0
+        elif objective_function == "accuracy":
+            validation_objective_function = validation_accuracies
+            best_validation_objective_function = 0
+        else:
+            validation_objective_function = avg_validation_losses
+            best_validation_objective_function = 999999
 
         if FLAG_EARLYSTOPPING:
-            # early_stopping needs the validation loss to check if it has decresed,
+            # Early_stopping needs the objective function to check if it has improved,
             # and if it has, it will make a checkpoint of the current model
-            early_stopping(avg_valid_losses[-1], model)
-            # If the loss has not decreased for {patience} number of epochs, trigger early stop
+            if objective_function == 'F1_score':
+                early_stopping(1 - validation_objective_function[-1], model)
+            elif objective_function == 'accuracy':
+                early_stopping(100 - validation_objective_function[-1], model)
+            else:
+                early_stopping(validation_objective_function[-1], model)
+            # Check if the objective function has improved to the right direction
+            if validation_objective_function[-1] < best_validation_objective_function if direction == 'minimize' \
+                    else validation_objective_function[-1] > best_validation_objective_function:
+                best_valid_loss = avg_validation_losses[-1]
+                best_valid_acc = validation_accuracies[-1]
+                if NUM_CLASSES == 2:
+                    best_valid_F1 = validation_binary_F1s[-1]
+                else:
+                    best_valid_F1 = validation_weighted_macro_F1s[-1]                
+                best_epoch = epoch
+                best_validation_objective_function = validation_objective_function[-1]
+            # If the objective function has not improved for {patience} number of epochs, trigger early stop
             if early_stopping.early_stop:
                 logger.info("Early stop")
                 break
 
     # Training loss and accuracy average for all batches
     plt.plot(range(1, epoch + 1), avg_training_losses, label = "Training loss")
-    plt.plot(range(1, epoch + 1), avg_valid_losses, label = "Validation loss")
+    plt.plot(range(1, epoch + 1), avg_validation_losses, label = "Validation loss")
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.ylabel('loss')
@@ -258,7 +283,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     plt.show()
 
     plt.plot(range(1, epoch + 1), training_accuracies, label = "Training accuracy")
-    plt.plot(range(1, epoch + 1), valid_accuracies, label = "Validation accuracy")
+    plt.plot(range(1, epoch + 1), validation_accuracies, label = "Validation accuracy")
     plt.xlabel('epoch')
     plt.ylabel('accuracy')
     plt.title('Accuracy')
@@ -266,7 +291,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     plt.show()
 
     plt.plot(range(1, epoch + 1), train_F1s, label = "Training F1")
-    plt.plot(range(1, epoch + 1), valid_F1s, label = "Validation F1")
+    plt.plot(range(1, epoch + 1), validation_F1s, label = "Validation F1")
     plt.xlabel('epoch')
     plt.ylabel('F1')
     plt.title('F1')
@@ -274,7 +299,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     plt.show()
 
     plt.plot(range(1, epoch + 1), train_unweighted_macro_F1s, label = "Training unweighted macro F1")
-    plt.plot(range(1, epoch + 1), valid_unweighted_macro_F1s, label = "Validation unweighted macro F1")
+    plt.plot(range(1, epoch + 1), validation_unweighted_macro_F1s, label = "Validation unweighted macro F1")
     plt.xlabel('epoch')
     plt.ylabel('Unweighted macro F1')
     plt.title('Unweighted macro F1')
@@ -282,30 +307,35 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     plt.show()
 
     plt.plot(range(1, epoch + 1), train_weighted_macro_F1s, label = "Training weighted macro F1")
-    plt.plot(range(1, epoch + 1), valid_weighted_macro_F1s, label = "Validation weighted macro F1")
+    plt.plot(range(1, epoch + 1), validation_weighted_macro_F1s, label = "Validation weighted macro F1")
     plt.xlabel('epoch')
     plt.ylabel('Weighted macro F1')
     plt.title('Weighted macro F1')
     plt.legend()
     plt.show()
 
-    optimal_no_of_epochs_in_each_trial.append(epoch)
+    best_epoch_in_each_trial.append(best_epoch)
+    best_validation_accuracy_in_each_trial.append(best_valid_acc)
+    best_validation_F1_in_each_trial.append(best_valid_F1)
+    best_validation_loss_in_each_trial.append(best_valid_loss)
     print_search_results_to_file(dataset, binary, MODEL_NAME, \
-        optimal_no_of_epochs_in_each_trial, timestamp)
+        best_epoch_in_each_trial, best_validation_accuracy_in_each_trial, \
+        best_validation_F1_in_each_trial, best_validation_loss_in_each_trial, \
+        timestamp, EARLYSTOPPING_PATIENCE, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, sort_ascending)
 
     # load the last checkpoint with the best model
     model.load_state_dict(torch.load('checkpoint.pt'))
 
-    # trial.report(early_stopping.val_loss_min, epoch)
-    return early_stopping.val_loss_min
+    return best_validation_objective_function
+    # return early_stopping.val_loss_min
 
 # %%
 # Hyperparameter search
 @click.command()
 @click.option('-m', '--model', required=True, type=click.Choice(AVAILABLE_MODELS, case_sensitive=False), help='Model architechture.')
-@click.option('-e', '--no_of_epochs', type=int, show_default=True, default=20, help='Number of epochs in training loop.')
-@click.option('-es', '--early_stopping_counter', type=int, help='Number of consequtive epochs with no improvement in loss until trial is stopped. Default: ~one third of no of epochs.')
-@click.option('-t', '--no_of_trials', type=int, show_default=True, default=20, help='Number of hyperparamter search trials in training loop.')
+@click.option('-e', '--no_of_epochs', type=int, show_default=True, default=50, help='Number of epochs in training loop.')
+@click.option('-es', '--early_stopping_counter', type=int, help='Number of consequtive epochs with no improvement in loss until trial is stopped. Default: (the floor of) one seventh of the no of epochs.')
+@click.option('-t', '--no_of_trials', type=int, show_default=True, default=50, help='Number of hyperparamter search trials in training loop.')
 @click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
@@ -313,7 +343,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 @click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 @click.option('-o', '--optimizers', type=str, show_default=True, default='adam,adamw', help='Which optimizer algorithms to include in the hyperparameter search. Give a comma-separated list of optimizers, e.g.: adam,adamw,rmsprop,sgd,adagrad.')
-def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose, optimizers):
+@click.option('-ob', '--objective_function', type=click.Choice(['F1_score', 'accuracy', 'cross_entropy_loss']), show_default=True, default='F1_score', help='What is the function the value of which we try to optimize.')
+def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose, optimizers, objective_function):
 
     if verbose:
         logger.setLevel(logging.DEBUG)
@@ -351,7 +382,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
     if early_stopping_counter:
         EARLYSTOPPING_PATIENCE = early_stopping_counter
     else:
-        EARLYSTOPPING_PATIENCE = N_EPOCHS//3 # By default early stopping patience (i.e. the number of consequtive epochs with no decrease in training loss) is a third (rounded down) of the number of epochs
+        EARLYSTOPPING_PATIENCE = N_EPOCHS//7 # By default early stopping patience (i.e. the number of consequtive epochs with no decrease in training loss) is one seventh (rounded down) of the number of epochs
 
     MODEL_NAME = model
     if augmentation:
@@ -410,28 +441,44 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
         device = torch.device('cpu')
 
     global study
-    study = optuna.create_study(direction='minimize')
+    if objective_function == 'F1_score' or objective_function == 'accuracy':
+        direction = 'maximize'
+        sort_ascending = False
+    else:
+        direction = 'minimize'
+        sort_ascending = True
+
+    study = optuna.create_study(direction=direction)
     timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    optimal_no_of_epochs_in_each_trial = []
+    best_epoch_in_each_trial = []
+    best_validation_accuracy_in_each_trial = []
+    best_validation_F1_in_each_trial = []
+    best_validation_loss_in_each_trial = []
     study.optimize(func=lambda trial: objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, \
         device, train_plant_dataloader, val_plant_dataloader, FLAG_EARLYSTOPPING, EARLYSTOPPING_PATIENCE, \
-        binary, dataset, timestamp, optimal_no_of_epochs_in_each_trial), n_trials=N_TRIALS)
+        binary, dataset, timestamp, best_epoch_in_each_trial, best_validation_accuracy_in_each_trial, \
+        best_validation_F1_in_each_trial, best_validation_loss_in_each_trial, direction, sort_ascending, \
+        objective_function), n_trials=N_TRIALS)
 
 def print_search_results_to_file(dataset, binary, MODEL_NAME, \
-    optimal_no_of_epochs_in_each_trial, timestamp):
+    best_epoch_in_each_trial, best_validation_accuracy_in_each_trial, \
+    best_validation_F1_score_in_each_trial, best_validation_loss_in_each_trial, \
+    timestamp, EARLYSTOPPING_PATIENCE, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, sort_ascending):
     global study
     df = study.trials_dataframe()
-    df['best_epoch'] = optimal_no_of_epochs_in_each_trial
-    df = df.sort_values(by=['value'], ascending=True).iloc[0:9,:]
+    df['best_epoch'] = best_epoch_in_each_trial
+    df['best_accuracy'] = best_validation_accuracy_in_each_trial
+    df['best_F1_score'] = best_validation_F1_score_in_each_trial
+    df['best_loss'] = best_validation_loss_in_each_trial
+    df = df.sort_values(by=['value'], ascending=sort_ascending).iloc[0:9,:]
 
     if binary:
         target_variable_type = "binary"
     else:
         target_variable_type = "multiclass"
-    filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_for_{dataset}_{target_variable_type}_at_{timestamp}.csv')
-    id, t = create_model_id_and_timestamp()
+    filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_for_{MODEL_NAME}_{dataset}_{target_variable_type}_at_{timestamp}.csv')
     with open(filename, "w") as f:
-        f.write(f"{id}-{MODEL_NAME}-{timestamp}\n")
+        f.write(f"{MODEL_NAME}-{dataset}-{target_variable_type}-{timestamp}-N_EPOCHS: {N_EPOCHS}-EARLYSTOPPING_PATIENCE: {EARLYSTOPPING_PATIENCE}-OPTIMIZER_SEARCH_SPACE: {OPTIMIZER_SEARCH_SPACE}\n")
 
     df.to_csv(filename, mode='a', header=True, index=False)
 
