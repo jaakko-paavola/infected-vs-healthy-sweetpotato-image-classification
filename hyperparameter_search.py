@@ -259,8 +259,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
             # Check if the objective function has improved to the right direction
             if validation_objective_function[-1] < best_validation_objective_function if direction == 'minimize' \
                     else validation_objective_function[-1] > best_validation_objective_function:
-                best_valid_loss = avg_validation_losses[-1]
-                best_valid_acc = validation_accuracies[-1]
+                best_validation_loss = avg_validation_losses[-1]
+                best_validation_acc = validation_accuracies[-1]
                 if NUM_CLASSES == 2:
                     best_valid_F1 = validation_binary_F1s[-1]
                 else:
@@ -315,9 +315,9 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     plt.show()
 
     best_epoch_in_each_trial.append(best_epoch)
-    best_validation_accuracy_in_each_trial.append(best_valid_acc)
+    best_validation_accuracy_in_each_trial.append(best_validation_acc)
     best_validation_F1_in_each_trial.append(best_valid_F1)
-    best_validation_loss_in_each_trial.append(best_valid_loss)
+    best_validation_loss_in_each_trial.append(best_validation_loss)
     print_search_results_to_file(dataset, binary, MODEL_NAME, \
         best_epoch_in_each_trial, best_validation_accuracy_in_each_trial, \
         best_validation_F1_in_each_trial, best_validation_loss_in_each_trial, \
