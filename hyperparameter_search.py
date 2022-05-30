@@ -233,19 +233,22 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
         validation_F1s.append(2 * precision * recall / (precision + recall + 1e-10))
         validation_accuracies.append(100. * total_correct / total)
         avg_validation_losses.append(total_validation_loss / (batch_num + 1))
+        best_validation_acc = 0
+        best_validation_F1 = 0
+        best_validation_loss = 9999999
 
         if objective_function == 'F1_score':
             if NUM_CLASSES == 2:
                 validation_objective_function = validation_binary_F1s
             else:
                 validation_objective_function = validation_weighted_macro_F1s
-            best_validation_objective_function = 0
+            best_validation_objective_function = best_validation_F1
         elif objective_function == "accuracy":
             validation_objective_function = validation_accuracies
-            best_validation_objective_function = 0
+            best_validation_objective_function = best_validation_acc
         else:
             validation_objective_function = avg_validation_losses
-            best_validation_objective_function = 999999
+            best_validation_objective_function = best_validation_loss
 
         if FLAG_EARLYSTOPPING:
             # Early_stopping needs the objective function to check if it has improved,
