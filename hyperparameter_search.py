@@ -148,7 +148,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 
     early_stopping = EarlyStopping(patience=EARLYSTOPPING_PATIENCE, verbose=True, delta=1e-4)
     best_epoch = 1
-    best_validation_objective_function = None
+    best_validation_objective_function_value = None
 
     for epoch in range(1, N_EPOCHS + 1):
         # Training
@@ -242,13 +242,13 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
                 validation_objective_function = validation_binary_F1s
             else:
                 validation_objective_function = validation_weighted_macro_F1s
-            best_validation_objective_function = best_validation_F1
+            best_validation_objective_function_value = best_validation_F1
         elif objective_function == "accuracy":
             validation_objective_function = validation_accuracies
-            best_validation_objective_function = best_validation_acc
+            best_validation_objective_function_value = best_validation_acc
         else:
             validation_objective_function = avg_validation_losses
-            best_validation_objective_function = best_validation_loss
+            best_validation_objective_function_value = best_validation_loss
 
         if FLAG_EARLYSTOPPING:
             # Early_stopping needs the objective function to check if it has improved,
@@ -260,8 +260,8 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
             else:
                 early_stopping(validation_objective_function[-1], model)
             # Check if the objective function has improved to the right direction
-            if validation_objective_function[-1] < best_validation_objective_function if direction == 'minimize' \
-                    else validation_objective_function[-1] > best_validation_objective_function:
+            if (((validation_objective_function[-1] <= best_validation_objective_function_value) and direction == 'minimize') \
+                    or (validation_objective_function[-1] >= best_validation_objective_function_value and direction == 'maximize')):
                 best_validation_loss = avg_validation_losses[-1]
                 best_validation_acc = validation_accuracies[-1]
                 if NUM_CLASSES == 2:
@@ -269,7 +269,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
                 else:
                     best_validation_F1 = validation_weighted_macro_F1s[-1]                
                 best_epoch = epoch
-                best_validation_objective_function = validation_objective_function[-1]
+                best_validation_objective_function_value = validation_objective_function[-1]
             # If the objective function has not improved for {patience} number of epochs, trigger early stop
             if early_stopping.early_stop:
                 logger.info("Early stop")
@@ -330,7 +330,7 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
     # load the last checkpoint with the best model
     model.load_state_dict(torch.load('checkpoint.pt'))
 
-    return best_validation_objective_function
+    return best_validation_objective_function_value
     # return early_stopping.val_loss_min
 
 # %%
