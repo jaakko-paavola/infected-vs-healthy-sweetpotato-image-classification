@@ -1,0 +1,736 @@
+Training plant models
+Training ResNet18 multiclass for plant
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with resnet18_plant_multiclass
+INFO:__main__:Starting training cycle
+  0%|          | 0/40 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 20/20: Loss: 0.9836 | Train Acc: 65.891% (821/1246)
+  2%|▎         | 1/40 [00:26<17:14, 26.53s/it]INFO:__main__:Training: Epoch 1 - Batch 20/20: Loss: 0.7793 | Train Acc: 70.385% (877/1246)
+  5%|▌         | 2/40 [00:54<17:19, 27.35s/it]INFO:__main__:Training: Epoch 2 - Batch 20/20: Loss: 0.7131 | Train Acc: 71.910% (896/1246)
+  8%|▊         | 3/40 [01:20<16:23, 26.59s/it]INFO:__main__:Training: Epoch 3 - Batch 20/20: Loss: 0.6613 | Train Acc: 73.435% (915/1246)
+ 10%|█         | 4/40 [01:44<15:28, 25.80s/it]INFO:__main__:Training: Epoch 4 - Batch 20/20: Loss: 0.6264 | Train Acc: 75.120% (936/1246)
+ 12%|█▎        | 5/40 [02:08<14:37, 25.08s/it]INFO:__main__:Training: Epoch 5 - Batch 20/20: Loss: 0.6204 | Train Acc: 75.040% (935/1246)
+ 15%|█▌        | 6/40 [02:32<13:57, 24.63s/it]INFO:__main__:Training: Epoch 6 - Batch 20/20: Loss: 0.5718 | Train Acc: 76.886% (958/1246)
+ 18%|█▊        | 7/40 [02:56<13:27, 24.48s/it]INFO:__main__:Training: Epoch 7 - Batch 20/20: Loss: 0.5755 | Train Acc: 77.207% (962/1246)
+ 20%|██        | 8/40 [03:22<13:15, 24.86s/it]INFO:__main__:Training: Epoch 8 - Batch 20/20: Loss: 0.5731 | Train Acc: 74.960% (934/1246)
+ 22%|██▎       | 9/40 [03:50<13:26, 26.01s/it]INFO:__main__:Training: Epoch 9 - Batch 20/20: Loss: 0.5418 | Train Acc: 77.448% (965/1246)
+ 25%|██▌       | 10/40 [04:19<13:27, 26.91s/it]INFO:__main__:Training: Epoch 10 - Batch 20/20: Loss: 0.5783 | Train Acc: 76.083% (948/1246)
+ 28%|██▊       | 11/40 [04:48<13:21, 27.65s/it]INFO:__main__:Training: Epoch 11 - Batch 20/20: Loss: 0.5054 | Train Acc: 78.010% (972/1246)
+ 30%|███       | 12/40 [05:16<12:52, 27.57s/it]INFO:__main__:Training: Epoch 12 - Batch 20/20: Loss: 0.4762 | Train Acc: 78.892% (983/1246)
+ 32%|███▎      | 13/40 [05:43<12:18, 27.34s/it]INFO:__main__:Training: Epoch 13 - Batch 20/20: Loss: 0.4963 | Train Acc: 78.411% (977/1246)
+ 35%|███▌      | 14/40 [06:10<11:48, 27.27s/it]INFO:__main__:Training: Epoch 14 - Batch 20/20: Loss: 0.5113 | Train Acc: 79.053% (985/1246)
+ 38%|███▊      | 15/40 [06:36<11:10, 26.83s/it]INFO:__main__:Training: Epoch 15 - Batch 20/20: Loss: 0.4588 | Train Acc: 79.454% (990/1246)
+ 40%|████      | 16/40 [06:59<10:20, 25.86s/it]INFO:__main__:Training: Epoch 16 - Batch 20/20: Loss: 0.4433 | Train Acc: 80.177% (999/1246)
+ 42%|████▎     | 17/40 [07:26<10:01, 26.16s/it]INFO:__main__:Training: Epoch 17 - Batch 20/20: Loss: 0.4718 | Train Acc: 79.775% (994/1246)
+ 45%|████▌     | 18/40 [07:54<09:46, 26.67s/it]INFO:__main__:Training: Epoch 18 - Batch 20/20: Loss: 0.4507 | Train Acc: 80.498% (1003/1246)
+ 48%|████▊     | 19/40 [08:19<09:11, 26.28s/it]INFO:__main__:Training: Epoch 19 - Batch 20/20: Loss: 0.4457 | Train Acc: 80.257% (1000/1246)
+ 50%|█████     | 20/40 [08:45<08:40, 26.04s/it]INFO:__main__:Training: Epoch 20 - Batch 20/20: Loss: 0.4392 | Train Acc: 81.220% (1012/1246)
+ 52%|█████▎    | 21/40 [09:12<08:21, 26.37s/it]INFO:__main__:Training: Epoch 21 - Batch 20/20: Loss: 0.4248 | Train Acc: 81.621% (1017/1246)
+ 55%|█████▌    | 22/40 [09:38<07:55, 26.44s/it]INFO:__main__:Training: Epoch 22 - Batch 20/20: Loss: 0.4100 | Train Acc: 82.825% (1032/1246)
+ 57%|█████▊    | 23/40 [10:07<07:38, 26.97s/it]INFO:__main__:Training: Epoch 23 - Batch 20/20: Loss: 0.4293 | Train Acc: 82.343% (1026/1246)
+ 60%|██████    | 24/40 [10:35<07:19, 27.46s/it]INFO:__main__:Training: Epoch 24 - Batch 20/20: Loss: 0.4000 | Train Acc: 83.226% (1037/1246)
+ 62%|██████▎   | 25/40 [11:04<06:55, 27.72s/it]INFO:__main__:Training: Epoch 25 - Batch 20/20: Loss: 0.3747 | Train Acc: 84.350% (1051/1246)
+ 65%|██████▌   | 26/40 [11:32<06:29, 27.82s/it]INFO:__main__:Training: Epoch 26 - Batch 20/20: Loss: 0.3805 | Train Acc: 83.868% (1045/1246)
+ 68%|██████▊   | 27/40 [12:00<06:03, 27.99s/it]INFO:__main__:Training: Epoch 27 - Batch 20/20: Loss: 0.4085 | Train Acc: 83.146% (1036/1246)
+ 70%|███████   | 28/40 [12:27<05:31, 27.63s/it]INFO:__main__:Training: Epoch 28 - Batch 20/20: Loss: 0.3714 | Train Acc: 84.671% (1055/1246)
+ 72%|███████▎  | 29/40 [12:54<05:01, 27.39s/it]INFO:__main__:Training: Epoch 29 - Batch 20/20: Loss: 0.4039 | Train Acc: 82.263% (1025/1246)
+ 75%|███████▌  | 30/40 [13:20<04:31, 27.18s/it]INFO:__main__:Training: Epoch 30 - Batch 20/20: Loss: 0.3572 | Train Acc: 84.671% (1055/1246)
+ 78%|███████▊  | 31/40 [13:45<03:58, 26.55s/it]INFO:__main__:Training: Epoch 31 - Batch 20/20: Loss: 0.3814 | Train Acc: 83.066% (1035/1246)
+ 80%|████████  | 32/40 [14:11<03:29, 26.17s/it]INFO:__main__:Training: Epoch 32 - Batch 20/20: Loss: 0.3614 | Train Acc: 84.992% (1059/1246)
+ 82%|████████▎ | 33/40 [14:38<03:05, 26.51s/it]INFO:__main__:Training: Epoch 33 - Batch 20/20: Loss: 0.3887 | Train Acc: 82.986% (1034/1246)
+ 85%|████████▌ | 34/40 [15:05<02:40, 26.75s/it]INFO:__main__:Training: Epoch 34 - Batch 20/20: Loss: 0.3578 | Train Acc: 84.510% (1053/1246)
+ 88%|████████▊ | 35/40 [15:31<02:12, 26.52s/it]INFO:__main__:Training: Epoch 35 - Batch 20/20: Loss: 0.3503 | Train Acc: 85.393% (1064/1246)
+ 90%|█████████ | 36/40 [15:57<01:45, 26.38s/it]INFO:__main__:Training: Epoch 36 - Batch 20/20: Loss: 0.3575 | Train Acc: 84.671% (1055/1246)
+ 92%|█████████▎| 37/40 [16:24<01:19, 26.44s/it]INFO:__main__:Training: Epoch 37 - Batch 20/20: Loss: 0.3457 | Train Acc: 85.554% (1066/1246)
+ 95%|█████████▌| 38/40 [16:48<00:51, 25.87s/it]INFO:__main__:Training: Epoch 38 - Batch 20/20: Loss: 0.3328 | Train Acc: 86.597% (1079/1246)
+ 98%|█████████▊| 39/40 [17:14<00:25, 25.89s/it]INFO:__main__:Training: Epoch 39 - Batch 20/20: Loss: 0.3414 | Train Acc: 84.992% (1059/1246)
+100%|██████████| 40/40 [17:43<00:00, 26.59s/it]100%|██████████| 40/40 [17:43<00:00, 26.58s/it]
+INFO:__main__:Final training score: Loss: 0.3455, Accuracy: 85.441%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0038, Accuracy: 77.698%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id 90vcoshf
+Training ResNet18 binary for plant
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with resnet18_plant_binary
+INFO:__main__:Starting training cycle
+  0%|          | 0/40 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 20/20: Loss: 0.5586 | Train Acc: 77.127% (961/1246)
+  2%|▎         | 1/40 [00:29<19:05, 29.37s/it]INFO:__main__:Training: Epoch 1 - Batch 20/20: Loss: 0.4344 | Train Acc: 80.096% (998/1246)
+  5%|▌         | 2/40 [00:59<18:43, 29.57s/it]INFO:__main__:Training: Epoch 2 - Batch 20/20: Loss: 0.3190 | Train Acc: 87.159% (1086/1246)
+  8%|▊         | 3/40 [01:27<17:51, 28.96s/it]INFO:__main__:Training: Epoch 3 - Batch 20/20: Loss: 0.2620 | Train Acc: 89.165% (1111/1246)
+ 10%|█         | 4/40 [01:52<16:34, 27.61s/it]INFO:__main__:Training: Epoch 4 - Batch 20/20: Loss: 0.2221 | Train Acc: 91.172% (1136/1246)
+ 12%|█▎        | 5/40 [02:19<15:55, 27.31s/it]INFO:__main__:Training: Epoch 5 - Batch 20/20: Loss: 0.2087 | Train Acc: 91.734% (1143/1246)
+ 15%|█▌        | 6/40 [02:45<15:06, 26.66s/it]INFO:__main__:Training: Epoch 6 - Batch 20/20: Loss: 0.2024 | Train Acc: 91.974% (1146/1246)
+ 18%|█▊        | 7/40 [03:12<14:46, 26.86s/it]INFO:__main__:Training: Epoch 7 - Batch 20/20: Loss: 0.2006 | Train Acc: 91.332% (1138/1246)
+ 20%|██        | 8/40 [03:41<14:40, 27.53s/it]INFO:__main__:Training: Epoch 8 - Batch 20/20: Loss: 0.1801 | Train Acc: 92.777% (1156/1246)
+ 22%|██▎       | 9/40 [04:08<14:12, 27.51s/it]INFO:__main__:Training: Epoch 9 - Batch 20/20: Loss: 0.1898 | Train Acc: 92.536% (1153/1246)
+ 25%|██▌       | 10/40 [04:36<13:46, 27.55s/it]INFO:__main__:Training: Epoch 10 - Batch 20/20: Loss: 0.1731 | Train Acc: 93.579% (1166/1246)
+ 28%|██▊       | 11/40 [05:04<13:25, 27.79s/it]INFO:__main__:Training: Epoch 11 - Batch 20/20: Loss: 0.1571 | Train Acc: 93.258% (1162/1246)
+ 30%|███       | 12/40 [05:31<12:45, 27.35s/it]INFO:__main__:Training: Epoch 12 - Batch 20/20: Loss: 0.1462 | Train Acc: 93.981% (1171/1246)
+ 32%|███▎      | 13/40 [05:55<11:54, 26.47s/it]INFO:__main__:Training: Epoch 13 - Batch 20/20: Loss: 0.1480 | Train Acc: 93.820% (1169/1246)
+ 35%|███▌      | 14/40 [06:24<11:45, 27.13s/it]INFO:__main__:Training: Epoch 14 - Batch 20/20: Loss: 0.1356 | Train Acc: 94.543% (1178/1246)
+ 38%|███▊      | 15/40 [06:50<11:12, 26.90s/it]INFO:__main__:Training: Epoch 15 - Batch 20/20: Loss: 0.1431 | Train Acc: 94.944% (1183/1246)
+ 40%|████      | 16/40 [07:21<11:12, 28.02s/it]INFO:__main__:Training: Epoch 16 - Batch 20/20: Loss: 0.1163 | Train Acc: 95.185% (1186/1246)
+ 42%|████▎     | 17/40 [07:45<10:19, 26.94s/it]INFO:__main__:Training: Epoch 17 - Batch 20/20: Loss: 0.1436 | Train Acc: 94.783% (1181/1246)
+ 45%|████▌     | 18/40 [08:09<09:31, 25.97s/it]INFO:__main__:Training: Epoch 18 - Batch 20/20: Loss: 0.1402 | Train Acc: 95.185% (1186/1246)
+ 48%|████▊     | 19/40 [08:31<08:44, 24.96s/it]INFO:__main__:Training: Epoch 19 - Batch 20/20: Loss: 0.1008 | Train Acc: 95.907% (1195/1246)
+ 50%|█████     | 20/40 [08:58<08:29, 25.49s/it]INFO:__main__:Training: Epoch 20 - Batch 20/20: Loss: 0.1130 | Train Acc: 95.666% (1192/1246)
+ 52%|█████▎    | 21/40 [09:24<08:07, 25.67s/it]INFO:__main__:Training: Epoch 21 - Batch 20/20: Loss: 0.1200 | Train Acc: 95.666% (1192/1246)
+ 55%|█████▌    | 22/40 [09:52<07:51, 26.21s/it]INFO:__main__:Training: Epoch 22 - Batch 20/20: Loss: 0.1155 | Train Acc: 95.827% (1194/1246)
+ 57%|█████▊    | 23/40 [10:19<07:30, 26.50s/it]INFO:__main__:Training: Epoch 23 - Batch 20/20: Loss: 0.0982 | Train Acc: 95.827% (1194/1246)
+ 60%|██████    | 24/40 [10:47<07:13, 27.10s/it]INFO:__main__:Training: Epoch 24 - Batch 20/20: Loss: 0.1099 | Train Acc: 96.308% (1200/1246)
+ 62%|██████▎   | 25/40 [11:14<06:45, 27.02s/it]INFO:__main__:Training: Epoch 25 - Batch 20/20: Loss: 0.1178 | Train Acc: 95.907% (1195/1246)
+ 65%|██████▌   | 26/40 [11:39<06:09, 26.36s/it]INFO:__main__:Training: Epoch 26 - Batch 20/20: Loss: 0.0945 | Train Acc: 96.629% (1204/1246)
+ 68%|██████▊   | 27/40 [12:03<05:32, 25.61s/it]INFO:__main__:Training: Epoch 27 - Batch 20/20: Loss: 0.0950 | Train Acc: 97.030% (1209/1246)
+ 70%|███████   | 28/40 [12:27<05:01, 25.13s/it]INFO:__main__:Training: Epoch 28 - Batch 20/20: Loss: 0.0949 | Train Acc: 95.907% (1195/1246)
+ 72%|███████▎  | 29/40 [12:54<04:43, 25.76s/it]INFO:__main__:Training: Epoch 29 - Batch 20/20: Loss: 0.0983 | Train Acc: 96.067% (1197/1246)
+ 75%|███████▌  | 30/40 [13:21<04:19, 25.98s/it]INFO:__main__:Training: Epoch 30 - Batch 20/20: Loss: 0.1131 | Train Acc: 95.827% (1194/1246)
+ 78%|███████▊  | 31/40 [13:50<04:02, 26.92s/it]INFO:__main__:Training: Epoch 31 - Batch 20/20: Loss: 0.0911 | Train Acc: 96.549% (1203/1246)
+ 80%|████████  | 32/40 [14:18<03:39, 27.48s/it]INFO:__main__:Training: Epoch 32 - Batch 20/20: Loss: 0.0739 | Train Acc: 97.673% (1217/1246)
+ 82%|████████▎ | 33/40 [14:44<03:09, 27.02s/it]INFO:__main__:Training: Epoch 33 - Batch 20/20: Loss: 0.0814 | Train Acc: 97.271% (1212/1246)
+ 85%|████████▌ | 34/40 [15:12<02:43, 27.30s/it]INFO:__main__:Training: Epoch 34 - Batch 20/20: Loss: 0.0739 | Train Acc: 97.352% (1213/1246)
+ 88%|████████▊ | 35/40 [15:41<02:17, 27.57s/it]INFO:__main__:Training: Epoch 35 - Batch 20/20: Loss: 0.0782 | Train Acc: 97.673% (1217/1246)
+ 90%|█████████ | 36/40 [16:06<01:48, 27.00s/it]INFO:__main__:Training: Epoch 36 - Batch 20/20: Loss: 0.0951 | Train Acc: 95.746% (1193/1246)
+ 92%|█████████▎| 37/40 [16:33<01:20, 26.94s/it]INFO:__main__:Training: Epoch 37 - Batch 20/20: Loss: 0.0699 | Train Acc: 97.913% (1220/1246)
+ 95%|█████████▌| 38/40 [17:00<00:53, 26.91s/it]INFO:__main__:Training: Epoch 38 - Batch 20/20: Loss: 0.0833 | Train Acc: 97.432% (1214/1246)
+ 98%|█████████▊| 39/40 [17:27<00:26, 26.84s/it]INFO:__main__:Training: Epoch 39 - Batch 20/20: Loss: 0.0822 | Train Acc: 96.950% (1208/1246)
+100%|██████████| 40/40 [17:53<00:00, 26.81s/it]100%|██████████| 40/40 [17:53<00:00, 26.84s/it]
+INFO:__main__:Final training score: Loss: 0.0817, Accuracy: 97.143%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0009, Accuracy: 98.561%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id aab61f07
+Training Inception V3 multiclass for plant
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with inception_v3_plant_multiclass
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/models/inception.py:48: FutureWarning: The default weight initialization of inception_v3 will be changed in future releases of torchvision. If you wish to keep the old behavior (which leads to long initialization times due to scipy/scipy#11299), please set init_weights=True.
+  warnings.warn('The default weight initialization of inception_v3 will be changed in future releases of '
+INFO:__main__:Starting training cycle
+  0%|          | 0/15 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 39/39: Loss: 1.5455 | Train Acc: 57.143% (712/1246)
+  7%|▋         | 1/15 [00:44<10:24, 44.63s/it]INFO:__main__:Training: Epoch 1 - Batch 39/39: Loss: 1.2413 | Train Acc: 67.335% (839/1246)
+ 13%|█▎        | 2/15 [01:27<09:29, 43.80s/it]INFO:__main__:Training: Epoch 2 - Batch 39/39: Loss: 1.1768 | Train Acc: 67.657% (843/1246)
+ 20%|██        | 3/15 [02:13<08:55, 44.61s/it]INFO:__main__:Training: Epoch 3 - Batch 39/39: Loss: 1.0050 | Train Acc: 71.348% (889/1246)
+ 27%|██▋       | 4/15 [02:57<08:08, 44.44s/it]INFO:__main__:Training: Epoch 4 - Batch 39/39: Loss: 0.8351 | Train Acc: 72.151% (899/1246)
+ 33%|███▎      | 5/15 [03:42<07:27, 44.72s/it]INFO:__main__:Training: Epoch 5 - Batch 39/39: Loss: 0.8041 | Train Acc: 70.706% (881/1246)
+ 40%|████      | 6/15 [04:27<06:41, 44.60s/it]INFO:__main__:Training: Epoch 6 - Batch 39/39: Loss: 0.6861 | Train Acc: 75.843% (945/1246)
+ 47%|████▋     | 7/15 [05:10<05:54, 44.30s/it]INFO:__main__:Training: Epoch 7 - Batch 39/39: Loss: 0.7253 | Train Acc: 73.836% (920/1246)
+ 53%|█████▎    | 8/15 [05:55<05:10, 44.30s/it]INFO:__main__:Training: Epoch 8 - Batch 39/39: Loss: 0.6277 | Train Acc: 74.559% (929/1246)
+ 60%|██████    | 9/15 [06:39<04:26, 44.40s/it]INFO:__main__:Training: Epoch 9 - Batch 39/39: Loss: 0.7149 | Train Acc: 73.756% (919/1246)
+ 67%|██████▋   | 10/15 [07:25<03:43, 44.78s/it]INFO:__main__:Training: Epoch 10 - Batch 39/39: Loss: 0.7088 | Train Acc: 73.997% (922/1246)
+ 73%|███████▎  | 11/15 [08:11<03:01, 45.28s/it]INFO:__main__:Training: Epoch 11 - Batch 39/39: Loss: 0.5705 | Train Acc: 75.762% (944/1246)
+ 80%|████████  | 12/15 [09:01<02:19, 46.58s/it]INFO:__main__:Training: Epoch 12 - Batch 39/39: Loss: 0.4999 | Train Acc: 77.769% (969/1246)
+ 87%|████████▋ | 13/15 [09:46<01:32, 46.11s/it]INFO:__main__:Training: Epoch 13 - Batch 39/39: Loss: 0.5244 | Train Acc: 78.170% (974/1246)
+ 93%|█████████▎| 14/15 [10:29<00:45, 45.17s/it]INFO:__main__:Training: Epoch 14 - Batch 39/39: Loss: 0.5261 | Train Acc: 78.491% (978/1246)
+100%|██████████| 15/15 [11:14<00:00, 45.22s/it]100%|██████████| 15/15 [11:14<00:00, 44.98s/it]
+INFO:__main__:Final training score: Loss: 0.5660, Accuracy: 76.838%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0030, Accuracy: 66.187%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id tywo4t7d
+Training Inception V3 binary for plant
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with inception_v3_plant_binary
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/models/inception.py:48: FutureWarning: The default weight initialization of inception_v3 will be changed in future releases of torchvision. If you wish to keep the old behavior (which leads to long initialization times due to scipy/scipy#11299), please set init_weights=True.
+  warnings.warn('The default weight initialization of inception_v3 will be changed in future releases of '
+INFO:__main__:Starting training cycle
+  0%|          | 0/20 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 39/39: Loss: 0.7418 | Train Acc: 79.053% (985/1246)
+  5%|▌         | 1/20 [00:44<14:10, 44.75s/it]INFO:__main__:Training: Epoch 1 - Batch 39/39: Loss: 0.3255 | Train Acc: 86.437% (1077/1246)
+ 10%|█         | 2/20 [01:28<13:19, 44.39s/it]INFO:__main__:Training: Epoch 2 - Batch 39/39: Loss: 0.3152 | Train Acc: 89.486% (1115/1246)
+ 15%|█▌        | 3/20 [02:15<12:54, 45.54s/it]INFO:__main__:Training: Epoch 3 - Batch 39/39: Loss: 0.3027 | Train Acc: 87.319% (1088/1246)
+ 20%|██        | 4/20 [02:59<11:57, 44.86s/it]INFO:__main__:Training: Epoch 4 - Batch 39/39: Loss: 0.2779 | Train Acc: 89.246% (1112/1246)
+ 25%|██▌       | 5/20 [03:45<11:16, 45.12s/it]INFO:__main__:Training: Epoch 5 - Batch 39/39: Loss: 0.2809 | Train Acc: 88.764% (1106/1246)
+ 30%|███       | 6/20 [04:28<10:22, 44.47s/it]INFO:__main__:Training: Epoch 6 - Batch 39/39: Loss: 0.2442 | Train Acc: 90.931% (1133/1246)
+ 35%|███▌      | 7/20 [05:11<09:33, 44.13s/it]INFO:__main__:Training: Epoch 7 - Batch 39/39: Loss: 0.2268 | Train Acc: 90.530% (1128/1246)
+ 40%|████      | 8/20 [05:54<08:44, 43.73s/it]INFO:__main__:Training: Epoch 8 - Batch 39/39: Loss: 0.2844 | Train Acc: 88.684% (1105/1246)
+ 45%|████▌     | 9/20 [06:39<08:03, 43.91s/it]INFO:__main__:Training: Epoch 9 - Batch 39/39: Loss: 0.2125 | Train Acc: 91.332% (1138/1246)
+ 50%|█████     | 10/20 [07:27<07:31, 45.18s/it]INFO:__main__:Training: Epoch 10 - Batch 39/39: Loss: 0.2379 | Train Acc: 91.172% (1136/1246)
+ 55%|█████▌    | 11/20 [08:15<06:55, 46.15s/it]INFO:__main__:Training: Epoch 11 - Batch 39/39: Loss: 0.2318 | Train Acc: 90.690% (1130/1246)
+ 60%|██████    | 12/20 [09:03<06:13, 46.74s/it]INFO:__main__:Training: Epoch 12 - Batch 39/39: Loss: 0.2718 | Train Acc: 88.202% (1099/1246)
+ 65%|██████▌   | 13/20 [09:50<05:27, 46.77s/it]INFO:__main__:Training: Epoch 13 - Batch 39/39: Loss: 0.2896 | Train Acc: 88.523% (1103/1246)
+ 70%|███████   | 14/20 [10:35<04:37, 46.23s/it]INFO:__main__:Training: Epoch 14 - Batch 39/39: Loss: 0.2255 | Train Acc: 90.610% (1129/1246)
+ 75%|███████▌  | 15/20 [11:20<03:49, 45.81s/it]INFO:__main__:Training: Epoch 15 - Batch 39/39: Loss: 0.2264 | Train Acc: 91.172% (1136/1246)
+ 80%|████████  | 16/20 [12:04<03:01, 45.25s/it]INFO:__main__:Training: Epoch 16 - Batch 39/39: Loss: 0.1872 | Train Acc: 92.055% (1147/1246)
+ 85%|████████▌ | 17/20 [12:49<02:15, 45.23s/it]INFO:__main__:Training: Epoch 17 - Batch 39/39: Loss: 0.1705 | Train Acc: 92.456% (1152/1246)
+ 90%|█████████ | 18/20 [13:37<01:32, 46.04s/it]INFO:__main__:Training: Epoch 18 - Batch 39/39: Loss: 0.1778 | Train Acc: 92.857% (1157/1246)
+ 95%|█████████▌| 19/20 [14:24<00:46, 46.35s/it]INFO:__main__:Training: Epoch 19 - Batch 39/39: Loss: 0.1885 | Train Acc: 92.697% (1155/1246)
+100%|██████████| 20/20 [15:12<00:00, 46.85s/it]100%|██████████| 20/20 [15:12<00:00, 45.61s/it]
+INFO:__main__:Final training score: Loss: 0.1901, Accuracy: 92.247%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0018, Accuracy: 92.806%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id hyr4kpv6
+Training Vision Transformer multiclass for plant
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with vision_transformer_plant_multiclass
+INFO:__main__:Starting training cycle
+  0%|          | 0/64 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 39/39: Loss: 1.1997 | Train Acc: 48.636% (606/1246)
+  2%|▏         | 1/64 [00:20<21:21, 20.34s/it]INFO:__main__:Training: Epoch 1 - Batch 39/39: Loss: 1.0849 | Train Acc: 55.778% (695/1246)
+  3%|▎         | 2/64 [00:38<19:54, 19.26s/it]INFO:__main__:Training: Epoch 2 - Batch 39/39: Loss: 1.0955 | Train Acc: 55.217% (688/1246)
+  5%|▍         | 3/64 [00:57<19:22, 19.06s/it]INFO:__main__:Training: Epoch 3 - Batch 39/39: Loss: 1.0518 | Train Acc: 56.742% (707/1246)
+  6%|▋         | 4/64 [01:16<18:51, 18.86s/it]INFO:__main__:Training: Epoch 4 - Batch 39/39: Loss: 0.9893 | Train Acc: 58.748% (732/1246)
+  8%|▊         | 5/64 [01:34<18:23, 18.71s/it]INFO:__main__:Training: Epoch 5 - Batch 39/39: Loss: 0.9771 | Train Acc: 60.193% (750/1246)
+  9%|▉         | 6/64 [01:53<18:00, 18.63s/it]INFO:__main__:Training: Epoch 6 - Batch 39/39: Loss: 0.9199 | Train Acc: 63.403% (790/1246)
+ 11%|█         | 7/64 [02:11<17:38, 18.58s/it]INFO:__main__:Training: Epoch 7 - Batch 39/39: Loss: 0.8784 | Train Acc: 65.409% (815/1246)
+ 12%|█▎        | 8/64 [02:29<17:11, 18.43s/it]INFO:__main__:Training: Epoch 8 - Batch 39/39: Loss: 0.7794 | Train Acc: 68.299% (851/1246)
+ 14%|█▍        | 9/64 [02:48<16:52, 18.41s/it]INFO:__main__:Training: Epoch 9 - Batch 39/39: Loss: 0.7775 | Train Acc: 69.583% (867/1246)
+ 16%|█▌        | 10/64 [03:07<16:47, 18.65s/it]INFO:__main__:Training: Epoch 10 - Batch 39/39: Loss: 0.7297 | Train Acc: 69.823% (870/1246)
+ 17%|█▋        | 11/64 [03:25<16:23, 18.55s/it]INFO:__main__:Training: Epoch 11 - Batch 39/39: Loss: 0.7214 | Train Acc: 71.830% (895/1246)
+ 19%|█▉        | 12/64 [03:44<16:09, 18.65s/it]INFO:__main__:Training: Epoch 12 - Batch 39/39: Loss: 0.7626 | Train Acc: 69.583% (867/1246)
+ 20%|██        | 13/64 [04:02<15:43, 18.51s/it]INFO:__main__:Training: Epoch 13 - Batch 39/39: Loss: 0.7027 | Train Acc: 71.268% (888/1246)
+ 22%|██▏       | 14/64 [04:20<15:20, 18.41s/it]INFO:__main__:Training: Epoch 14 - Batch 39/39: Loss: 0.7361 | Train Acc: 69.101% (861/1246)
+ 23%|██▎       | 15/64 [04:41<15:33, 19.04s/it]INFO:__main__:Training: Epoch 15 - Batch 39/39: Loss: 0.6813 | Train Acc: 72.713% (906/1246)
+ 25%|██▌       | 16/64 [05:01<15:32, 19.42s/it]INFO:__main__:Training: Epoch 16 - Batch 39/39: Loss: 0.6788 | Train Acc: 74.077% (923/1246)
+ 27%|██▋       | 17/64 [05:22<15:36, 19.93s/it]INFO:__main__:Training: Epoch 17 - Batch 39/39: Loss: 0.6706 | Train Acc: 73.194% (912/1246)
+ 28%|██▊       | 18/64 [05:42<15:20, 20.01s/it]INFO:__main__:Training: Epoch 18 - Batch 39/39: Loss: 0.6590 | Train Acc: 73.114% (911/1246)
+ 30%|██▉       | 19/64 [06:03<15:14, 20.32s/it]INFO:__main__:Training: Epoch 19 - Batch 39/39: Loss: 0.6505 | Train Acc: 72.632% (905/1246)
+ 31%|███▏      | 20/64 [06:24<14:59, 20.44s/it]INFO:__main__:Training: Epoch 20 - Batch 39/39: Loss: 0.6392 | Train Acc: 75.120% (936/1246)
+ 33%|███▎      | 21/64 [06:45<14:44, 20.57s/it]INFO:__main__:Training: Epoch 21 - Batch 39/39: Loss: 0.6454 | Train Acc: 73.114% (911/1246)
+ 34%|███▍      | 22/64 [07:03<13:54, 19.86s/it]INFO:__main__:Training: Epoch 22 - Batch 39/39: Loss: 0.6188 | Train Acc: 75.120% (936/1246)
+ 36%|███▌      | 23/64 [07:22<13:18, 19.47s/it]INFO:__main__:Training: Epoch 23 - Batch 39/39: Loss: 0.6153 | Train Acc: 75.602% (942/1246)
+ 38%|███▊      | 24/64 [07:41<12:54, 19.35s/it]INFO:__main__:Training: Epoch 24 - Batch 39/39: Loss: 0.6229 | Train Acc: 75.120% (936/1246)
+ 39%|███▉      | 25/64 [07:59<12:17, 18.90s/it]INFO:__main__:Training: Epoch 25 - Batch 39/39: Loss: 0.5911 | Train Acc: 75.441% (940/1246)
+ 41%|████      | 26/64 [08:17<11:51, 18.71s/it]INFO:__main__:Training: Epoch 26 - Batch 39/39: Loss: 0.5928 | Train Acc: 74.639% (930/1246)
+ 42%|████▏     | 27/64 [08:35<11:26, 18.54s/it]INFO:__main__:Training: Epoch 27 - Batch 39/39: Loss: 0.5738 | Train Acc: 76.726% (956/1246)
+ 44%|████▍     | 28/64 [08:54<11:09, 18.60s/it]INFO:__main__:Training: Epoch 28 - Batch 39/39: Loss: 0.5745 | Train Acc: 77.047% (960/1246)
+ 45%|████▌     | 29/64 [09:13<10:55, 18.73s/it]INFO:__main__:Training: Epoch 29 - Batch 39/39: Loss: 0.5825 | Train Acc: 75.040% (935/1246)
+ 47%|████▋     | 30/64 [09:31<10:29, 18.52s/it]INFO:__main__:Training: Epoch 30 - Batch 39/39: Loss: 0.5864 | Train Acc: 74.559% (929/1246)
+ 48%|████▊     | 31/64 [09:49<10:09, 18.48s/it]INFO:__main__:Training: Epoch 31 - Batch 39/39: Loss: 0.5639 | Train Acc: 75.120% (936/1246)
+ 50%|█████     | 32/64 [10:08<09:49, 18.44s/it]INFO:__main__:Training: Epoch 32 - Batch 39/39: Loss: 0.5623 | Train Acc: 76.083% (948/1246)
+ 52%|█████▏    | 33/64 [10:26<09:25, 18.25s/it]INFO:__main__:Training: Epoch 33 - Batch 39/39: Loss: 0.5536 | Train Acc: 76.565% (954/1246)
+ 53%|█████▎    | 34/64 [10:44<09:10, 18.33s/it]INFO:__main__:Training: Epoch 34 - Batch 39/39: Loss: 0.5373 | Train Acc: 76.806% (957/1246)
+ 55%|█████▍    | 35/64 [11:02<08:51, 18.33s/it]INFO:__main__:Training: Epoch 35 - Batch 39/39: Loss: 0.5790 | Train Acc: 75.682% (943/1246)
+ 56%|█████▋    | 36/64 [11:21<08:37, 18.48s/it]INFO:__main__:Training: Epoch 36 - Batch 39/39: Loss: 0.5391 | Train Acc: 76.645% (955/1246)
+ 58%|█████▊    | 37/64 [11:40<08:18, 18.48s/it]INFO:__main__:Training: Epoch 37 - Batch 39/39: Loss: 0.5449 | Train Acc: 77.528% (966/1246)
+ 59%|█████▉    | 38/64 [11:58<07:58, 18.40s/it]INFO:__main__:Training: Epoch 38 - Batch 39/39: Loss: 0.5191 | Train Acc: 77.689% (968/1246)
+ 61%|██████    | 39/64 [12:18<07:52, 18.90s/it]INFO:__main__:Training: Epoch 39 - Batch 39/39: Loss: 0.5122 | Train Acc: 79.374% (989/1246)
+ 62%|██████▎   | 40/64 [12:39<07:49, 19.55s/it]INFO:__main__:Training: Epoch 40 - Batch 39/39: Loss: 0.5005 | Train Acc: 78.331% (976/1246)
+ 64%|██████▍   | 41/64 [13:00<07:37, 19.87s/it]INFO:__main__:Training: Epoch 41 - Batch 39/39: Loss: 0.5263 | Train Acc: 78.250% (975/1246)
+ 66%|██████▌   | 42/64 [13:21<07:29, 20.42s/it]INFO:__main__:Training: Epoch 42 - Batch 39/39: Loss: 0.4982 | Train Acc: 78.812% (982/1246)
+ 67%|██████▋   | 43/64 [13:42<07:08, 20.40s/it]INFO:__main__:Training: Epoch 43 - Batch 39/39: Loss: 0.5013 | Train Acc: 78.652% (980/1246)
+ 69%|██████▉   | 44/64 [14:02<06:49, 20.49s/it]INFO:__main__:Training: Epoch 44 - Batch 39/39: Loss: 0.4986 | Train Acc: 79.294% (988/1246)
+ 70%|███████   | 45/64 [14:23<06:30, 20.53s/it]INFO:__main__:Training: Epoch 45 - Batch 39/39: Loss: 0.4895 | Train Acc: 79.535% (991/1246)
+ 72%|███████▏  | 46/64 [14:42<05:58, 19.94s/it]INFO:__main__:Training: Epoch 46 - Batch 39/39: Loss: 0.5148 | Train Acc: 76.966% (959/1246)
+ 73%|███████▎  | 47/64 [15:00<05:32, 19.54s/it]INFO:__main__:Training: Epoch 47 - Batch 39/39: Loss: 0.4746 | Train Acc: 79.053% (985/1246)
+ 75%|███████▌  | 48/64 [15:19<05:09, 19.32s/it]INFO:__main__:Training: Epoch 48 - Batch 39/39: Loss: 0.5010 | Train Acc: 78.170% (974/1246)
+ 77%|███████▋  | 49/64 [15:37<04:45, 19.02s/it]INFO:__main__:Training: Epoch 49 - Batch 39/39: Loss: 0.4743 | Train Acc: 80.257% (1000/1246)
+ 78%|███████▊  | 50/64 [15:56<04:24, 18.87s/it]INFO:__main__:Training: Epoch 50 - Batch 39/39: Loss: 0.4655 | Train Acc: 80.578% (1004/1246)
+ 80%|███████▉  | 51/64 [16:14<04:03, 18.74s/it]INFO:__main__:Training: Epoch 51 - Batch 39/39: Loss: 0.4707 | Train Acc: 79.535% (991/1246)
+ 81%|████████▏ | 52/64 [16:33<03:43, 18.62s/it]INFO:__main__:Training: Epoch 52 - Batch 39/39: Loss: 0.4713 | Train Acc: 80.337% (1001/1246)
+ 83%|████████▎ | 53/64 [16:51<03:25, 18.65s/it]INFO:__main__:Training: Epoch 53 - Batch 39/39: Loss: 0.4869 | Train Acc: 79.535% (991/1246)
+ 84%|████████▍ | 54/64 [17:10<03:07, 18.72s/it]INFO:__main__:Training: Epoch 54 - Batch 39/39: Loss: 0.4819 | Train Acc: 79.374% (989/1246)
+ 86%|████████▌ | 55/64 [17:30<02:51, 19.08s/it]INFO:__main__:Training: Epoch 55 - Batch 39/39: Loss: 0.4540 | Train Acc: 81.300% (1013/1246)
+ 88%|████████▊ | 56/64 [17:51<02:36, 19.53s/it]INFO:__main__:Training: Epoch 56 - Batch 39/39: Loss: 0.4625 | Train Acc: 80.257% (1000/1246)
+ 89%|████████▉ | 57/64 [18:14<02:23, 20.53s/it]INFO:__main__:Training: Epoch 57 - Batch 39/39: Loss: 0.4768 | Train Acc: 79.133% (986/1246)
+ 91%|█████████ | 58/64 [18:34<02:03, 20.60s/it]INFO:__main__:Training: Epoch 58 - Batch 39/39: Loss: 0.4618 | Train Acc: 80.257% (1000/1246)
+ 92%|█████████▏| 59/64 [18:54<01:41, 20.39s/it]INFO:__main__:Training: Epoch 59 - Batch 39/39: Loss: 0.4670 | Train Acc: 79.535% (991/1246)
+ 94%|█████████▍| 60/64 [19:13<01:19, 19.96s/it]INFO:__main__:Training: Epoch 60 - Batch 39/39: Loss: 0.4671 | Train Acc: 80.177% (999/1246)
+ 95%|█████████▌| 61/64 [19:31<00:57, 19.26s/it]INFO:__main__:Training: Epoch 61 - Batch 39/39: Loss: 0.4351 | Train Acc: 80.979% (1009/1246)
+ 97%|█████████▋| 62/64 [19:50<00:38, 19.10s/it]INFO:__main__:Training: Epoch 62 - Batch 39/39: Loss: 0.4547 | Train Acc: 80.417% (1002/1246)
+ 98%|█████████▊| 63/64 [20:08<00:18, 18.94s/it]INFO:__main__:Training: Epoch 63 - Batch 39/39: Loss: 0.4349 | Train Acc: 81.059% (1010/1246)
+100%|██████████| 64/64 [20:26<00:00, 18.70s/it]100%|██████████| 64/64 [20:26<00:00, 19.17s/it]
+INFO:__main__:Final training score: Loss: 0.4517, Accuracy: 80.433%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0041, Accuracy: 78.417%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id dztyh0m0
+Training Vision Transformer binary for plant
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with vision_transformer_plant_binary
+INFO:__main__:Starting training cycle
+  0%|          | 0/110 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 39/39: Loss: 0.6176 | Train Acc: 72.151% (899/1246)
+  1%|          | 1/110 [00:19<35:28, 19.52s/it]INFO:__main__:Training: Epoch 1 - Batch 39/39: Loss: 0.5727 | Train Acc: 75.120% (936/1246)
+  2%|▏         | 2/110 [00:43<40:11, 22.33s/it]INFO:__main__:Training: Epoch 2 - Batch 39/39: Loss: 0.5541 | Train Acc: 75.120% (936/1246)
+  3%|▎         | 3/110 [01:05<38:54, 21.82s/it]INFO:__main__:Training: Epoch 3 - Batch 39/39: Loss: 0.5355 | Train Acc: 74.960% (934/1246)
+  4%|▎         | 4/110 [01:23<36:26, 20.62s/it]INFO:__main__:Training: Epoch 4 - Batch 39/39: Loss: 0.5238 | Train Acc: 74.077% (923/1246)
+  5%|▍         | 5/110 [01:42<34:43, 19.84s/it]INFO:__main__:Training: Epoch 5 - Batch 39/39: Loss: 0.4891 | Train Acc: 77.127% (961/1246)
+  5%|▌         | 6/110 [02:01<33:44, 19.47s/it]INFO:__main__:Training: Epoch 6 - Batch 39/39: Loss: 0.4510 | Train Acc: 77.689% (968/1246)
+  6%|▋         | 7/110 [02:19<32:46, 19.10s/it]INFO:__main__:Training: Epoch 7 - Batch 39/39: Loss: 0.4298 | Train Acc: 81.220% (1012/1246)
+  7%|▋         | 8/110 [02:37<32:02, 18.85s/it]INFO:__main__:Training: Epoch 8 - Batch 39/39: Loss: 0.4055 | Train Acc: 80.578% (1004/1246)
+  8%|▊         | 9/110 [02:55<31:24, 18.66s/it]INFO:__main__:Training: Epoch 9 - Batch 39/39: Loss: 0.3464 | Train Acc: 83.949% (1046/1246)
+  9%|▉         | 10/110 [03:14<31:14, 18.74s/it]INFO:__main__:Training: Epoch 10 - Batch 39/39: Loss: 0.3323 | Train Acc: 86.116% (1073/1246)
+ 10%|█         | 11/110 [03:33<30:50, 18.69s/it]INFO:__main__:Training: Epoch 11 - Batch 39/39: Loss: 0.3321 | Train Acc: 84.510% (1053/1246)
+ 11%|█         | 12/110 [03:53<31:02, 19.00s/it]INFO:__main__:Training: Epoch 12 - Batch 39/39: Loss: 0.3182 | Train Acc: 86.677% (1080/1246)
+ 12%|█▏        | 13/110 [04:13<31:33, 19.52s/it]INFO:__main__:Training: Epoch 13 - Batch 39/39: Loss: 0.3149 | Train Acc: 86.517% (1078/1246)
+ 13%|█▎        | 14/110 [04:33<31:05, 19.43s/it]INFO:__main__:Training: Epoch 14 - Batch 39/39: Loss: 0.2955 | Train Acc: 87.079% (1085/1246)
+ 14%|█▎        | 15/110 [04:51<30:09, 19.04s/it]INFO:__main__:Training: Epoch 15 - Batch 39/39: Loss: 0.2986 | Train Acc: 86.998% (1084/1246)
+ 15%|█▍        | 16/110 [05:09<29:29, 18.82s/it]INFO:__main__:Training: Epoch 16 - Batch 39/39: Loss: 0.3493 | Train Acc: 84.992% (1059/1246)
+ 15%|█▌        | 17/110 [05:28<29:06, 18.78s/it]INFO:__main__:Training: Epoch 17 - Batch 39/39: Loss: 0.3143 | Train Acc: 86.356% (1076/1246)
+ 16%|█▋        | 18/110 [05:46<28:34, 18.64s/it]INFO:__main__:Training: Epoch 18 - Batch 39/39: Loss: 0.2881 | Train Acc: 87.239% (1087/1246)
+ 17%|█▋        | 19/110 [06:05<28:26, 18.76s/it]INFO:__main__:Training: Epoch 19 - Batch 39/39: Loss: 0.3022 | Train Acc: 88.443% (1102/1246)
+ 18%|█▊        | 20/110 [06:24<28:01, 18.69s/it]INFO:__main__:Training: Epoch 20 - Batch 39/39: Loss: 0.2619 | Train Acc: 88.925% (1108/1246)
+ 19%|█▉        | 21/110 [06:42<27:37, 18.63s/it]INFO:__main__:Training: Epoch 21 - Batch 39/39: Loss: 0.2657 | Train Acc: 87.881% (1095/1246)
+ 20%|██        | 22/110 [07:01<27:18, 18.62s/it]INFO:__main__:Training: Epoch 22 - Batch 39/39: Loss: 0.2412 | Train Acc: 89.888% (1120/1246)
+ 21%|██        | 23/110 [07:18<26:38, 18.38s/it]INFO:__main__:Training: Epoch 23 - Batch 39/39: Loss: 0.2660 | Train Acc: 87.881% (1095/1246)
+ 22%|██▏       | 24/110 [07:37<26:32, 18.51s/it]INFO:__main__:Training: Epoch 24 - Batch 39/39: Loss: 0.2232 | Train Acc: 91.172% (1136/1246)
+ 23%|██▎       | 25/110 [07:55<25:59, 18.35s/it]INFO:__main__:Training: Epoch 25 - Batch 39/39: Loss: 0.2506 | Train Acc: 90.289% (1125/1246)
+ 24%|██▎       | 26/110 [08:14<25:42, 18.37s/it]INFO:__main__:Training: Epoch 26 - Batch 39/39: Loss: 0.2431 | Train Acc: 89.888% (1120/1246)
+ 25%|██▍       | 27/110 [08:33<25:46, 18.64s/it]INFO:__main__:Training: Epoch 27 - Batch 39/39: Loss: 0.2635 | Train Acc: 87.801% (1094/1246)
+ 25%|██▌       | 28/110 [08:53<26:07, 19.11s/it]INFO:__main__:Training: Epoch 28 - Batch 39/39: Loss: 0.2732 | Train Acc: 88.925% (1108/1246)
+ 26%|██▋       | 29/110 [09:14<26:31, 19.64s/it]INFO:__main__:Training: Epoch 29 - Batch 39/39: Loss: 0.2466 | Train Acc: 89.807% (1119/1246)
+ 27%|██▋       | 30/110 [09:35<26:33, 19.92s/it]INFO:__main__:Training: Epoch 30 - Batch 39/39: Loss: 0.2179 | Train Acc: 90.931% (1133/1246)
+ 28%|██▊       | 31/110 [09:55<26:13, 19.92s/it]INFO:__main__:Training: Epoch 31 - Batch 39/39: Loss: 0.2100 | Train Acc: 90.610% (1129/1246)
+ 29%|██▉       | 32/110 [10:15<26:17, 20.23s/it]INFO:__main__:Training: Epoch 32 - Batch 39/39: Loss: 0.2504 | Train Acc: 89.647% (1117/1246)
+ 30%|███       | 33/110 [10:36<26:06, 20.35s/it]INFO:__main__:Training: Epoch 33 - Batch 39/39: Loss: 0.2209 | Train Acc: 91.011% (1134/1246)
+ 31%|███       | 34/110 [10:58<26:18, 20.78s/it]INFO:__main__:Training: Epoch 34 - Batch 39/39: Loss: 0.2395 | Train Acc: 89.807% (1119/1246)
+ 32%|███▏      | 35/110 [11:18<25:46, 20.63s/it]INFO:__main__:Training: Epoch 35 - Batch 39/39: Loss: 0.2349 | Train Acc: 90.449% (1127/1246)
+ 33%|███▎      | 36/110 [11:37<24:46, 20.09s/it]INFO:__main__:Training: Epoch 36 - Batch 39/39: Loss: 0.1982 | Train Acc: 91.734% (1143/1246)
+ 34%|███▎      | 37/110 [11:55<23:46, 19.55s/it]INFO:__main__:Training: Epoch 37 - Batch 39/39: Loss: 0.1885 | Train Acc: 92.616% (1154/1246)
+ 35%|███▍      | 38/110 [12:14<23:05, 19.24s/it]INFO:__main__:Training: Epoch 38 - Batch 39/39: Loss: 0.2205 | Train Acc: 90.449% (1127/1246)
+ 35%|███▌      | 39/110 [12:33<22:43, 19.21s/it]INFO:__main__:Training: Epoch 39 - Batch 39/39: Loss: 0.2011 | Train Acc: 91.172% (1136/1246)
+ 36%|███▋      | 40/110 [12:51<22:04, 18.92s/it]INFO:__main__:Training: Epoch 40 - Batch 39/39: Loss: 0.2174 | Train Acc: 91.653% (1142/1246)
+ 37%|███▋      | 41/110 [13:09<21:28, 18.68s/it]INFO:__main__:Training: Epoch 41 - Batch 39/39: Loss: 0.1948 | Train Acc: 92.055% (1147/1246)
+ 38%|███▊      | 42/110 [13:28<21:01, 18.56s/it]INFO:__main__:Training: Epoch 42 - Batch 39/39: Loss: 0.1756 | Train Acc: 93.660% (1167/1246)
+ 39%|███▉      | 43/110 [13:46<20:38, 18.48s/it]INFO:__main__:Training: Epoch 43 - Batch 39/39: Loss: 0.2014 | Train Acc: 91.653% (1142/1246)
+ 40%|████      | 44/110 [14:04<20:16, 18.44s/it]INFO:__main__:Training: Epoch 44 - Batch 39/39: Loss: 0.1838 | Train Acc: 92.697% (1155/1246)
+ 41%|████      | 45/110 [14:22<19:49, 18.31s/it]INFO:__main__:Training: Epoch 45 - Batch 39/39: Loss: 0.1725 | Train Acc: 92.697% (1155/1246)
+ 42%|████▏     | 46/110 [14:41<19:44, 18.50s/it]INFO:__main__:Training: Epoch 46 - Batch 39/39: Loss: 0.1815 | Train Acc: 92.536% (1153/1246)
+ 43%|████▎     | 47/110 [15:00<19:36, 18.68s/it]INFO:__main__:Training: Epoch 47 - Batch 39/39: Loss: 0.1622 | Train Acc: 93.018% (1159/1246)
+ 44%|████▎     | 48/110 [15:18<19:08, 18.52s/it]INFO:__main__:Training: Epoch 48 - Batch 39/39: Loss: 0.2050 | Train Acc: 91.252% (1137/1246)
+ 45%|████▍     | 49/110 [15:37<18:54, 18.60s/it]INFO:__main__:Training: Epoch 49 - Batch 39/39: Loss: 0.1720 | Train Acc: 92.937% (1158/1246)
+ 45%|████▌     | 50/110 [15:56<18:32, 18.54s/it]INFO:__main__:Training: Epoch 50 - Batch 39/39: Loss: 0.1504 | Train Acc: 94.382% (1176/1246)
+ 46%|████▋     | 51/110 [16:14<18:09, 18.47s/it]INFO:__main__:Training: Epoch 51 - Batch 39/39: Loss: 0.1421 | Train Acc: 94.462% (1177/1246)
+ 47%|████▋     | 52/110 [16:34<18:12, 18.83s/it]INFO:__main__:Training: Epoch 52 - Batch 39/39: Loss: 0.1503 | Train Acc: 94.141% (1173/1246)
+ 48%|████▊     | 53/110 [16:54<18:23, 19.37s/it]INFO:__main__:Training: Epoch 53 - Batch 39/39: Loss: 0.1472 | Train Acc: 94.061% (1172/1246)
+ 49%|████▉     | 54/110 [17:16<18:47, 20.14s/it]INFO:__main__:Training: Epoch 54 - Batch 39/39: Loss: 0.1353 | Train Acc: 94.703% (1180/1246)
+ 50%|█████     | 55/110 [17:37<18:47, 20.49s/it]INFO:__main__:Training: Epoch 55 - Batch 39/39: Loss: 0.1562 | Train Acc: 94.382% (1176/1246)
+ 51%|█████     | 56/110 [17:59<18:37, 20.70s/it]INFO:__main__:Training: Epoch 56 - Batch 39/39: Loss: 0.1439 | Train Acc: 94.382% (1176/1246)
+ 52%|█████▏    | 57/110 [18:19<18:09, 20.56s/it]INFO:__main__:Training: Epoch 57 - Batch 39/39: Loss: 0.1491 | Train Acc: 93.981% (1171/1246)
+ 53%|█████▎    | 58/110 [18:39<17:44, 20.48s/it]INFO:__main__:Training: Epoch 58 - Batch 39/39: Loss: 0.1715 | Train Acc: 93.018% (1159/1246)
+ 54%|█████▎    | 59/110 [18:59<17:20, 20.39s/it]INFO:__main__:Training: Epoch 59 - Batch 39/39: Loss: 0.1391 | Train Acc: 94.302% (1175/1246)
+ 55%|█████▍    | 60/110 [19:21<17:11, 20.62s/it]INFO:__main__:Training: Epoch 60 - Batch 39/39: Loss: 0.1548 | Train Acc: 92.857% (1157/1246)
+ 55%|█████▌    | 61/110 [19:41<16:43, 20.47s/it]INFO:__main__:Training: Epoch 61 - Batch 39/39: Loss: 0.1466 | Train Acc: 93.499% (1165/1246)
+ 56%|█████▋    | 62/110 [20:02<16:34, 20.73s/it]INFO:__main__:Training: Epoch 62 - Batch 39/39: Loss: 0.1453 | Train Acc: 94.141% (1173/1246)
+ 57%|█████▋    | 63/110 [20:22<16:07, 20.59s/it]INFO:__main__:Training: Epoch 63 - Batch 39/39: Loss: 0.1551 | Train Acc: 93.981% (1171/1246)
+ 58%|█████▊    | 64/110 [20:43<15:47, 20.59s/it]INFO:__main__:Training: Epoch 64 - Batch 39/39: Loss: 0.1424 | Train Acc: 94.462% (1177/1246)
+ 59%|█████▉    | 65/110 [21:02<15:07, 20.16s/it]INFO:__main__:Training: Epoch 65 - Batch 39/39: Loss: 0.1373 | Train Acc: 94.543% (1178/1246)
+ 60%|██████    | 66/110 [21:21<14:37, 19.95s/it]INFO:__main__:Training: Epoch 66 - Batch 39/39: Loss: 0.1310 | Train Acc: 95.185% (1186/1246)
+ 61%|██████    | 67/110 [21:43<14:34, 20.34s/it]INFO:__main__:Training: Epoch 67 - Batch 39/39: Loss: 0.1364 | Train Acc: 95.024% (1184/1246)
+ 62%|██████▏   | 68/110 [22:04<14:21, 20.51s/it]INFO:__main__:Training: Epoch 68 - Batch 39/39: Loss: 0.1252 | Train Acc: 94.864% (1182/1246)
+ 63%|██████▎   | 69/110 [22:23<13:41, 20.03s/it]INFO:__main__:Training: Epoch 69 - Batch 39/39: Loss: 0.1307 | Train Acc: 95.185% (1186/1246)
+ 64%|██████▎   | 70/110 [22:41<13:03, 19.59s/it]INFO:__main__:Training: Epoch 70 - Batch 39/39: Loss: 0.1315 | Train Acc: 95.345% (1188/1246)
+ 65%|██████▍   | 71/110 [23:00<12:34, 19.35s/it]INFO:__main__:Training: Epoch 71 - Batch 39/39: Loss: 0.1127 | Train Acc: 95.425% (1189/1246)
+ 65%|██████▌   | 72/110 [23:18<12:02, 19.00s/it]INFO:__main__:Training: Epoch 72 - Batch 39/39: Loss: 0.1352 | Train Acc: 93.981% (1171/1246)
+ 66%|██████▋   | 73/110 [23:37<11:36, 18.83s/it]INFO:__main__:Training: Epoch 73 - Batch 39/39: Loss: 0.1266 | Train Acc: 94.703% (1180/1246)
+ 67%|██████▋   | 74/110 [23:55<11:10, 18.62s/it]INFO:__main__:Training: Epoch 74 - Batch 39/39: Loss: 0.1283 | Train Acc: 94.623% (1179/1246)
+ 68%|██████▊   | 75/110 [24:14<10:54, 18.70s/it]INFO:__main__:Training: Epoch 75 - Batch 39/39: Loss: 0.1392 | Train Acc: 95.265% (1187/1246)
+ 69%|██████▉   | 76/110 [24:32<10:31, 18.56s/it]INFO:__main__:Training: Epoch 76 - Batch 39/39: Loss: 0.1119 | Train Acc: 96.228% (1199/1246)
+ 70%|███████   | 77/110 [24:50<10:11, 18.53s/it]INFO:__main__:Training: Epoch 77 - Batch 39/39: Loss: 0.1417 | Train Acc: 94.462% (1177/1246)
+ 71%|███████   | 78/110 [25:09<09:56, 18.65s/it]INFO:__main__:Training: Epoch 78 - Batch 39/39: Loss: 0.1661 | Train Acc: 93.740% (1168/1246)
+ 72%|███████▏  | 79/110 [25:29<09:46, 18.91s/it]INFO:__main__:Training: Epoch 79 - Batch 39/39: Loss: 0.1126 | Train Acc: 95.746% (1193/1246)
+ 73%|███████▎  | 80/110 [25:49<09:38, 19.29s/it]INFO:__main__:Training: Epoch 80 - Batch 39/39: Loss: 0.0973 | Train Acc: 96.469% (1202/1246)
+ 74%|███████▎  | 81/110 [26:09<09:29, 19.65s/it]INFO:__main__:Training: Epoch 81 - Batch 39/39: Loss: 0.1046 | Train Acc: 95.746% (1193/1246)
+ 75%|███████▍  | 82/110 [26:29<09:13, 19.76s/it]INFO:__main__:Training: Epoch 82 - Batch 39/39: Loss: 0.1283 | Train Acc: 94.783% (1181/1246)
+ 75%|███████▌  | 83/110 [26:48<08:46, 19.49s/it]INFO:__main__:Training: Epoch 83 - Batch 39/39: Loss: 0.1621 | Train Acc: 93.579% (1166/1246)
+ 76%|███████▋  | 84/110 [27:07<08:18, 19.19s/it]INFO:__main__:Training: Epoch 84 - Batch 39/39: Loss: 0.1219 | Train Acc: 95.024% (1184/1246)
+ 77%|███████▋  | 85/110 [27:25<07:53, 18.95s/it]INFO:__main__:Training: Epoch 85 - Batch 39/39: Loss: 0.1138 | Train Acc: 95.827% (1194/1246)
+ 78%|███████▊  | 86/110 [27:43<07:30, 18.77s/it]INFO:__main__:Training: Epoch 86 - Batch 39/39: Loss: 0.1071 | Train Acc: 95.987% (1196/1246)
+ 79%|███████▉  | 87/110 [28:02<07:08, 18.64s/it]INFO:__main__:Training: Epoch 87 - Batch 39/39: Loss: 0.1265 | Train Acc: 95.425% (1189/1246)
+ 80%|████████  | 88/110 [28:20<06:47, 18.53s/it]INFO:__main__:Training: Epoch 88 - Batch 39/39: Loss: 0.1033 | Train Acc: 96.549% (1203/1246)
+ 81%|████████  | 89/110 [28:38<06:28, 18.50s/it]INFO:__main__:Training: Epoch 89 - Batch 39/39: Loss: 0.0993 | Train Acc: 96.308% (1200/1246)
+ 82%|████████▏ | 90/110 [28:58<06:14, 18.73s/it]INFO:__main__:Training: Epoch 90 - Batch 39/39: Loss: 0.1075 | Train Acc: 95.666% (1192/1246)
+ 83%|████████▎ | 91/110 [29:18<06:06, 19.30s/it]INFO:__main__:Training: Epoch 91 - Batch 39/39: Loss: 0.1222 | Train Acc: 94.543% (1178/1246)
+ 84%|████████▎ | 92/110 [29:40<05:59, 19.96s/it]INFO:__main__:Training: Epoch 92 - Batch 39/39: Loss: 0.1128 | Train Acc: 95.746% (1193/1246)
+ 85%|████████▍ | 93/110 [30:00<05:42, 20.15s/it]INFO:__main__:Training: Epoch 93 - Batch 39/39: Loss: 0.1041 | Train Acc: 96.067% (1197/1246)
+ 85%|████████▌ | 94/110 [30:21<05:25, 20.34s/it]INFO:__main__:Training: Epoch 94 - Batch 39/39: Loss: 0.0947 | Train Acc: 96.308% (1200/1246)
+ 86%|████████▋ | 95/110 [30:41<05:04, 20.29s/it]INFO:__main__:Training: Epoch 95 - Batch 39/39: Loss: 0.0960 | Train Acc: 96.388% (1201/1246)
+ 87%|████████▋ | 96/110 [31:01<04:41, 20.09s/it]INFO:__main__:Training: Epoch 96 - Batch 39/39: Loss: 0.1061 | Train Acc: 95.666% (1192/1246)
+ 88%|████████▊ | 97/110 [31:19<04:14, 19.56s/it]INFO:__main__:Training: Epoch 97 - Batch 39/39: Loss: 0.1041 | Train Acc: 95.345% (1188/1246)
+ 89%|████████▉ | 98/110 [31:38<03:49, 19.16s/it]INFO:__main__:Training: Epoch 98 - Batch 39/39: Loss: 0.0936 | Train Acc: 96.709% (1205/1246)
+ 90%|█████████ | 99/110 [31:56<03:27, 18.86s/it]INFO:__main__:Training: Epoch 99 - Batch 39/39: Loss: 0.1165 | Train Acc: 95.425% (1189/1246)
+ 91%|█████████ | 100/110 [32:15<03:09, 18.97s/it]INFO:__main__:Training: Epoch 100 - Batch 39/39: Loss: 0.0810 | Train Acc: 96.469% (1202/1246)
+ 92%|█████████▏| 101/110 [32:35<02:53, 19.30s/it]INFO:__main__:Training: Epoch 101 - Batch 39/39: Loss: 0.1212 | Train Acc: 95.586% (1191/1246)
+ 93%|█████████▎| 102/110 [32:55<02:35, 19.48s/it]INFO:__main__:Training: Epoch 102 - Batch 39/39: Loss: 0.1101 | Train Acc: 95.907% (1195/1246)
+ 94%|█████████▎| 103/110 [33:16<02:19, 19.93s/it]INFO:__main__:Training: Epoch 103 - Batch 39/39: Loss: 0.0935 | Train Acc: 96.388% (1201/1246)
+ 95%|█████████▍| 104/110 [33:35<01:58, 19.76s/it]INFO:__main__:Training: Epoch 104 - Batch 39/39: Loss: 0.0961 | Train Acc: 96.148% (1198/1246)
+ 95%|█████████▌| 105/110 [33:54<01:36, 19.37s/it]INFO:__main__:Training: Epoch 105 - Batch 39/39: Loss: 0.1174 | Train Acc: 95.345% (1188/1246)
+ 96%|█████████▋| 106/110 [34:12<01:16, 19.01s/it]INFO:__main__:Training: Epoch 106 - Batch 39/39: Loss: 0.1419 | Train Acc: 94.222% (1174/1246)
+ 97%|█████████▋| 107/110 [34:30<00:56, 18.86s/it]INFO:__main__:Training: Epoch 107 - Batch 39/39: Loss: 0.0837 | Train Acc: 96.790% (1206/1246)
+ 98%|█████████▊| 108/110 [34:50<00:38, 19.06s/it]INFO:__main__:Training: Epoch 108 - Batch 39/39: Loss: 0.1108 | Train Acc: 95.907% (1195/1246)
+ 99%|█████████▉| 109/110 [35:08<00:18, 18.88s/it]INFO:__main__:Training: Epoch 109 - Batch 39/39: Loss: 0.0951 | Train Acc: 96.388% (1201/1246)
+100%|██████████| 110/110 [35:28<00:00, 19.15s/it]100%|██████████| 110/110 [35:28<00:00, 19.35s/it]
+INFO:__main__:Final training score: Loss: 0.1098, Accuracy: 95.730%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0043, Accuracy: 95.683%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id yhfqs98s
+Training leaf models
+Training ResNet18 multiclass for leaf
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with resnet18_leaf_multiclass
+INFO:__main__:Starting training cycle
+  0%|          | 0/50 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 17/17: Loss: 1.1052 | Train Acc: 54.928% (574/1045)
+  2%|▏         | 1/50 [00:17<13:54, 17.03s/it]INFO:__main__:Training: Epoch 1 - Batch 17/17: Loss: 0.7657 | Train Acc: 68.708% (718/1045)
+  4%|▍         | 2/50 [00:34<13:58, 17.48s/it]INFO:__main__:Training: Epoch 2 - Batch 17/17: Loss: 0.6835 | Train Acc: 69.952% (731/1045)
+  6%|▌         | 3/50 [00:51<13:28, 17.21s/it]INFO:__main__:Training: Epoch 3 - Batch 17/17: Loss: 0.6811 | Train Acc: 73.301% (766/1045)
+  8%|▊         | 4/50 [01:09<13:15, 17.30s/it]INFO:__main__:Training: Epoch 4 - Batch 17/17: Loss: 0.6442 | Train Acc: 72.919% (762/1045)
+ 10%|█         | 5/50 [01:26<13:05, 17.47s/it]INFO:__main__:Training: Epoch 5 - Batch 17/17: Loss: 0.5917 | Train Acc: 75.789% (792/1045)
+ 12%|█▏        | 6/50 [01:44<12:56, 17.66s/it]INFO:__main__:Training: Epoch 6 - Batch 17/17: Loss: 0.5609 | Train Acc: 77.321% (808/1045)
+ 14%|█▍        | 7/50 [02:02<12:38, 17.64s/it]INFO:__main__:Training: Epoch 7 - Batch 17/17: Loss: 0.5147 | Train Acc: 77.321% (808/1045)
+ 16%|█▌        | 8/50 [02:20<12:25, 17.75s/it]INFO:__main__:Training: Epoch 8 - Batch 17/17: Loss: 0.5467 | Train Acc: 75.694% (791/1045)
+ 18%|█▊        | 9/50 [02:38<12:14, 17.91s/it]INFO:__main__:Training: Epoch 9 - Batch 17/17: Loss: 0.5869 | Train Acc: 75.789% (792/1045)
+ 20%|██        | 10/50 [02:56<11:51, 17.79s/it]INFO:__main__:Training: Epoch 10 - Batch 17/17: Loss: 0.5643 | Train Acc: 76.268% (797/1045)
+ 22%|██▏       | 11/50 [03:13<11:25, 17.58s/it]INFO:__main__:Training: Epoch 11 - Batch 17/17: Loss: 0.5275 | Train Acc: 78.469% (820/1045)
+ 24%|██▍       | 12/50 [03:31<11:10, 17.66s/it]INFO:__main__:Training: Epoch 12 - Batch 17/17: Loss: 0.5398 | Train Acc: 77.416% (809/1045)
+ 26%|██▌       | 13/50 [04:05<13:54, 22.55s/it]INFO:__main__:Training: Epoch 13 - Batch 17/17: Loss: 0.5542 | Train Acc: 76.555% (800/1045)
+ 28%|██▊       | 14/50 [04:36<15:10, 25.28s/it]INFO:__main__:Training: Epoch 14 - Batch 17/17: Loss: 0.4739 | Train Acc: 80.383% (840/1045)
+ 30%|███       | 15/50 [04:54<13:23, 22.95s/it]INFO:__main__:Training: Epoch 15 - Batch 17/17: Loss: 0.4949 | Train Acc: 77.799% (813/1045)
+ 32%|███▏      | 16/50 [05:11<12:07, 21.39s/it]INFO:__main__:Training: Epoch 16 - Batch 17/17: Loss: 0.5308 | Train Acc: 79.234% (828/1045)
+ 34%|███▍      | 17/50 [05:29<11:08, 20.25s/it]INFO:__main__:Training: Epoch 17 - Batch 17/17: Loss: 0.4616 | Train Acc: 78.852% (824/1045)
+ 36%|███▌      | 18/50 [05:47<10:27, 19.61s/it]INFO:__main__:Training: Epoch 18 - Batch 17/17: Loss: 0.4939 | Train Acc: 78.278% (818/1045)
+ 38%|███▊      | 19/50 [06:05<09:52, 19.13s/it]INFO:__main__:Training: Epoch 19 - Batch 17/17: Loss: 0.5072 | Train Acc: 79.139% (827/1045)
+ 40%|████      | 20/50 [06:30<10:26, 20.88s/it]INFO:__main__:Training: Epoch 20 - Batch 17/17: Loss: 0.4958 | Train Acc: 78.947% (825/1045)
+ 42%|████▏     | 21/50 [06:48<09:42, 20.10s/it]INFO:__main__:Training: Epoch 21 - Batch 17/17: Loss: 0.4969 | Train Acc: 78.947% (825/1045)
+ 44%|████▍     | 22/50 [07:26<11:51, 25.40s/it]INFO:__main__:Training: Epoch 22 - Batch 17/17: Loss: 0.4636 | Train Acc: 80.478% (841/1045)
+ 46%|████▌     | 23/50 [07:43<10:17, 22.85s/it]INFO:__main__:Training: Epoch 23 - Batch 17/17: Loss: 0.4945 | Train Acc: 79.330% (829/1045)
+ 48%|████▊     | 24/50 [08:00<09:10, 21.16s/it]INFO:__main__:Training: Epoch 24 - Batch 17/17: Loss: 0.4641 | Train Acc: 80.287% (839/1045)
+ 50%|█████     | 25/50 [08:17<08:13, 19.72s/it]INFO:__main__:Training: Epoch 25 - Batch 17/17: Loss: 0.4436 | Train Acc: 79.522% (831/1045)
+ 52%|█████▏    | 26/50 [08:34<07:32, 18.87s/it]INFO:__main__:Training: Epoch 26 - Batch 17/17: Loss: 0.4627 | Train Acc: 79.330% (829/1045)
+ 54%|█████▍    | 27/50 [08:51<07:03, 18.40s/it]INFO:__main__:Training: Epoch 27 - Batch 17/17: Loss: 0.4178 | Train Acc: 81.627% (853/1045)
+ 56%|█████▌    | 28/50 [09:08<06:35, 17.99s/it]INFO:__main__:Training: Epoch 28 - Batch 17/17: Loss: 0.4323 | Train Acc: 80.670% (843/1045)
+ 58%|█████▊    | 29/50 [09:25<06:13, 17.77s/it]INFO:__main__:Training: Epoch 29 - Batch 17/17: Loss: 0.4701 | Train Acc: 80.000% (836/1045)
+ 60%|██████    | 30/50 [09:43<05:53, 17.66s/it]INFO:__main__:Training: Epoch 30 - Batch 17/17: Loss: 0.4493 | Train Acc: 80.574% (842/1045)
+ 62%|██████▏   | 31/50 [10:00<05:34, 17.58s/it]INFO:__main__:Training: Epoch 31 - Batch 17/17: Loss: 0.4119 | Train Acc: 81.435% (851/1045)
+ 64%|██████▍   | 32/50 [10:17<05:15, 17.51s/it]INFO:__main__:Training: Epoch 32 - Batch 17/17: Loss: 0.4113 | Train Acc: 83.062% (868/1045)
+ 66%|██████▌   | 33/50 [10:35<04:57, 17.51s/it]INFO:__main__:Training: Epoch 33 - Batch 17/17: Loss: 0.4589 | Train Acc: 79.904% (835/1045)
+ 68%|██████▊   | 34/50 [10:52<04:37, 17.34s/it]INFO:__main__:Training: Epoch 34 - Batch 17/17: Loss: 0.4345 | Train Acc: 80.383% (840/1045)
+ 70%|███████   | 35/50 [11:09<04:19, 17.29s/it]INFO:__main__:Training: Epoch 35 - Batch 17/17: Loss: 0.4704 | Train Acc: 80.574% (842/1045)
+ 72%|███████▏  | 36/50 [11:27<04:03, 17.38s/it]INFO:__main__:Training: Epoch 36 - Batch 17/17: Loss: 0.4612 | Train Acc: 79.426% (830/1045)
+ 74%|███████▍  | 37/50 [11:44<03:45, 17.32s/it]INFO:__main__:Training: Epoch 37 - Batch 17/17: Loss: 0.4279 | Train Acc: 82.201% (859/1045)
+ 76%|███████▌  | 38/50 [12:02<03:30, 17.51s/it]INFO:__main__:Training: Epoch 38 - Batch 17/17: Loss: 0.4469 | Train Acc: 81.244% (849/1045)
+ 78%|███████▊  | 39/50 [12:20<03:16, 17.90s/it]INFO:__main__:Training: Epoch 39 - Batch 17/17: Loss: 0.4125 | Train Acc: 82.584% (863/1045)
+ 80%|████████  | 40/50 [12:38<02:57, 17.70s/it]INFO:__main__:Training: Epoch 40 - Batch 17/17: Loss: 0.4411 | Train Acc: 82.105% (858/1045)
+ 82%|████████▏ | 41/50 [12:56<02:42, 18.00s/it]INFO:__main__:Training: Epoch 41 - Batch 17/17: Loss: 0.3851 | Train Acc: 82.297% (860/1045)
+ 84%|████████▍ | 42/50 [13:14<02:23, 17.98s/it]INFO:__main__:Training: Epoch 42 - Batch 17/17: Loss: 0.4369 | Train Acc: 82.010% (857/1045)
+ 86%|████████▌ | 43/50 [13:32<02:04, 17.76s/it]INFO:__main__:Training: Epoch 43 - Batch 17/17: Loss: 0.4246 | Train Acc: 82.584% (863/1045)
+ 88%|████████▊ | 44/50 [13:49<01:45, 17.62s/it]INFO:__main__:Training: Epoch 44 - Batch 17/17: Loss: 0.4228 | Train Acc: 82.584% (863/1045)
+ 90%|█████████ | 45/50 [14:06<01:27, 17.50s/it]INFO:__main__:Training: Epoch 45 - Batch 17/17: Loss: 0.4126 | Train Acc: 82.679% (864/1045)
+ 92%|█████████▏| 46/50 [14:23<01:09, 17.34s/it]INFO:__main__:Training: Epoch 46 - Batch 17/17: Loss: 0.4248 | Train Acc: 82.297% (860/1045)
+ 94%|█████████▍| 47/50 [14:40<00:51, 17.21s/it]INFO:__main__:Training: Epoch 47 - Batch 17/17: Loss: 0.4034 | Train Acc: 81.340% (850/1045)
+ 96%|█████████▌| 48/50 [14:58<00:34, 17.38s/it]INFO:__main__:Training: Epoch 48 - Batch 17/17: Loss: 0.4144 | Train Acc: 80.957% (846/1045)
+ 98%|█████████▊| 49/50 [15:15<00:17, 17.28s/it]INFO:__main__:Training: Epoch 49 - Batch 17/17: Loss: 0.3996 | Train Acc: 82.967% (867/1045)
+100%|██████████| 50/50 [15:33<00:00, 17.41s/it]100%|██████████| 50/50 [15:33<00:00, 18.66s/it]
+INFO:__main__:Final training score: Loss: 0.4109, Accuracy: 82.048%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0049, Accuracy: 78.632%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id f7422vb9
+Training ResNet18 binary for leaf
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with resnet18_leaf_binary
+INFO:__main__:Starting training cycle
+  0%|          | 0/25 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 17/17: Loss: 0.4443 | Train Acc: 80.096% (837/1045)
+  4%|▍         | 1/25 [00:18<07:20, 18.36s/it]INFO:__main__:Training: Epoch 1 - Batch 17/17: Loss: 0.2620 | Train Acc: 90.048% (941/1045)
+  8%|▊         | 2/25 [00:36<06:53, 17.98s/it]INFO:__main__:Training: Epoch 2 - Batch 17/17: Loss: 0.2328 | Train Acc: 89.952% (940/1045)
+ 12%|█▏        | 3/25 [00:53<06:27, 17.63s/it]INFO:__main__:Training: Epoch 3 - Batch 17/17: Loss: 0.2418 | Train Acc: 89.856% (939/1045)
+ 16%|█▌        | 4/25 [01:10<06:08, 17.56s/it]INFO:__main__:Training: Epoch 4 - Batch 17/17: Loss: 0.1991 | Train Acc: 92.249% (964/1045)
+ 20%|██        | 5/25 [01:28<05:49, 17.47s/it]INFO:__main__:Training: Epoch 5 - Batch 17/17: Loss: 0.2419 | Train Acc: 89.952% (940/1045)
+ 24%|██▍       | 6/25 [01:45<05:31, 17.46s/it]INFO:__main__:Training: Epoch 6 - Batch 17/17: Loss: 0.1779 | Train Acc: 93.014% (972/1045)
+ 28%|██▊       | 7/25 [02:02<05:10, 17.27s/it]INFO:__main__:Training: Epoch 7 - Batch 17/17: Loss: 0.1737 | Train Acc: 93.493% (977/1045)
+ 32%|███▏      | 8/25 [02:19<04:54, 17.35s/it]INFO:__main__:Training: Epoch 8 - Batch 17/17: Loss: 0.1518 | Train Acc: 94.258% (985/1045)
+ 36%|███▌      | 9/25 [02:36<04:35, 17.25s/it]INFO:__main__:Training: Epoch 9 - Batch 17/17: Loss: 0.1957 | Train Acc: 92.249% (964/1045)
+ 40%|████      | 10/25 [02:54<04:20, 17.36s/it]INFO:__main__:Training: Epoch 10 - Batch 17/17: Loss: 0.1737 | Train Acc: 93.110% (973/1045)
+ 44%|████▍     | 11/25 [03:11<04:03, 17.36s/it]INFO:__main__:Training: Epoch 11 - Batch 17/17: Loss: 0.1896 | Train Acc: 92.153% (963/1045)
+ 48%|████▊     | 12/25 [03:29<03:47, 17.50s/it]INFO:__main__:Training: Epoch 12 - Batch 17/17: Loss: 0.1489 | Train Acc: 95.024% (993/1045)
+ 52%|█████▏    | 13/25 [03:48<03:36, 18.03s/it]INFO:__main__:Training: Epoch 13 - Batch 17/17: Loss: 0.1416 | Train Acc: 93.876% (981/1045)
+ 56%|█████▌    | 14/25 [04:06<03:15, 17.74s/it]INFO:__main__:Training: Epoch 14 - Batch 17/17: Loss: 0.1520 | Train Acc: 94.258% (985/1045)
+ 60%|██████    | 15/25 [04:23<02:55, 17.54s/it]INFO:__main__:Training: Epoch 15 - Batch 17/17: Loss: 0.1314 | Train Acc: 95.024% (993/1045)
+ 64%|██████▍   | 16/25 [04:40<02:37, 17.45s/it]INFO:__main__:Training: Epoch 16 - Batch 17/17: Loss: 0.1229 | Train Acc: 95.407% (997/1045)
+ 68%|██████▊   | 17/25 [04:57<02:18, 17.29s/it]INFO:__main__:Training: Epoch 17 - Batch 17/17: Loss: 0.1321 | Train Acc: 94.737% (990/1045)
+ 72%|███████▏  | 18/25 [05:14<02:01, 17.35s/it]INFO:__main__:Training: Epoch 18 - Batch 17/17: Loss: 0.1075 | Train Acc: 96.364% (1007/1045)
+ 76%|███████▌  | 19/25 [05:31<01:43, 17.22s/it]INFO:__main__:Training: Epoch 19 - Batch 17/17: Loss: 0.1147 | Train Acc: 95.694% (1000/1045)
+ 80%|████████  | 20/25 [05:48<01:25, 17.17s/it]INFO:__main__:Training: Epoch 20 - Batch 17/17: Loss: 0.1259 | Train Acc: 95.502% (998/1045)
+ 84%|████████▍ | 21/25 [06:05<01:07, 16.98s/it]INFO:__main__:Training: Epoch 21 - Batch 17/17: Loss: 0.1366 | Train Acc: 95.598% (999/1045)
+ 88%|████████▊ | 22/25 [06:23<00:51, 17.21s/it]INFO:__main__:Training: Epoch 22 - Batch 17/17: Loss: 0.1129 | Train Acc: 95.407% (997/1045)
+ 92%|█████████▏| 23/25 [06:41<00:34, 17.49s/it]INFO:__main__:Training: Epoch 23 - Batch 17/17: Loss: 0.1182 | Train Acc: 94.928% (992/1045)
+ 96%|█████████▌| 24/25 [06:57<00:17, 17.25s/it]INFO:__main__:Training: Epoch 24 - Batch 17/17: Loss: 0.0975 | Train Acc: 95.789% (1001/1045)
+100%|██████████| 25/25 [07:15<00:00, 17.36s/it]100%|██████████| 25/25 [07:15<00:00, 17.42s/it]
+INFO:__main__:Final training score: Loss: 0.1182, Accuracy: 95.445%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0010, Accuracy: 96.581%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id 2uxtdb0i
+Training Inception V3 multiclass for leaf
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with inception_v3_leaf_multiclass
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/models/inception.py:48: FutureWarning: The default weight initialization of inception_v3 will be changed in future releases of torchvision. If you wish to keep the old behavior (which leads to long initialization times due to scipy/scipy#11299), please set init_weights=True.
+  warnings.warn('The default weight initialization of inception_v3 will be changed in future releases of '
+INFO:__main__:Starting training cycle
+  0%|          | 0/15 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 33/33: Loss: 1.5487 | Train Acc: 56.268% (588/1045)
+  7%|▋         | 1/15 [00:33<07:44, 33.21s/it]INFO:__main__:Training: Epoch 1 - Batch 33/33: Loss: 1.0176 | Train Acc: 65.646% (686/1045)
+ 13%|█▎        | 2/15 [01:07<07:21, 33.99s/it]INFO:__main__:Training: Epoch 2 - Batch 33/33: Loss: 0.8462 | Train Acc: 68.612% (717/1045)
+ 20%|██        | 3/15 [01:44<07:03, 35.28s/it]INFO:__main__:Training: Epoch 3 - Batch 33/33: Loss: 0.7650 | Train Acc: 70.526% (737/1045)
+ 27%|██▋       | 4/15 [02:18<06:23, 34.91s/it]INFO:__main__:Training: Epoch 4 - Batch 33/33: Loss: 0.7333 | Train Acc: 71.100% (743/1045)
+ 33%|███▎      | 5/15 [02:53<05:47, 34.79s/it]INFO:__main__:Training: Epoch 5 - Batch 33/33: Loss: 0.8004 | Train Acc: 69.091% (722/1045)
+ 40%|████      | 6/15 [03:28<05:13, 34.87s/it]INFO:__main__:Training: Epoch 6 - Batch 33/33: Loss: 0.7430 | Train Acc: 72.440% (757/1045)
+ 47%|████▋     | 7/15 [04:03<04:38, 34.77s/it]INFO:__main__:Training: Epoch 7 - Batch 33/33: Loss: 0.8478 | Train Acc: 70.622% (738/1045)
+ 53%|█████▎    | 8/15 [04:37<04:03, 34.72s/it]INFO:__main__:Training: Epoch 8 - Batch 33/33: Loss: 0.7796 | Train Acc: 67.751% (708/1045)
+ 60%|██████    | 9/15 [05:12<03:29, 34.85s/it]INFO:__main__:Training: Epoch 9 - Batch 33/33: Loss: 0.7629 | Train Acc: 70.048% (732/1045)
+ 67%|██████▋   | 10/15 [05:47<02:53, 34.75s/it]INFO:__main__:Training: Epoch 10 - Batch 33/33: Loss: 0.6703 | Train Acc: 74.067% (774/1045)
+ 73%|███████▎  | 11/15 [06:22<02:19, 34.79s/it]INFO:__main__:Training: Epoch 11 - Batch 33/33: Loss: 0.6879 | Train Acc: 71.388% (746/1045)
+ 80%|████████  | 12/15 [06:56<01:43, 34.60s/it]INFO:__main__:Training: Epoch 12 - Batch 33/33: Loss: 0.8079 | Train Acc: 67.273% (703/1045)
+ 87%|████████▋ | 13/15 [07:30<01:08, 34.43s/it]INFO:__main__:Training: Epoch 13 - Batch 33/33: Loss: 0.7630 | Train Acc: 70.239% (734/1045)
+ 93%|█████████▎| 14/15 [08:07<00:35, 35.15s/it]INFO:__main__:Training: Epoch 14 - Batch 33/33: Loss: 0.6996 | Train Acc: 71.196% (744/1045)
+100%|██████████| 15/15 [08:43<00:00, 35.33s/it]100%|██████████| 15/15 [08:43<00:00, 34.87s/it]
+INFO:__main__:Final training score: Loss: 0.7258, Accuracy: 70.833%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0125, Accuracy: 60.684%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id 8qicy2q0
+Training Inception V3 binary for leaf
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with inception_v3_leaf_binary
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/models/inception.py:48: FutureWarning: The default weight initialization of inception_v3 will be changed in future releases of torchvision. If you wish to keep the old behavior (which leads to long initialization times due to scipy/scipy#11299), please set init_weights=True.
+  warnings.warn('The default weight initialization of inception_v3 will be changed in future releases of '
+INFO:__main__:Starting training cycle
+  0%|          | 0/30 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 33/33: Loss: 0.5634 | Train Acc: 82.392% (861/1045)
+  3%|▎         | 1/30 [00:35<17:04, 35.33s/it]INFO:__main__:Training: Epoch 1 - Batch 33/33: Loss: 0.5246 | Train Acc: 84.976% (888/1045)
+  7%|▋         | 2/30 [01:09<16:14, 34.80s/it]INFO:__main__:Training: Epoch 2 - Batch 33/33: Loss: 0.3694 | Train Acc: 88.421% (924/1045)
+ 10%|█         | 3/30 [01:44<15:35, 34.65s/it]INFO:__main__:Training: Epoch 3 - Batch 33/33: Loss: 0.4731 | Train Acc: 85.455% (893/1045)
+ 13%|█▎        | 4/30 [02:18<14:59, 34.58s/it]INFO:__main__:Training: Epoch 4 - Batch 33/33: Loss: 0.3727 | Train Acc: 86.316% (902/1045)
+ 17%|█▋        | 5/30 [02:54<14:33, 34.95s/it]INFO:__main__:Training: Epoch 5 - Batch 33/33: Loss: 0.4012 | Train Acc: 85.933% (898/1045)
+ 20%|██        | 6/30 [03:28<13:49, 34.57s/it]INFO:__main__:Training: Epoch 6 - Batch 33/33: Loss: 0.2535 | Train Acc: 90.335% (944/1045)
+ 23%|██▎       | 7/30 [04:02<13:11, 34.40s/it]INFO:__main__:Training: Epoch 7 - Batch 33/33: Loss: 0.2563 | Train Acc: 89.952% (940/1045)
+ 27%|██▋       | 8/30 [04:35<12:30, 34.11s/it]INFO:__main__:Training: Epoch 8 - Batch 33/33: Loss: 0.2836 | Train Acc: 90.431% (945/1045)
+ 30%|███       | 9/30 [05:08<11:49, 33.79s/it]INFO:__main__:Training: Epoch 9 - Batch 33/33: Loss: 0.3197 | Train Acc: 87.560% (915/1045)
+ 33%|███▎      | 10/30 [05:41<11:11, 33.60s/it]INFO:__main__:Training: Epoch 10 - Batch 33/33: Loss: 0.2116 | Train Acc: 90.718% (948/1045)
+ 37%|███▋      | 11/30 [06:16<10:45, 33.96s/it]INFO:__main__:Training: Epoch 11 - Batch 33/33: Loss: 0.2734 | Train Acc: 89.378% (934/1045)
+ 40%|████      | 12/30 [06:50<10:12, 34.03s/it]INFO:__main__:Training: Epoch 12 - Batch 33/33: Loss: 0.3369 | Train Acc: 88.134% (921/1045)
+ 43%|████▎     | 13/30 [07:24<09:38, 34.04s/it]INFO:__main__:Training: Epoch 13 - Batch 33/33: Loss: 0.2441 | Train Acc: 90.144% (942/1045)
+ 47%|████▋     | 14/30 [07:58<09:01, 33.87s/it]INFO:__main__:Training: Epoch 14 - Batch 33/33: Loss: 0.2264 | Train Acc: 91.866% (960/1045)
+ 50%|█████     | 15/30 [08:33<08:33, 34.22s/it]INFO:__main__:Training: Epoch 15 - Batch 33/33: Loss: 0.2234 | Train Acc: 90.622% (947/1045)
+ 53%|█████▎    | 16/30 [09:06<07:53, 33.79s/it]INFO:__main__:Training: Epoch 16 - Batch 33/33: Loss: 0.2125 | Train Acc: 91.388% (955/1045)
+ 57%|█████▋    | 17/30 [09:39<07:18, 33.72s/it]INFO:__main__:Training: Epoch 17 - Batch 33/33: Loss: 0.2478 | Train Acc: 89.569% (936/1045)
+ 60%|██████    | 18/30 [10:14<06:46, 33.86s/it]INFO:__main__:Training: Epoch 18 - Batch 33/33: Loss: 0.1883 | Train Acc: 93.206% (974/1045)
+ 63%|██████▎   | 19/30 [10:47<06:10, 33.70s/it]INFO:__main__:Training: Epoch 19 - Batch 33/33: Loss: 0.1910 | Train Acc: 93.301% (975/1045)
+ 67%|██████▋   | 20/30 [11:21<05:37, 33.73s/it]INFO:__main__:Training: Epoch 20 - Batch 33/33: Loss: 0.1697 | Train Acc: 93.493% (977/1045)
+ 70%|███████   | 21/30 [11:54<05:03, 33.72s/it]INFO:__main__:Training: Epoch 21 - Batch 33/33: Loss: 0.2290 | Train Acc: 91.005% (951/1045)
+ 73%|███████▎  | 22/30 [12:27<04:28, 33.50s/it]INFO:__main__:Training: Epoch 22 - Batch 33/33: Loss: 0.2538 | Train Acc: 92.632% (968/1045)
+ 77%|███████▋  | 23/30 [13:00<03:53, 33.31s/it]INFO:__main__:Training: Epoch 23 - Batch 33/33: Loss: 0.2064 | Train Acc: 92.440% (966/1045)
+ 80%|████████  | 24/30 [13:34<03:20, 33.47s/it]INFO:__main__:Training: Epoch 24 - Batch 33/33: Loss: 0.2141 | Train Acc: 91.866% (960/1045)
+ 83%|████████▎ | 25/30 [14:07<02:46, 33.40s/it]INFO:__main__:Training: Epoch 25 - Batch 33/33: Loss: 0.2942 | Train Acc: 87.943% (919/1045)
+ 87%|████████▋ | 26/30 [14:41<02:14, 33.63s/it]INFO:__main__:Training: Epoch 26 - Batch 33/33: Loss: 0.1623 | Train Acc: 93.876% (981/1045)
+ 90%|█████████ | 27/30 [15:15<01:40, 33.62s/it]INFO:__main__:Training: Epoch 27 - Batch 33/33: Loss: 0.2267 | Train Acc: 91.675% (958/1045)
+ 93%|█████████▎| 28/30 [15:48<01:07, 33.52s/it]INFO:__main__:Training: Epoch 28 - Batch 33/33: Loss: 0.1602 | Train Acc: 94.067% (983/1045)
+ 97%|█████████▋| 29/30 [16:21<00:33, 33.40s/it]INFO:__main__:Training: Epoch 29 - Batch 33/33: Loss: 0.1736 | Train Acc: 93.589% (978/1045)
+100%|██████████| 30/30 [16:55<00:00, 33.46s/it]100%|██████████| 30/30 [16:55<00:00, 33.85s/it]
+INFO:__main__:Final training score: Loss: 0.2034, Accuracy: 92.230%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0061, Accuracy: 88.034%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id bue2pmy2
+Training Vision Transformer multiclass for leaf
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with vision_transformer_leaf_multiclass
+INFO:__main__:Starting training cycle
+  0%|          | 0/70 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 33/33: Loss: 1.1328 | Train Acc: 47.273% (494/1045)
+  1%|▏         | 1/70 [00:12<14:26, 12.56s/it]INFO:__main__:Training: Epoch 1 - Batch 33/33: Loss: 1.0092 | Train Acc: 53.397% (558/1045)
+  3%|▎         | 2/70 [00:24<13:57, 12.32s/it]INFO:__main__:Training: Epoch 2 - Batch 33/33: Loss: 0.9570 | Train Acc: 55.694% (582/1045)
+  4%|▍         | 3/70 [00:36<13:42, 12.27s/it]INFO:__main__:Training: Epoch 3 - Batch 33/33: Loss: 0.8622 | Train Acc: 62.679% (655/1045)
+  6%|▌         | 4/70 [00:49<13:39, 12.41s/it]INFO:__main__:Training: Epoch 4 - Batch 33/33: Loss: 0.8739 | Train Acc: 60.383% (631/1045)
+  7%|▋         | 5/70 [01:00<13:02, 12.04s/it]INFO:__main__:Training: Epoch 5 - Batch 33/33: Loss: 0.8373 | Train Acc: 62.871% (657/1045)
+  9%|▊         | 6/70 [01:12<12:35, 11.80s/it]INFO:__main__:Training: Epoch 6 - Batch 33/33: Loss: 0.7795 | Train Acc: 66.220% (692/1045)
+ 10%|█         | 7/70 [01:23<12:12, 11.62s/it]INFO:__main__:Training: Epoch 7 - Batch 33/33: Loss: 0.7828 | Train Acc: 66.794% (698/1045)
+ 11%|█▏        | 8/70 [01:34<11:51, 11.47s/it]INFO:__main__:Training: Epoch 8 - Batch 33/33: Loss: 0.7613 | Train Acc: 65.837% (688/1045)
+ 13%|█▎        | 9/70 [01:46<11:50, 11.65s/it]INFO:__main__:Training: Epoch 9 - Batch 33/33: Loss: 0.7537 | Train Acc: 67.081% (701/1045)
+ 14%|█▍        | 10/70 [01:57<11:19, 11.33s/it]INFO:__main__:Training: Epoch 10 - Batch 33/33: Loss: 0.7197 | Train Acc: 68.421% (715/1045)
+ 16%|█▌        | 11/70 [02:08<11:09, 11.35s/it]INFO:__main__:Training: Epoch 11 - Batch 33/33: Loss: 0.7412 | Train Acc: 67.656% (707/1045)
+ 17%|█▋        | 12/70 [02:20<11:06, 11.49s/it]INFO:__main__:Training: Epoch 12 - Batch 33/33: Loss: 0.7022 | Train Acc: 70.335% (735/1045)
+ 19%|█▊        | 13/70 [02:32<10:55, 11.50s/it]INFO:__main__:Training: Epoch 13 - Batch 33/33: Loss: 0.7063 | Train Acc: 68.612% (717/1045)
+ 20%|██        | 14/70 [02:43<10:45, 11.52s/it]INFO:__main__:Training: Epoch 14 - Batch 33/33: Loss: 0.6758 | Train Acc: 69.952% (731/1045)
+ 21%|██▏       | 15/70 [02:54<10:29, 11.45s/it]INFO:__main__:Training: Epoch 15 - Batch 33/33: Loss: 0.7017 | Train Acc: 68.134% (712/1045)
+ 23%|██▎       | 16/70 [03:06<10:19, 11.47s/it]INFO:__main__:Training: Epoch 16 - Batch 33/33: Loss: 0.6643 | Train Acc: 71.483% (747/1045)
+ 24%|██▍       | 17/70 [03:17<10:08, 11.47s/it]INFO:__main__:Training: Epoch 17 - Batch 33/33: Loss: 0.6572 | Train Acc: 71.770% (750/1045)
+ 26%|██▌       | 18/70 [03:29<09:55, 11.44s/it]INFO:__main__:Training: Epoch 18 - Batch 33/33: Loss: 0.6698 | Train Acc: 70.622% (738/1045)
+ 27%|██▋       | 19/70 [03:40<09:43, 11.44s/it]INFO:__main__:Training: Epoch 19 - Batch 33/33: Loss: 0.6681 | Train Acc: 70.335% (735/1045)
+ 29%|██▊       | 20/70 [03:51<09:27, 11.35s/it]INFO:__main__:Training: Epoch 20 - Batch 33/33: Loss: 0.6497 | Train Acc: 71.483% (747/1045)
+ 30%|███       | 21/70 [04:03<09:13, 11.31s/it]INFO:__main__:Training: Epoch 21 - Batch 33/33: Loss: 0.6641 | Train Acc: 70.526% (737/1045)
+ 31%|███▏      | 22/70 [04:14<09:01, 11.28s/it]INFO:__main__:Training: Epoch 22 - Batch 33/33: Loss: 0.6383 | Train Acc: 73.110% (764/1045)
+ 33%|███▎      | 23/70 [04:24<08:38, 11.03s/it]INFO:__main__:Training: Epoch 23 - Batch 33/33: Loss: 0.6357 | Train Acc: 73.971% (773/1045)
+ 34%|███▍      | 24/70 [04:34<08:15, 10.78s/it]INFO:__main__:Training: Epoch 24 - Batch 33/33: Loss: 0.6327 | Train Acc: 73.014% (763/1045)
+ 36%|███▌      | 25/70 [04:45<08:05, 10.79s/it]INFO:__main__:Training: Epoch 25 - Batch 33/33: Loss: 0.6377 | Train Acc: 72.057% (753/1045)
+ 37%|███▋      | 26/70 [04:55<07:47, 10.62s/it]INFO:__main__:Training: Epoch 26 - Batch 33/33: Loss: 0.6361 | Train Acc: 72.057% (753/1045)
+ 39%|███▊      | 27/70 [05:06<07:38, 10.65s/it]INFO:__main__:Training: Epoch 27 - Batch 33/33: Loss: 0.5993 | Train Acc: 72.919% (762/1045)
+ 40%|████      | 28/70 [05:17<07:25, 10.61s/it]INFO:__main__:Training: Epoch 28 - Batch 33/33: Loss: 0.6142 | Train Acc: 73.110% (764/1045)
+ 41%|████▏     | 29/70 [05:28<07:18, 10.70s/it]INFO:__main__:Training: Epoch 29 - Batch 33/33: Loss: 0.5973 | Train Acc: 74.258% (776/1045)
+ 43%|████▎     | 30/70 [05:38<07:04, 10.61s/it]INFO:__main__:Training: Epoch 30 - Batch 33/33: Loss: 0.5847 | Train Acc: 74.163% (775/1045)
+ 44%|████▍     | 31/70 [05:49<06:53, 10.59s/it]INFO:__main__:Training: Epoch 31 - Batch 33/33: Loss: 0.6093 | Train Acc: 73.301% (766/1045)
+ 46%|████▌     | 32/70 [05:59<06:38, 10.48s/it]INFO:__main__:Training: Epoch 32 - Batch 33/33: Loss: 0.5843 | Train Acc: 74.928% (783/1045)
+ 47%|████▋     | 33/70 [06:10<06:30, 10.55s/it]INFO:__main__:Training: Epoch 33 - Batch 33/33: Loss: 0.5720 | Train Acc: 75.311% (787/1045)
+ 49%|████▊     | 34/70 [06:20<06:19, 10.54s/it]INFO:__main__:Training: Epoch 34 - Batch 33/33: Loss: 0.5935 | Train Acc: 74.354% (777/1045)
+ 50%|█████     | 35/70 [06:30<06:05, 10.44s/it]INFO:__main__:Training: Epoch 35 - Batch 33/33: Loss: 0.5482 | Train Acc: 76.459% (799/1045)
+ 51%|█████▏    | 36/70 [06:41<05:54, 10.42s/it]INFO:__main__:Training: Epoch 36 - Batch 33/33: Loss: 0.5563 | Train Acc: 77.225% (807/1045)
+ 53%|█████▎    | 37/70 [06:51<05:47, 10.52s/it]INFO:__main__:Training: Epoch 37 - Batch 33/33: Loss: 0.5462 | Train Acc: 76.651% (801/1045)
+ 54%|█████▍    | 38/70 [07:02<05:35, 10.48s/it]INFO:__main__:Training: Epoch 38 - Batch 33/33: Loss: 0.5721 | Train Acc: 73.684% (770/1045)
+ 56%|█████▌    | 39/70 [07:13<05:29, 10.64s/it]INFO:__main__:Training: Epoch 39 - Batch 33/33: Loss: 0.5414 | Train Acc: 78.373% (819/1045)
+ 57%|█████▋    | 40/70 [07:23<05:17, 10.57s/it]INFO:__main__:Training: Epoch 40 - Batch 33/33: Loss: 0.5691 | Train Acc: 76.364% (798/1045)
+ 59%|█████▊    | 41/70 [07:34<05:05, 10.52s/it]INFO:__main__:Training: Epoch 41 - Batch 33/33: Loss: 0.5364 | Train Acc: 77.799% (813/1045)
+ 60%|██████    | 42/70 [07:44<04:55, 10.54s/it]INFO:__main__:Training: Epoch 42 - Batch 33/33: Loss: 0.5404 | Train Acc: 77.512% (810/1045)
+ 61%|██████▏   | 43/70 [07:55<04:43, 10.52s/it]INFO:__main__:Training: Epoch 43 - Batch 33/33: Loss: 0.5447 | Train Acc: 75.981% (794/1045)
+ 63%|██████▎   | 44/70 [08:05<04:34, 10.54s/it]INFO:__main__:Training: Epoch 44 - Batch 33/33: Loss: 0.5152 | Train Acc: 78.469% (820/1045)
+ 64%|██████▍   | 45/70 [08:16<04:24, 10.60s/it]INFO:__main__:Training: Epoch 45 - Batch 33/33: Loss: 0.5371 | Train Acc: 76.555% (800/1045)
+ 66%|██████▌   | 46/70 [08:26<04:11, 10.50s/it]INFO:__main__:Training: Epoch 46 - Batch 33/33: Loss: 0.5322 | Train Acc: 77.895% (814/1045)
+ 67%|██████▋   | 47/70 [08:37<04:00, 10.47s/it]INFO:__main__:Training: Epoch 47 - Batch 33/33: Loss: 0.5222 | Train Acc: 78.373% (819/1045)
+ 69%|██████▊   | 48/70 [08:47<03:51, 10.54s/it]INFO:__main__:Training: Epoch 48 - Batch 33/33: Loss: 0.5462 | Train Acc: 77.512% (810/1045)
+ 70%|███████   | 49/70 [08:58<03:40, 10.51s/it]INFO:__main__:Training: Epoch 49 - Batch 33/33: Loss: 0.4952 | Train Acc: 78.565% (821/1045)
+ 71%|███████▏  | 50/70 [09:08<03:29, 10.47s/it]INFO:__main__:Training: Epoch 50 - Batch 33/33: Loss: 0.5007 | Train Acc: 78.565% (821/1045)
+ 73%|███████▎  | 51/70 [09:19<03:21, 10.61s/it]INFO:__main__:Training: Epoch 51 - Batch 33/33: Loss: 0.4839 | Train Acc: 79.426% (830/1045)
+ 74%|███████▍  | 52/70 [09:29<03:09, 10.53s/it]INFO:__main__:Training: Epoch 52 - Batch 33/33: Loss: 0.5129 | Train Acc: 78.086% (816/1045)
+ 76%|███████▌  | 53/70 [09:40<03:01, 10.65s/it]INFO:__main__:Training: Epoch 53 - Batch 33/33: Loss: 0.4669 | Train Acc: 79.713% (833/1045)
+ 77%|███████▋  | 54/70 [09:51<02:49, 10.61s/it]INFO:__main__:Training: Epoch 54 - Batch 33/33: Loss: 0.4987 | Train Acc: 79.043% (826/1045)
+ 79%|███████▊  | 55/70 [10:01<02:37, 10.47s/it]INFO:__main__:Training: Epoch 55 - Batch 33/33: Loss: 0.4780 | Train Acc: 79.617% (832/1045)
+ 80%|████████  | 56/70 [10:12<02:27, 10.54s/it]INFO:__main__:Training: Epoch 56 - Batch 33/33: Loss: 0.4790 | Train Acc: 79.522% (831/1045)
+ 81%|████████▏ | 57/70 [10:22<02:16, 10.52s/it]INFO:__main__:Training: Epoch 57 - Batch 33/33: Loss: 0.4634 | Train Acc: 80.191% (838/1045)
+ 83%|████████▎ | 58/70 [10:32<02:04, 10.41s/it]INFO:__main__:Training: Epoch 58 - Batch 33/33: Loss: 0.4798 | Train Acc: 80.191% (838/1045)
+ 84%|████████▍ | 59/70 [10:43<01:54, 10.43s/it]INFO:__main__:Training: Epoch 59 - Batch 33/33: Loss: 0.4427 | Train Acc: 82.584% (863/1045)
+ 86%|████████▌ | 60/70 [10:53<01:45, 10.50s/it]INFO:__main__:Training: Epoch 60 - Batch 33/33: Loss: 0.4637 | Train Acc: 79.713% (833/1045)
+ 87%|████████▋ | 61/70 [11:04<01:33, 10.39s/it]INFO:__main__:Training: Epoch 61 - Batch 33/33: Loss: 0.4713 | Train Acc: 80.957% (846/1045)
+ 89%|████████▊ | 62/70 [11:14<01:23, 10.42s/it]INFO:__main__:Training: Epoch 62 - Batch 33/33: Loss: 0.4684 | Train Acc: 80.861% (845/1045)
+ 90%|█████████ | 63/70 [11:24<01:12, 10.35s/it]INFO:__main__:Training: Epoch 63 - Batch 33/33: Loss: 0.4561 | Train Acc: 80.766% (844/1045)
+ 91%|█████████▏| 64/70 [11:35<01:02, 10.40s/it]INFO:__main__:Training: Epoch 64 - Batch 33/33: Loss: 0.4425 | Train Acc: 80.670% (843/1045)
+ 93%|█████████▎| 65/70 [11:45<00:51, 10.39s/it]INFO:__main__:Training: Epoch 65 - Batch 33/33: Loss: 0.4637 | Train Acc: 80.000% (836/1045)
+ 94%|█████████▍| 66/70 [11:56<00:41, 10.39s/it]INFO:__main__:Training: Epoch 66 - Batch 33/33: Loss: 0.4396 | Train Acc: 81.722% (854/1045)
+ 96%|█████████▌| 67/70 [12:06<00:30, 10.33s/it]INFO:__main__:Training: Epoch 67 - Batch 33/33: Loss: 0.4318 | Train Acc: 81.148% (848/1045)
+ 97%|█████████▋| 68/70 [12:16<00:20, 10.27s/it]INFO:__main__:Training: Epoch 68 - Batch 33/33: Loss: 0.4232 | Train Acc: 81.914% (856/1045)
+ 99%|█████████▊| 69/70 [12:26<00:10, 10.26s/it]INFO:__main__:Training: Epoch 69 - Batch 33/33: Loss: 0.4120 | Train Acc: 83.062% (868/1045)
+100%|██████████| 70/70 [12:37<00:00, 10.42s/it]100%|██████████| 70/70 [12:37<00:00, 10.82s/it]
+INFO:__main__:Final training score: Loss: 0.4341, Accuracy: 81.569%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0049, Accuracy: 76.923%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id 0ojsfc4u
+Training Vision Transformer binary for leaf
+/home/jarsba/git_opiskelu/data_science_project_1/Infected-sweetpotato-classification/venv/lib/python3.8/site-packages/xgboost/compat.py:36: FutureWarning: pandas.Int64Index is deprecated and will be removed from pandas in a future version. Use pandas.Index with the appropriate dtype instead.
+  from pandas import MultiIndex, Int64Index
+INFO:__main__:Reading the data
+WARNING:__main__:Hyperparameter set name not given as argument, trying with vision_transformer_leaf_binary
+INFO:__main__:Starting training cycle
+  0%|          | 0/55 [00:00<?, ?it/s]INFO:__main__:Training: Epoch 0 - Batch 17/17: Loss: 0.5259 | Train Acc: 80.287% (839/1045)
+  2%|▏         | 1/55 [00:10<09:06, 10.13s/it]INFO:__main__:Training: Epoch 1 - Batch 17/17: Loss: 0.4371 | Train Acc: 80.766% (844/1045)
+  4%|▎         | 2/55 [00:20<08:56, 10.12s/it]INFO:__main__:Training: Epoch 2 - Batch 17/17: Loss: 0.5264 | Train Acc: 78.852% (824/1045)
+  5%|▌         | 3/55 [00:30<08:45, 10.10s/it]INFO:__main__:Training: Epoch 3 - Batch 17/17: Loss: 0.4678 | Train Acc: 80.478% (841/1045)
+  7%|▋         | 4/55 [00:40<08:36, 10.12s/it]INFO:__main__:Training: Epoch 4 - Batch 17/17: Loss: 0.4414 | Train Acc: 79.617% (832/1045)
+  9%|▉         | 5/55 [00:50<08:27, 10.15s/it]INFO:__main__:Training: Epoch 5 - Batch 17/17: Loss: 0.4167 | Train Acc: 79.522% (831/1045)
+ 11%|█         | 6/55 [01:00<08:19, 10.19s/it]INFO:__main__:Training: Epoch 6 - Batch 17/17: Loss: 0.4299 | Train Acc: 79.809% (834/1045)
+ 13%|█▎        | 7/55 [01:10<08:03, 10.07s/it]INFO:__main__:Training: Epoch 7 - Batch 17/17: Loss: 0.4319 | Train Acc: 79.617% (832/1045)
+ 15%|█▍        | 8/55 [01:20<07:51, 10.04s/it]INFO:__main__:Training: Epoch 8 - Batch 17/17: Loss: 0.3840 | Train Acc: 79.234% (828/1045)
+ 16%|█▋        | 9/55 [01:30<07:38,  9.97s/it]INFO:__main__:Training: Epoch 9 - Batch 17/17: Loss: 0.4053 | Train Acc: 78.947% (825/1045)
+ 18%|█▊        | 10/55 [01:40<07:30, 10.01s/it]INFO:__main__:Training: Epoch 10 - Batch 17/17: Loss: 0.3984 | Train Acc: 80.766% (844/1045)
+ 20%|██        | 11/55 [01:50<07:22, 10.06s/it]INFO:__main__:Training: Epoch 11 - Batch 17/17: Loss: 0.3763 | Train Acc: 79.904% (835/1045)
+ 22%|██▏       | 12/55 [02:01<07:17, 10.17s/it]INFO:__main__:Training: Epoch 12 - Batch 17/17: Loss: 0.3634 | Train Acc: 81.531% (852/1045)
+ 24%|██▎       | 13/55 [02:11<07:02, 10.07s/it]INFO:__main__:Training: Epoch 13 - Batch 17/17: Loss: 0.4051 | Train Acc: 80.000% (836/1045)
+ 25%|██▌       | 14/55 [02:20<06:49,  9.98s/it]INFO:__main__:Training: Epoch 14 - Batch 17/17: Loss: 0.3570 | Train Acc: 81.531% (852/1045)
+ 27%|██▋       | 15/55 [02:30<06:35,  9.88s/it]INFO:__main__:Training: Epoch 15 - Batch 17/17: Loss: 0.3823 | Train Acc: 80.766% (844/1045)
+ 29%|██▉       | 16/55 [02:40<06:24,  9.85s/it]INFO:__main__:Training: Epoch 16 - Batch 17/17: Loss: 0.3554 | Train Acc: 80.861% (845/1045)
+ 31%|███       | 17/55 [02:49<06:09,  9.73s/it]INFO:__main__:Training: Epoch 17 - Batch 17/17: Loss: 0.3632 | Train Acc: 81.053% (847/1045)
+ 33%|███▎      | 18/55 [02:59<06:00,  9.74s/it]INFO:__main__:Training: Epoch 18 - Batch 17/17: Loss: 0.3488 | Train Acc: 81.531% (852/1045)
+ 35%|███▍      | 19/55 [03:09<05:50,  9.75s/it]INFO:__main__:Training: Epoch 19 - Batch 17/17: Loss: 0.3616 | Train Acc: 81.531% (852/1045)
+ 36%|███▋      | 20/55 [03:19<05:42,  9.77s/it]INFO:__main__:Training: Epoch 20 - Batch 17/17: Loss: 0.3533 | Train Acc: 82.584% (863/1045)
+ 38%|███▊      | 21/55 [03:29<05:34,  9.85s/it]INFO:__main__:Training: Epoch 21 - Batch 17/17: Loss: 0.3314 | Train Acc: 83.254% (870/1045)
+ 40%|████      | 22/55 [03:38<05:23,  9.79s/it]INFO:__main__:Training: Epoch 22 - Batch 17/17: Loss: 0.3330 | Train Acc: 81.914% (856/1045)
+ 42%|████▏     | 23/55 [03:48<05:13,  9.80s/it]INFO:__main__:Training: Epoch 23 - Batch 17/17: Loss: 0.3562 | Train Acc: 82.775% (865/1045)
+ 44%|████▎     | 24/55 [03:58<05:08,  9.94s/it]INFO:__main__:Training: Epoch 24 - Batch 17/17: Loss: 0.3358 | Train Acc: 83.254% (870/1045)
+ 45%|████▌     | 25/55 [04:08<04:56,  9.89s/it]INFO:__main__:Training: Epoch 25 - Batch 17/17: Loss: 0.3248 | Train Acc: 83.828% (876/1045)
+ 47%|████▋     | 26/55 [04:18<04:47,  9.92s/it]INFO:__main__:Training: Epoch 26 - Batch 17/17: Loss: 0.3592 | Train Acc: 81.053% (847/1045)
+ 49%|████▉     | 27/55 [04:28<04:38,  9.96s/it]INFO:__main__:Training: Epoch 27 - Batch 17/17: Loss: 0.3341 | Train Acc: 84.593% (884/1045)
+ 51%|█████     | 28/55 [04:38<04:29, 10.00s/it]INFO:__main__:Training: Epoch 28 - Batch 17/17: Loss: 0.3139 | Train Acc: 84.689% (885/1045)
+ 53%|█████▎    | 29/55 [04:48<04:15,  9.84s/it]INFO:__main__:Training: Epoch 29 - Batch 17/17: Loss: 0.3247 | Train Acc: 83.062% (868/1045)
+ 55%|█████▍    | 30/55 [04:58<04:09,  9.98s/it]INFO:__main__:Training: Epoch 30 - Batch 17/17: Loss: 0.3212 | Train Acc: 82.679% (864/1045)
+ 56%|█████▋    | 31/55 [05:08<03:57,  9.90s/it]INFO:__main__:Training: Epoch 31 - Batch 17/17: Loss: 0.3051 | Train Acc: 84.019% (878/1045)
+ 58%|█████▊    | 32/55 [05:17<03:45,  9.80s/it]INFO:__main__:Training: Epoch 32 - Batch 17/17: Loss: 0.3450 | Train Acc: 83.254% (870/1045)
+ 60%|██████    | 33/55 [05:27<03:37,  9.90s/it]INFO:__main__:Training: Epoch 33 - Batch 17/17: Loss: 0.3151 | Train Acc: 84.880% (887/1045)
+ 62%|██████▏   | 34/55 [05:38<03:28,  9.95s/it]INFO:__main__:Training: Epoch 34 - Batch 17/17: Loss: 0.3095 | Train Acc: 84.593% (884/1045)
+ 64%|██████▎   | 35/55 [05:47<03:17,  9.89s/it]INFO:__main__:Training: Epoch 35 - Batch 17/17: Loss: 0.3015 | Train Acc: 84.880% (887/1045)
+ 65%|██████▌   | 36/55 [05:57<03:07,  9.86s/it]INFO:__main__:Training: Epoch 36 - Batch 17/17: Loss: 0.3003 | Train Acc: 84.976% (888/1045)
+ 67%|██████▋   | 37/55 [06:07<02:57,  9.84s/it]INFO:__main__:Training: Epoch 37 - Batch 17/17: Loss: 0.2958 | Train Acc: 85.263% (891/1045)
+ 69%|██████▉   | 38/55 [06:16<02:46,  9.77s/it]INFO:__main__:Training: Epoch 38 - Batch 17/17: Loss: 0.3083 | Train Acc: 87.368% (913/1045)
+ 71%|███████   | 39/55 [06:27<02:37,  9.86s/it]INFO:__main__:Training: Epoch 39 - Batch 17/17: Loss: 0.2815 | Train Acc: 87.560% (915/1045)
+ 73%|███████▎  | 40/55 [06:36<02:28,  9.89s/it]INFO:__main__:Training: Epoch 40 - Batch 17/17: Loss: 0.2861 | Train Acc: 86.507% (904/1045)
+ 75%|███████▍  | 41/55 [06:46<02:18,  9.91s/it]INFO:__main__:Training: Epoch 41 - Batch 17/17: Loss: 0.3080 | Train Acc: 84.498% (883/1045)
+ 76%|███████▋  | 42/55 [06:57<02:10, 10.05s/it]INFO:__main__:Training: Epoch 42 - Batch 17/17: Loss: 0.2722 | Train Acc: 87.560% (915/1045)
+ 78%|███████▊  | 43/55 [07:06<01:58,  9.86s/it]INFO:__main__:Training: Epoch 43 - Batch 17/17: Loss: 0.2836 | Train Acc: 87.847% (918/1045)
+ 80%|████████  | 44/55 [07:16<01:48,  9.82s/it]INFO:__main__:Training: Epoch 44 - Batch 17/17: Loss: 0.2439 | Train Acc: 88.612% (926/1045)
+ 82%|████████▏ | 45/55 [07:26<01:39,  9.99s/it]INFO:__main__:Training: Epoch 45 - Batch 17/17: Loss: 0.2631 | Train Acc: 87.656% (916/1045)
+ 84%|████████▎ | 46/55 [07:36<01:29,  9.93s/it]INFO:__main__:Training: Epoch 46 - Batch 17/17: Loss: 0.2681 | Train Acc: 88.134% (921/1045)
+ 85%|████████▌ | 47/55 [07:46<01:18,  9.78s/it]INFO:__main__:Training: Epoch 47 - Batch 17/17: Loss: 0.2589 | Train Acc: 89.378% (934/1045)
+ 87%|████████▋ | 48/55 [07:55<01:08,  9.79s/it]INFO:__main__:Training: Epoch 48 - Batch 17/17: Loss: 0.2413 | Train Acc: 89.187% (932/1045)
+ 89%|████████▉ | 49/55 [08:05<00:58,  9.69s/it]INFO:__main__:Training: Epoch 49 - Batch 17/17: Loss: 0.2296 | Train Acc: 89.856% (939/1045)
+ 91%|█████████ | 50/55 [08:15<00:48,  9.71s/it]INFO:__main__:Training: Epoch 50 - Batch 17/17: Loss: 0.2560 | Train Acc: 88.995% (930/1045)
+ 93%|█████████▎| 51/55 [08:25<00:39,  9.80s/it]INFO:__main__:Training: Epoch 51 - Batch 17/17: Loss: 0.2425 | Train Acc: 88.900% (929/1045)
+ 95%|█████████▍| 52/55 [08:35<00:29,  9.93s/it]INFO:__main__:Training: Epoch 52 - Batch 17/17: Loss: 0.2326 | Train Acc: 89.952% (940/1045)
+ 96%|█████████▋| 53/55 [08:45<00:19,  9.86s/it]INFO:__main__:Training: Epoch 53 - Batch 17/17: Loss: 0.2424 | Train Acc: 89.856% (939/1045)
+ 98%|█████████▊| 54/55 [08:55<00:09,  9.92s/it]INFO:__main__:Training: Epoch 54 - Batch 17/17: Loss: 0.2231 | Train Acc: 90.909% (950/1045)
+100%|██████████| 55/55 [09:04<00:00,  9.87s/it]100%|██████████| 55/55 [09:04<00:00,  9.91s/it]
+INFO:__main__:Final training score: Loss: 0.2393, Accuracy: 89.722%
+train.py:260: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+train.py:267: UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+  plt.show()
+INFO:__main__:Starting testing cycle
+INFO:__main__:Final test score: Loss: 0.0016, Accuracy: 89.744%
+INFO:__main__:Saving the model
+INFO:__main__:Model saved with id yy0e5fl6
