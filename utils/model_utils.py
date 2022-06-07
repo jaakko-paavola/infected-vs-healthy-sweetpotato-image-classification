@@ -62,11 +62,11 @@ def get_model_file_name(id: str, model_name: str, timestamp: str) -> str:
 
 	return model_file_name
 
-def get_dataset_file_name(id: str, model_name: str, timestamp: str, prefix: str) -> str:
+def get_dataset_file_name(id: str, model_name: str, timestamp: str, suffix: str) -> str:
 	if type(model_name) != str:
 		raise ValueError("Model name must be string")
 
-	model_file_name = f"{id}-{model_name}-{timestamp}-{prefix}.npy"
+	model_file_name = f"{id}-{model_name}-{timestamp}-{suffix}.npy"
 	return model_file_name
 
 
@@ -130,6 +130,9 @@ def save_dataset_of_torch_model(model: nn.Module, dataset: DataLoader, prefix: s
 		model_name = type(model).__name__
 		model_name = CLASS_TO_MODEL_NAME_MAPPING[model_name]
 
+	id, timestamp = create_model_id_and_timestamp()
+	timestamp_str = datetime_to_str(timestamp)
+
 	dataset_file_name = get_dataset_file_name(
 		id=id, model_name=model_name, timestamp=timestamp_str, prefix="test_dataset")
 
@@ -138,14 +141,14 @@ def save_dataset_of_torch_model(model: nn.Module, dataset: DataLoader, prefix: s
 
 	return id, model_name, timestamp_str
 
+def load_dataset_of_torch_model(hyperparam_search_id: str, prefix: str) -> Tuple[str, str, datetime]:
+	return np.load(os.path.join(MODEL_FOLDER, f"{hyperparam_search_id}-{prefix}.npy"), allow_pickle=True)
+
 def save_sklearn_model(model) -> Tuple[str, str, datetime]:
 	model_name = "bag_of_words"
 
 	id, timestamp = create_model_id_and_timestamp()
 	timestamp_str = datetime_to_str(timestamp)
-
-def load_dataset_of_torch_model(hyperparam_search_id: str, prefix: str) -> Tuple[str, str, datetime]:
-	return np.load(os.path.join(MODEL_FOLDER, f"{hyperparam_search_id}-{prefix}.npy"), allow_pickle=True)
 
 	model_file_name = get_model_file_name(
 		id=id, model_name=model_name, timestamp=timestamp_str

@@ -453,7 +453,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
         sort_ascending = True
 
     study = optuna.create_study(direction=direction)
-    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    timestamp = strftime("%Y-%m-%d %H%M%S", gmtime())
     best_epoch_in_each_trial = []
     best_validation_accuracy_in_each_trial = []
     best_validation_F1_in_each_trial = []
