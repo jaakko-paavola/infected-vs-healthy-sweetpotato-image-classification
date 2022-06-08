@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 import torch
 import os
 import optuna
+from pathlib import Path
 from pytorchtools import EarlyStopping
 import warnings
 import logging
@@ -340,15 +341,14 @@ def objective(trial, MODEL_NAME, NUM_CLASSES, N_EPOCHS, OPTIMIZER_SEARCH_SPACE, 
 @click.option('-e', '--no_of_epochs', type=int, show_default=True, default=50, help='Number of epochs in training loop.')
 @click.option('-es', '--early_stopping_counter', type=int, help='Number of consequtive epochs with no improvement in loss until trial is stopped. Default: (the floor of) one seventh of the no of epochs.')
 @click.option('-t', '--no_of_trials', type=int, show_default=True, default=50, help='Number of hyperparamter search trials in training loop.')
-@click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), default="plant", help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
+@click.option('-d', '--dataset', type=click.Choice(['plant', 'plant_golden', 'leaf'], case_sensitive=False), help='Already available dataset to use to train the model. Give either -d or -csv, not both.')
 @click.option('-csv', '--data-csv', type=str, help='Full file path to dataset CSV-file created during segmentation. Give either -d or -csv, not both.')
 @click.option('-b', '--binary', is_flag=True, show_default=True, default=False, help='Train binary classifier instead of multiclass classifier.')
 @click.option('-aug', '--augmentation', is_flag=True, show_default=True, default=True, help='Use data-augmentation for the training.')
-@click.option('-s', '--save', is_flag=True, show_default=True, default=True, help='Save the trained model and add information to model dataframe.')
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Print verbose logs.')
 @click.option('-o', '--optimizers', type=str, show_default=True, default='adam,adamw', help='Which optimizer algorithms to include in the hyperparameter search. Give a comma-separated list of optimizers, e.g.: adam,adamw,rmsprop,sgd,adagrad.')
 @click.option('-ob', '--objective_function', type=click.Choice(['F1_score', 'accuracy', 'cross_entropy_loss']), show_default=True, default='F1_score', help='What is the function the value of which we try to optimize.')
-def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, save, verbose, optimizers, objective_function):
+def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_trials, dataset, data_csv, binary, augmentation, verbose, optimizers, objective_function):
 
     if verbose:
         logger.setLevel(logging.DEBUG)
@@ -369,7 +369,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
     else:
         DATA_MASTER_PATH = data_csv
         mean, std = get_normalization_mean_std(datasheet=data_csv)
-
+        dataset = Path(data_csv).stem
 
     labels = get_dataset_labels(datasheet_path=DATA_MASTER_PATH)
 
@@ -386,7 +386,7 @@ def search_hyperparameters(model, no_of_epochs, early_stopping_counter, no_of_tr
     if early_stopping_counter:
         EARLYSTOPPING_PATIENCE = early_stopping_counter
     else:
-        EARLYSTOPPING_PATIENCE = N_EPOCHS//7 # By default early stopping patience (i.e. the number of consequtive epochs with no decrease in training loss) is one seventh (rounded down) of the number of epochs
+        EARLYSTOPPING_PATIENCE = min(max(3, N_EPOCHS//7), 20) # By default early stopping patience (i.e. the number of consequtive epochs with no decrease in training loss) is one seventh (rounded down) of the number of epochs and max 20
 
     MODEL_NAME = model
     if augmentation:
@@ -487,11 +487,16 @@ def print_search_results_to_file(dataset, binary, MODEL_NAME, \
         target_variable_type = "binary"
     else:
         target_variable_type = "multiclass"
+    
     filename = os.path.join(DATA_FOLDER_PATH, f'Top_10_hyperparameter_search_results_for_{MODEL_NAME}_{dataset}_{target_variable_type}_at_{timestamp}.csv')
+        
     with open(filename, "w") as f:
         f.write(f"{MODEL_NAME}-{dataset}-{target_variable_type}-{timestamp}-N_EPOCHS: {N_EPOCHS}-EARLYSTOPPING_PATIENCE: {EARLYSTOPPING_PATIENCE}-OPTIMIZER_SEARCH_SPACE: {OPTIMIZER_SEARCH_SPACE}\n")
 
     df.to_csv(filename, mode='a', header=True, index=False)
+
+    logger.info(f'Writing results to file {filename}')
+
 
 
 if __name__ == "__main__":

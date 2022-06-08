@@ -73,7 +73,6 @@ def write(segments, path, img_original, output_path):
 
     original_filetype = os.path.splitext(path)[1]
 
-
     segmented_paths = []
 
     if not os.path.exists(pathname):

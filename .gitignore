@@ -131,3 +131,6 @@ dmypy.json
 # Image data, won't fit in GitHub
 /data
 /Separated_plants
+
+# Model checkpoints
+checkpoint.pt

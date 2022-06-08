@@ -3,9 +3,9 @@ import re
 from utils.path_utils import get_relative_path_to_data_folder
 
 
-def get_masked_plant_filename(masked_image_path, output_path, plant_index: int = None):
+def get_masked_image_filename(masked_image_path, output_path, plant_index: int = None):
 
-  if not plant_index:
+  if plant_index is None:
     plant_index = "?"
 
   masked_filename = re.findall(r'[^\/]+(?=\.)', masked_image_path)[0]
@@ -19,7 +19,7 @@ def get_masked_plant_filename(masked_image_path, output_path, plant_index: int =
 
   return relative_path
 
-def get_original_plant_filename(original_image_path, output_path, plant_index: int = None):
+def get_original_image_filename(original_image_path, output_path, plant_index: int = None):
 
   if not plant_index:
     plant_index = "?"
