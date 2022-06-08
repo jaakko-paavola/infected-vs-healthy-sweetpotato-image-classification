@@ -5,7 +5,7 @@ Image processing and computer vision approaches to split and classify images of 
 
 For non-technical users we describe the full instructions in the [Wiki](https://github.com/Jakoviz/Infected-sweetpotato-classification/wiki). Please read the instructions carefully.
 
-## Developers setup
+## Developer setup
 
 ### Data Version Control (DVC) usage
 
