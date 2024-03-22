@@ -1,5 +1,8 @@
-# Infected-sweetpotato-classification
-Image processing and computer vision approaches to split and classify images of infected sweetpotato plants
+# Classification of sweet potato plants into healthy and infected specimens
+Image processing and computer vision approaches to split/segment images of sweetpotato plants and classify them into healthy ones and ones suffering from one or two specified plant infections.
+
+The software in this repository was used for image segmentation and classification in the following study conducted at the University of Helsinki:
+![image](https://github.com/jaakko-paavola/infected-vs-healthy-sweetpotato-image-classification/assets/7263106/7ea7941c-fecb-482c-8550-9eea7bee635c)
 
 ## How to use?
 
